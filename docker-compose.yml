@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+
+  db:
+    container_name: ecormmercedb
+    image: postgres
+    environment:
+      GET_HOST_FROM: dns
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    hostname: db
+    ports:
+      - 5434:5434
+    volumes:
+      - ./sql/init_db.sql:/docker-entrypoint-initdb.d/1-init_db.sql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/2-schema.sql
+    networks:
+      - ecormmercenet
+
+  ecommerceapi:
+    container_name: ecormmerce-app
+    image: abdulmuhsin/ecormmerce_app:v1
+    hostname: ecormmerce_app
+    env_file: .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      GET_HOSTS_FROM: dns
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+    networks:
+    - ecormmercenet
+    volumes:
+    - .:/go/src/ecormmerce-rest-api
+    ports:
+    - 8080:8080
+    depends_on:
+    - db
+    links:
+    - db
+    labels:
+      kompose.service.type: LoadBalancer
+
+networks:
+  ecormmercenet:
+    driver: bridge

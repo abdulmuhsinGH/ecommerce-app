@@ -1,0 +1,7 @@
+main
+.env
+Gopkg.lock
+Gopkg.toml
+
+
+/vendor
