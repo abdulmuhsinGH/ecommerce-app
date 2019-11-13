@@ -45,7 +45,7 @@ func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Req
 
 	err := json.NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
-		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err)
+		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err.Error())
 		respond(response, message(false, "Error while decoding request body"))
 		return
 	}
@@ -53,7 +53,7 @@ func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Req
 	err = userService.AddUser(newUser)
 
 	if err != nil {
-		h.logger.Printf("User HandleAddUser; Error while saving user: %v", err)
+		h.logger.Printf("User HandleAddUser; Error while saving user: %v", err.Error())
 		respond(response, message(false, "Error while saving user"))
 		return
 	}
