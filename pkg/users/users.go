@@ -1,9 +1,14 @@
 package users
 
+import (
+	"github.com/jinzhu/gorm"
+)
+
 /*
 User defines the properties of a user
 */
 type User struct {
+	gorm.Model
 	UUID      string `json:"uuid"`
 	Username  string `json:"username"`
 	Password  string `json:"password"`

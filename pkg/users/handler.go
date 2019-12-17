@@ -1,13 +1,13 @@
 package users
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 )
 
 /*
@@ -103,7 +103,7 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 /*
 NewHandlers initiates user handler
 */
-func NewHandlers(logger *log.Logger, db *sql.DB) *Handlers {
+func NewHandlers(logger *log.Logger, db *gorm.DB) *Handlers {
 	userRepository = NewRepository(db)
 	userService = NewService(userRepository)
 	return &Handlers{

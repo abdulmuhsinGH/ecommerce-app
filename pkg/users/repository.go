@@ -1,34 +1,45 @@
 package users
 
 import (
-	"database/sql"
+	"github.com/jinzhu/gorm"
 )
 
-/* 
-Repository provides user repository operations 
+/*
+Repository provides user repository operations
 */
 type Repository interface {
-	AddUser(User) error
+	AddUser(User) bool
+	GetAllUsers() []User
 }
 
 type repository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-/* 
+/*
 NewRepository creates a users repository with the necessary dependencies
- */
- func NewRepository(db *sql.DB) Repository {
+*/
+func NewRepository(db *gorm.DB) Repository {
 
 	return &repository{db}
 
 }
-/*
-AddUser saves user to the repository
-*/
-func (r *repository) AddUser(user User) error {
 
-	const q = `INSERT INTO users(username, password, firstname, lastname, gender) VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.Exec(q, user.Username, user.Password, user.Firstname, user.Lastname, user.Gender)
-	return err
+/*
+AddUser saves user to the user's table
+*/
+func (r *repository) AddUser(user User) bool {
+	r.db.NewRecord(user)
+	r.db.Create(&user)
+
+	return !r.db.NewRecord(user)
+}
+
+/*
+GetAllUsers returns all users from the user's table
+*/
+func (r *repository) GetAllUsers() []User {
+	var users []User
+	r.db.Find(&users)
+	return users
 }

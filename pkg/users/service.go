@@ -1,12 +1,14 @@
 package users
 
 import (
+	"errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Service provides user adding operations.
 type Service interface {
 	AddUser(User) error
+	GetAllUsers() []User
 	Login(User)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
@@ -32,10 +34,21 @@ func (s *service) AddUser(user User) error {
 	if err != nil {
 		return err
 	}
-	
-	err = s.userRepository.AddUser(user) // error handling omitted for simplicity
-	return err
 
+	status := s.userRepository.AddUser(user)
+	if !status {
+		return errors.New("not created")
+	}
+	return nil
+
+}
+
+/*
+GetAllUsers gets all users
+*/
+func (s *service) GetAllUsers() []User {
+	users := s.userRepository.GetAllUsers()
+	return users
 }
 
 /*
