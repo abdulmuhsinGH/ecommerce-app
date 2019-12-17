@@ -9,7 +9,7 @@ import (
 type Service interface {
 	AddUser(User) error
 	GetAllUsers() []User
-	Login(User)
+	Login(string, string) (User, error)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 }
@@ -52,10 +52,19 @@ func (s *service) GetAllUsers() []User {
 }
 
 /*
-Login authenticates user
+Login authenticates users
 */
-func (s *service) Login(user User) {
-	_ = s.userRepository.AddUser(user) // error handling omitted for simplicity
+func (s *service) Login(username string, password string) (User, error) {
+	user := s.userRepository.FindUserByUsername(username)
+	if (User{}) == user {
+		return User{}, errors.New("user does not exist")
+	}
+	passwordMatched := s.CheckPasswordHash(password, user.Password)
+	if !passwordMatched {
+		return User{}, errors.New("password does not match")
+	}
+
+	return user, nil
 }
 
 /*

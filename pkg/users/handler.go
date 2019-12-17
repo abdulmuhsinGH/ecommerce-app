@@ -2,9 +2,11 @@ package users
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
+	"ecormmerce-rest-api/pkg/format"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -46,7 +48,7 @@ func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Req
 	err := json.NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
 		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err.Error())
-		respond(response, message(false, "Error while decoding request body"))
+		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
 
@@ -54,43 +56,35 @@ func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Req
 
 	if err != nil {
 		h.logger.Printf("User HandleAddUser; Error while saving user: %v", err.Error())
-		respond(response, message(false, "Error while saving user"))
+		format.Send(response, 400, format.Message(false, "Error while saving user", nil))
 		return
 	}
-	respond(response, message(true, "User saved"))
+	format.Send(response, 200, format.Message(false, "User Saved", nil))
 
 }
 
 /*
 HandleGetUsers gets data from http request and sends to
 */
-func (h *Handlers) HandleGetUsers(response http.ResponseWriter, request *http.Request) {
+func (h *Handlers) HandleGetAllUsers(response http.ResponseWriter, request *http.Request) {
 
 	newUser := User{}
 
 	err := json.NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
-		respond(response, message(false, "Error while decoding request body"))
+		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
+		//respond(response, message(false, "Error while decoding request body"))
 		return
 	}
 
-	err = userService.AddUser(newUser)
+	users := userService.GetAllUsers()
 
-	if err != nil {
-		respond(response, message(false, "Error while saving user"))
+	if len(users) == 0 {
+		format.Send(response, 200, format.Message(false, "No users", nil))
 		return
 	}
-	respond(response, message(true, "User saved"))
+	format.Send(response, 200, format.Message(false, "all Users", users))
 
-}
-
-func respond(response http.ResponseWriter, data Resp) {
-	response.Header().Set("Content-Type", "application/json")
-	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(data)
-}
-func message(status bool, message string) Resp {
-	return Resp{"status": status, "message": message}
 }
 
 /*
@@ -98,6 +92,7 @@ SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/users/new", h.Logger(h.HandleAddUser)).Methods("POST")
+	mux.HandleFunc("/api/users/all", h.Logger(h.HandleGetAllUsers)).Methods("GET")
 }
 
 /*

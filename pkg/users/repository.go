@@ -10,6 +10,7 @@ Repository provides user repository operations
 type Repository interface {
 	AddUser(User) bool
 	GetAllUsers() []User
+	FindUserByUsername(string) User
 }
 
 type repository struct {
@@ -42,4 +43,13 @@ func (r *repository) GetAllUsers() []User {
 	var users []User
 	r.db.Find(&users)
 	return users
+}
+
+/*
+GetAllUsers returns all users from the user's table
+*/
+func (r *repository) FindUserByUsername(username string) User {
+	var user User
+	r.db.Where("username = ?", username).Find(&user)
+	return user
 }
