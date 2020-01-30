@@ -4,8 +4,8 @@
 BEGIN
 
 CREATE TABLE users (
-    id uuid DEFAULT uuid_generate_v4(),
-    username varchar(25) UNIQUE NOT NULL, 
+        id uuid DEFAULT uuid_generate_v4(),
+        username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
 	firstname varchar(100) NOT NULL,
 	lastname varchar(100) NOT NULL, 
@@ -17,7 +17,7 @@ CREATE TABLE users (
 	role INTEGER NOT NULL REFERENCES user_roles(id) ,
 	status BOOLEAN NOT NULL,
 	last_login TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
 	updated_by TEXT,
@@ -38,7 +38,7 @@ CREATE TABLE user_roles(
 
 CREATE TABLE customers(
 	ID uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username varchar(25) UNIQUE NOT NULL, 
+        username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
 	firstname varchar(100) NOT NULL,
 	lastname varchar(100) NOT NULL, 
