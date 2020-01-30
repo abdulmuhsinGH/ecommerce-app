@@ -212,4 +212,6 @@ CREATE TABLE product_categories(
 	deleted_at TIMESTAMPTZ
 );
 
+END;
+
 COMMIT;
