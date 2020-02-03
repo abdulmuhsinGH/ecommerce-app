@@ -4,20 +4,21 @@
 BEGIN
 
 CREATE TABLE users (
-        id uuid DEFAULT uuid_generate_v4(),
-        username varchar(25) UNIQUE NOT NULL, 
+    id uuid DEFAULT uuid_generate_v4(),
+    username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
 	firstname varchar(100) NOT NULL,
+	middlename varchar(100), 
 	lastname varchar(100) NOT NULL, 
 	gender varchar(25) NOT NULL,
 	email_work text NOT NULL,
 	phone_work text,
 	email_personal text,
 	phone_personal text,
-	role INTEGER NOT NULL REFERENCES user_roles(id) ,
+	role integer NOT NULL REFERENCES user_roles(id) ,
 	status BOOLEAN NOT NULL,
 	last_login TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
 	updated_by TEXT,
@@ -26,7 +27,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE user_roles(
-	id INTERGER primary key not NULL,
+	id integer primary key not NULL,
 	role_name VARCHAR(100) UNIQUE not null,
 	description text  NOT NULL,
 	comment text,
@@ -37,24 +38,26 @@ CREATE TABLE user_roles(
 );
 
 CREATE TABLE customers(
-	ID uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-        username varchar(25) UNIQUE NOT NULL, 
+	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
 	firstname varchar(100) NOT NULL,
+	middlename varchar(100),-- This was not there. was it intentional.
 	lastname varchar(100) NOT NULL, 
 	gender varchar(25) NOT NULL, 
 	email text,
 	email_2 text,
 	phone text not null,
 	phone_2 text,
+	status BOOLEAN NOT NULL,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
 	updated_by TEXT
 );
 
-CREATE TABLE ADDRESSES(
-	ID UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE addresses(
+	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid REFERENCES customers(id),
 	region varchar(100),
 	town varchar(100),
