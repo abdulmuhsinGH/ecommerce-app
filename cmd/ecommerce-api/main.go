@@ -30,7 +30,6 @@ func main() {
 	router := mux.NewRouter()
 
 	u.SetupRoutes(router)
-	//m := http.ServeMux()
 	srv := server.New(router, ":8080")
 
 	logger.Println("server starting")

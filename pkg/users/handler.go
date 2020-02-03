@@ -1,12 +1,11 @@
 package users
 
 import (
+	"ecormmerce-rest-api/pkg/format"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
-	"ecormmerce-rest-api/pkg/format"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -64,7 +63,7 @@ func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Req
 }
 
 /*
-HandleGetUsers gets data from http request and sends to
+HandleGetAllUsers gets data from http request and sends to
 */
 func (h *Handlers) HandleGetAllUsers(response http.ResponseWriter, request *http.Request) {
 
