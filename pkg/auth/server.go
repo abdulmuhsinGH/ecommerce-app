@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -43,7 +44,7 @@ func Server(db *gorm.DB) {
 	srv := server.NewServer(server.NewConfig(), manager)
 
 	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
-		if username == "test" && password == "test" {
+		if username == "test" && password == "1234" {
 			userID = "test"
 		}
 		return
@@ -69,7 +70,7 @@ func Server(db *gorm.DB) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
+		fmt.Println(store.Get("ReturnUri"))
 		var form url.Values
 		if v, ok := store.Get("ReturnUri"); ok {
 			form = v.(url.Values)
@@ -78,9 +79,10 @@ func Server(db *gorm.DB) {
 
 		store.Delete("ReturnUri")
 		store.Save()
-
+		
 		err = srv.HandleAuthorizeRequest(w, r)
 		if err != nil {
+			fmt.Println("e",err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	})
@@ -124,10 +126,10 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		if r.Form == nil {
 			r.ParseForm()
 		}
-
+		
 		store.Set("ReturnUri", r.Form)
 		store.Save()
-
+		fmt.Println(store.Get("ReturnUri"))
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusFound)
 		return
