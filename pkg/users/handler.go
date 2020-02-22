@@ -29,7 +29,7 @@ type Resp map[string]interface{}
 /*
 Logger handles logs
 */
-func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
+func (h *Handlers) handleLog(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
 		defer h.logger.Printf("request processed in %s\n", time.Now().Sub(startTime))
@@ -40,7 +40,7 @@ func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
 /*
 HandleAddUser gets data from http request and sends to
 */
-func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Request) {
+func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Request) {
 
 	newUser := User{}
 
@@ -65,7 +65,7 @@ func (h *Handlers) HandleAddUser(response http.ResponseWriter, request *http.Req
 /*
 HandleGetAllUsers gets data from http request and sends to
 */
-func (h *Handlers) HandleGetAllUsers(response http.ResponseWriter, request *http.Request) {
+func (h *Handlers) handleGetAllUsers(response http.ResponseWriter, request *http.Request) {
 
 	newUser := User{}
 
@@ -90,8 +90,8 @@ func (h *Handlers) HandleGetAllUsers(response http.ResponseWriter, request *http
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/users/new", h.Logger(h.HandleAddUser)).Methods("POST")
-	mux.HandleFunc("/api/users/all", h.Logger(h.HandleGetAllUsers)).Methods("GET")
+	mux.HandleFunc("/api/users/new", h.handleLog(h.handleAddUser)).Methods("POST")
+	mux.HandleFunc("/api/users/all", h.handleLog(h.handleGetAllUsers)).Methods("GET")
 }
 
 /*
