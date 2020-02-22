@@ -22,7 +22,7 @@ type service struct {
 }
 
 /*
-NewService creates a auth service with the necessary dependencies
+NewAuthService creates a auth service with the necessary dependencies
 */
 func NewAuthService(r users.Repository) Service {
 	return &service{r}

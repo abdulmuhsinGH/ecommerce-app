@@ -20,7 +20,6 @@ import (
 
 var authService Service
 
-//var UserID string
 /*
 Server for authentication
 */
