@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-session/session"
@@ -23,8 +22,8 @@ var authService Service
 /*
 Server for authentication
 */
-func Server(db *gorm.DB) {
-	logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
+func Server(db *gorm.DB, logger *log.Logger) {
+	//logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
 	router := mux.NewRouter()
 	//authService = NewAuthService()
 
@@ -47,7 +46,7 @@ func Server(db *gorm.DB) {
 
 	srv := server.NewServer(server.NewConfig(), manager)
 	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
-
+		fmt.Print("SetPasswordAuthorizationHandler")
 		if username == "test" && password == "1234" {
 			userID = "test"
 		}
@@ -60,7 +59,7 @@ func Server(db *gorm.DB) {
 		log.Println("Internal Error:", err.Error())
 		return
 	})
-
+	//srv.Config
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
 		log.Println("Response Error:", re.Error.Error())
 	})
@@ -68,7 +67,7 @@ func Server(db *gorm.DB) {
 	authHandler.SetupRoutes(router)
 
 	log.Println("Server is running at 9096 port.")
-	log.Fatal(http.ListenAndServe(":9096", nil))
+	log.Fatal(http.ListenAndServe(":9096", router))
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
@@ -85,7 +84,7 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 
 		store.Set("ReturnUri", r.Form)
 		store.Save()
-		fmt.Println(store.Get("ReturnUri"))
+		fmt.Println("ddd")
 		w.Header().Set("Location", "/auth/login")
 		w.WriteHeader(http.StatusFound)
 		return

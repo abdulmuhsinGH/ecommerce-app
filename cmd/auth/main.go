@@ -16,6 +16,6 @@ func main() {
 	if err != nil {
 		logger.Fatalf("postgres connection failed: %v", err)
 	}
-	go auth.Server(db)
+	go auth.Server(db, logger)
 	auth.Client()
 }

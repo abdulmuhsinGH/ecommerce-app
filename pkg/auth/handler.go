@@ -72,6 +72,7 @@ func (h *Handlers) handleUserAuthTest(response http.ResponseWriter, request *htt
 HandleAddUser gets data from http request and sends to
 */
 func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.Request) {
+	fmt.Println("Hello World")
 	store, err := session.Start(nil, response, request)
 	if err != nil {
 		format.Send(response, 500, format.Message(false, "Error while starting session", nil))
@@ -112,7 +113,7 @@ func (h *Handlers) HandleUserAuthorize(response http.ResponseWriter, request *ht
 		store.Set("ReturnUri", request.Form)
 		store.Save()
 		fmt.Println(store.Get("ReturnUri"))
-		response.Header().Set("Location", "/login")
+		response.Header().Set("Location", "/auth/login")
 		response.WriteHeader(http.StatusFound)
 		return
 	}
@@ -125,6 +126,9 @@ func (h *Handlers) HandleUserAuthorize(response http.ResponseWriter, request *ht
 }
 
 func (h *Handlers) handleLogin(w http.ResponseWriter, r *http.Request) {
+	outputHTML(w, r, "pkg/auth/static/login.html")
+}
+func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -139,7 +143,6 @@ func (h *Handlers) handleLogin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusFound)
 		return
 	}
-	outputHTML(w, r, "pkg/auth/static/login.html")
 }
 
 func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +153,7 @@ func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok := store.Get("LoggedInUserID"); !ok {
-		w.Header().Set("Location", "/login")
+		w.Header().Set("Location", "/auth/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
@@ -185,10 +188,11 @@ func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
+	mux.HandleFunc("/auth", h.handleLog(h.handleAuth)).Methods("GET")
 	mux.HandleFunc("/auth/login", h.handleLog(h.handleLogin)).Methods("GET")
-	mux.HandleFunc("/auth/", h.handleLog(h.handleAuth)).Methods("GET")
-	mux.HandleFunc("/auth/authorize", h.handleLog(h.handleAuthorize)).Methods("GET")
-	mux.HandleFunc("/auth/token", h.handleLog(h.handleToken)).Methods("GET")
+	mux.HandleFunc("/auth/login", h.handleLog(h.handlePostLogin)).Methods("POST")
+	mux.HandleFunc("/auth/authorize", h.handleLog(h.handleAuthorize)).Methods("GET","POST")
+	mux.HandleFunc("/auth/token", h.handleLog(h.handleToken)).Methods("POST")
 	mux.HandleFunc("/auth/test", h.handleLog(h.handleUserAuthTest)).Methods("GET")
 }
 
