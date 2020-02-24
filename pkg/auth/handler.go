@@ -2,7 +2,6 @@ package auth
 
 import (
 	"ecormmerce-rest-api/pkg/format"
-	"ecormmerce-rest-api/pkg/users"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -18,8 +17,7 @@ import (
 )
 
 var (
-	userRepository users.Repository
-	srv            *server.Server
+	srv *server.Server
 )
 
 /*
@@ -95,7 +93,8 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 		format.Send(response, 500, format.Message(false, "Error handling authorization", nil))
 	}
 }
-/* 
+
+/*
 HandleUserAuthorize handles user authorization
 */
 func (h *Handlers) HandleUserAuthorize(response http.ResponseWriter, request *http.Request) {
@@ -134,15 +133,16 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	if r.Method == "POST" {
-		store.Set("LoggedInUserID", "000000")
-		store.Save()
-
-		w.Header().Set("Location", "/auth")
-		w.WriteHeader(http.StatusFound)
+	user,err := authService.Login(r.FormValue("username"), r.FormValue("password"))
+	if err != nil {
+		format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		return
 	}
+	store.Set("LoggedInUserID", user.ID)
+	store.Save()
+
+	w.Header().Set("Location", "/auth")
+	w.WriteHeader(http.StatusFound)	
 }
 
 func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
@@ -191,7 +191,7 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/auth", h.handleLog(h.handleAuth)).Methods("GET")
 	mux.HandleFunc("/auth/login", h.handleLog(h.handleLogin)).Methods("GET")
 	mux.HandleFunc("/auth/login", h.handleLog(h.handlePostLogin)).Methods("POST")
-	mux.HandleFunc("/auth/authorize", h.handleLog(h.handleAuthorize)).Methods("GET","POST")
+	mux.HandleFunc("/auth/authorize", h.handleLog(h.handleAuthorize)).Methods("GET", "POST")
 	mux.HandleFunc("/auth/token", h.handleLog(h.handleToken)).Methods("POST")
 	mux.HandleFunc("/auth/test", h.handleLog(h.handleUserAuthTest)).Methods("GET")
 }
@@ -199,10 +199,9 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 /*
 NewHandlers initiates auth handler
 */
-func NewHandlers(logger *log.Logger, db *gorm.DB, authServer *server.Server) *Handlers {
+func NewHandlers(logger *log.Logger, db *gorm.DB, authServer *server.Server, service Service) *Handlers {
 	srv = authServer
-	userRepository = users.NewRepository(db)
-	authService = NewAuthService(userRepository)
+	authService = service
 	return &Handlers{
 		logger: logger,
 	}

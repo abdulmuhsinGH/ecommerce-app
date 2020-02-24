@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"ecormmerce-rest-api/pkg/users"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,7 +26,8 @@ Server for authentication
 func Server(db *gorm.DB, logger *log.Logger) {
 	//logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
 	router := mux.NewRouter()
-	//authService = NewAuthService()
+	userRepository := users.NewRepository(db)
+	authService = NewAuthService(userRepository)
 
 	manager := manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
@@ -46,11 +48,11 @@ func Server(db *gorm.DB, logger *log.Logger) {
 
 	srv := server.NewServer(server.NewConfig(), manager)
 	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
-		fmt.Print("SetPasswordAuthorizationHandler")
-		if username == "test" && password == "1234" {
-			userID = "test"
+		user, err := authService.Login(username, password)
+		if err != nil {
+			return "", err
 		}
-		return
+		return user.ID, nil
 	})
 
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
@@ -63,7 +65,7 @@ func Server(db *gorm.DB, logger *log.Logger) {
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
 		log.Println("Response Error:", re.Error.Error())
 	})
-	authHandler := NewHandlers(logger, db, srv)
+	authHandler := NewHandlers(logger, db, srv, authService)
 	authHandler.SetupRoutes(router)
 
 	log.Println("Server is running at 9096 port.")
@@ -81,15 +83,15 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		if r.Form == nil {
 			r.ParseForm()
 		}
-
+		fmt.Println(uid)
 		store.Set("ReturnUri", r.Form)
 		store.Save()
-		fmt.Println("ddd")
+		//fmt.Println("ddd")
 		w.Header().Set("Location", "/auth/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
-
+	fmt.Println(uid)
 	userID = uid.(string)
 	store.Delete("LoggedInUserID")
 	store.Save()
