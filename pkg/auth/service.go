@@ -9,12 +9,12 @@ import (
 	"gopkg.in/oauth2.v3/server"
 )
 
-
 // Service provides user adding operations.
 type Service interface {
 	Login(string, string) (users.User, error)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
+	SignUp(users.User) error
 }
 
 type service struct {
@@ -57,6 +57,24 @@ func (s *service) Login(username string, password string) (users.User, error) {
 	}
 
 	return user, nil
+}
+
+/*
+SignUp creates a new user
+*/
+func (s *service) SignUp(user users.User) error {
+	var err error
+	user.Password, err = s.HashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
+	status := s.userRepository.AddUser(user)
+	if !status {
+		return errors.New("not created")
+	}
+	return nil
+
 }
 
 /*

@@ -2,8 +2,10 @@ package auth
 
 import (
 	"ecormmerce-rest-api/pkg/format"
+	"ecormmerce-rest-api/pkg/users"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -133,7 +135,7 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	user,err := authService.Login(r.FormValue("username"), r.FormValue("password"))
+	user, err := authService.Login(r.FormValue("username"), r.FormValue("password"))
 	if err != nil {
 		format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		return
@@ -142,7 +144,29 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	store.Save()
 
 	w.Header().Set("Location", "/auth")
-	w.WriteHeader(http.StatusFound)	
+	w.WriteHeader(http.StatusFound)
+}
+func (h *Handlers) handleSignUp(w http.ResponseWriter, r *http.Request) {
+	outputHTML(w, r, "pkg/auth/static/signup.html")
+}
+func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.Request) {
+	newUser := users.User{}
+	body, err := ioutil.ReadAll(request.Body)
+	fmt.Println(string(body))
+	err = json.NewDecoder(request.Body).Decode(&newUser)
+	if err != nil {
+		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err.Error())
+		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
+		return
+	}
+	err = authService.SignUp(newUser)
+	if err != nil {
+		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+		return
+	}
+
+	response.Header().Set("Location", "/auth/login")
+	format.Send(response, http.StatusCreated, format.Message(true, "User Created", nil))
 }
 
 func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
@@ -191,6 +215,8 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/auth", h.handleLog(h.handleAuth)).Methods("GET")
 	mux.HandleFunc("/auth/login", h.handleLog(h.handleLogin)).Methods("GET")
 	mux.HandleFunc("/auth/login", h.handleLog(h.handlePostLogin)).Methods("POST")
+	mux.HandleFunc("/auth/signup", h.handleLog(h.handleSignUp)).Methods("GET")
+	mux.HandleFunc("/auth/signup", h.handleLog(h.handlePostSignUp)).Methods("POST")
 	mux.HandleFunc("/auth/authorize", h.handleLog(h.handleAuthorize)).Methods("GET", "POST")
 	mux.HandleFunc("/auth/token", h.handleLog(h.handleToken)).Methods("POST")
 	mux.HandleFunc("/auth/test", h.handleLog(h.handleUserAuthTest)).Methods("GET")
