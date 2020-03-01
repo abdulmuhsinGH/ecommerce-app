@@ -1,7 +1,15 @@
 -- Schema is work in progress
 
-
-BEGIN
+CREATE TABLE user_roles(
+	id integer primary key not NULL,
+	role_name VARCHAR(100) UNIQUE not null,
+	description text  NOT NULL,
+	comment text,
+	updated_by TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMPTZ,
+	deleted_at TIMESTAMPTZ
+);
 
 CREATE TABLE users (
     id uuid DEFAULT uuid_generate_v4(),
@@ -26,17 +34,6 @@ CREATE TABLE users (
 	
 );
 
-CREATE TABLE user_roles(
-	id integer primary key not NULL,
-	role_name VARCHAR(100) UNIQUE not null,
-	description text  NOT NULL,
-	comment text,
-	updated_by TEXT,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
-
 CREATE TABLE customers(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     username varchar(25) UNIQUE NOT NULL, 
@@ -54,6 +51,12 @@ CREATE TABLE customers(
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
 	updated_by TEXT
+);
+
+CREATE TABLE address_type(
+	id int PRIMARY key not null,
+	address_name varchar(100) UNIQUE NOT NULL,
+	address_description TEXT
 );
 
 CREATE TABLE addresses(
@@ -81,11 +84,6 @@ create table customer_address(
 	
 );
 
-CREATE TABLE address_type(
-	id int PRIMARY key not null,
-	address_name varchar(100) UNIQUE NOT NULL,
-	address_description TEXT
-);
 CREATE TABLE payment_types(
 	id int PRIMARY key not null,
 	payment_name varchar(100) not null UNIQUE,
@@ -102,7 +100,7 @@ CREATE table payment_vendor(
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
-)
+);
 
 CREATE TABLE customer_payment_types(
 	id uuid PRIMARY KEY NOT NULL,
@@ -135,11 +133,22 @@ create table carts(
 	deleted_at TIMESTAMPTZ
 );
 
+CREATE TABLE order_status(
+	id int PRIMARY KEY NOT NULL,
+	name varchar(100) UNIQUE not null,
+	DESCRIPTION text
+);
+
+CREATE TABLE delivery_status(
+	id int PRIMARY KEY NOT NULL,
+	name varchar(100) UNIQUE not null,
+	DESCRIPTION text
+);
+
 CREATE TABLE orders(
 	id uuid PRIMARY key not null,
 	customer_id uuid REFERENCES customers(id),
-	cart_id uuid REFERENCES cart(id),
-	payment_id uuid REFERENCES payments(id),
+	cart_id uuid REFERENCES carts(id),
 	total_cost numeric not null,
 	delivery_cost numeric not null,
 	order_status int not null REFERENCES order_status(id),
@@ -149,43 +158,15 @@ CREATE TABLE orders(
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
-CREATE TABLE order_items(
-	id uuid primary key not null,
-	order_id uuid REFERENCES orders(id),
-	product_id uuid REFERENCES products(id),
-	quantity INTEGER not null,
-	cost numeric not null,
-	delivery_status int not null REFERENCES delivery_status(id),
-	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
-CREATE TABLE delivery_status(
-	id int PRIMARY KEY NOT NULL,
-	name varchar(100) UNIQUE not null,
-	DESCRIPTION text
-);
-create TABLE payments(
-	id uuid PRIMARY key not null,
-	order_id uuid REFERENCES orders(id),
-	payment_type integer not null REFERENCES  payment_type(id),
-	amount_paid numeric not null,
-	details json not null,
-	status boolean not null,
+
+CREATE TABLE product_brands(
+	id serial not null PRIMARY KEY,
+	name VARCHAR(100) not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
-create table inventory(
-	id uuid PRIMARY key not null,
-	product_id uuid REFERENCES products(id),
-	quantity integer not null,
-	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
+
 create TABLE products(
 	id uuid PRIMARY key not null,
 	name text not null,
@@ -198,13 +179,42 @@ create TABLE products(
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
-CREATE TABLE product_brands(
-	id serial not null PRIMARY KEY,
-	name VARCHAR(100) not null,
+
+CREATE TABLE order_items(
+	id uuid primary key not null,
+	order_id uuid REFERENCES orders(id),
+	product_id uuid REFERENCES products(id),
+	quantity INTEGER not null,
+	cost numeric not null,
+	delivery_status int not null REFERENCES delivery_status(id),
+	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	updated_by VARCHAR(100),
+	updated_at TIMESTAMPTZ,
+	deleted_at TIMESTAMPTZ
+);
+
+create TABLE payments(
+	id uuid PRIMARY key not null,
+	order_id uuid REFERENCES orders(id),
+	payment_type integer not null REFERENCES  payment_types(id),
+	amount_paid numeric not null,
+	details json not null,
+	status boolean not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
+
+create table inventory(
+	id uuid PRIMARY key not null,
+	product_id uuid REFERENCES products(id),
+	quantity integer not null,
+	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	updated_by VARCHAR(100),
+	updated_at TIMESTAMPTZ,
+	deleted_at TIMESTAMPTZ
+);
+
 CREATE TABLE product_categories(
 	id serial not null PRIMARY key,
 	name varchar(100) not null,
@@ -214,7 +224,3 @@ CREATE TABLE product_categories(
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
-
-END;
-
-COMMIT;
