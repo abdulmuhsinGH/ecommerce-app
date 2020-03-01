@@ -38,7 +38,7 @@ func Connect() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	
 
 	fmt.Println("Postgres Successfully connected!")
 

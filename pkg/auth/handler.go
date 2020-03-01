@@ -5,6 +5,7 @@ import (
 	"ecormmerce-rest-api/pkg/users"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -154,13 +155,17 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 	body, err := ioutil.ReadAll(request.Body)
 	fmt.Println(string(body))
 	err = json.NewDecoder(request.Body).Decode(&newUser)
-	if err != nil {
+	if err == io.EOF {
+		h.logger.Printf("End of File")
+	} else if err != nil {
 		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err.Error())
-		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
+		format.Send(response, 500, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
 	err = authService.SignUp(newUser)
-	if err != nil {
+	if err == io.EOF {
+		h.logger.Printf("End of File")
+	} else if err != nil {
 		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		return
 	}

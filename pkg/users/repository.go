@@ -32,6 +32,7 @@ AddUser saves user to the user's table
 func (r *repository) AddUser(user User) bool {
 	r.db.NewRecord(user)
 	r.db.Create(&user)
+	r.db.Close()
 
 	return !r.db.NewRecord(user)
 }
@@ -42,6 +43,7 @@ GetAllUsers returns all users from the user's table
 func (r *repository) GetAllUsers() []User {
 	var users []User
 	r.db.Find(&users)
+	r.db.Close()
 	return users
 }
 
@@ -51,5 +53,6 @@ GetAllUsers returns all users from the user's table
 func (r *repository) FindUserByUsername(username string) User {
 	var user User
 	r.db.Where("username = ?", username).Find(&user)
+	r.db.Close()
 	return user
 }
