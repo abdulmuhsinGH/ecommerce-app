@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -9,7 +10,7 @@ import (
 type Service interface {
 	AddUser(*User) error
 	GetAllUsers() []User
-	Login(string, string) (User, error)
+	Login(string, string) (*User, error)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 }
@@ -32,11 +33,13 @@ func (s *service) AddUser(user *User) error {
 	var err error
 	user.Password, err = s.HashPassword(user.Password)
 	if err != nil {
+		userLogging.Printlog("user_repository: Password Hash Error;", err.Error())
 		return err
 	}
 
 	status := s.userRepository.AddUser(user)
 	if !status {
+		userLogging.Printlog("user_repository:Add user Error;", err.Error())
 		return errors.New("not created")
 	}
 	return nil
@@ -54,14 +57,14 @@ func (s *service) GetAllUsers() []User {
 /*
 Login authenticates users
 */
-func (s *service) Login(username string, password string) (User, error) {
+func (s *service) Login(username string, password string) (*User, error) {
 	user := s.userRepository.FindUserByUsername(username)
-	if (User{}) == user {
-		return User{}, errors.New("user does not exist")
+	if (&User{}) == user {
+		return &User{}, errors.New("user does not exist")
 	}
 	passwordMatched := s.CheckPasswordHash(password, user.Password)
 	if !passwordMatched {
-		return User{}, errors.New("password does not match")
+		return &User{}, errors.New("password does not match")
 	}
 
 	return user, nil

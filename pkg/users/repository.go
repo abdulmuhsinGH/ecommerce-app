@@ -1,8 +1,6 @@
 package users
 
 import (
-	"fmt"
-
 	"github.com/go-pg/pg/v9"
 )
 
@@ -12,7 +10,7 @@ Repository provides user repository operations
 type Repository interface {
 	AddUser(*User) bool
 	GetAllUsers() []User
-	FindUserByUsername(string) User
+	FindUserByUsername(string) *User
 }
 
 type repository struct {
@@ -36,7 +34,6 @@ func (r *repository) AddUser(user *User) bool {
 	//r.db.NewRecord(user)
 	err := r.db.Insert(user)
 	if err != nil {
-		fmt.Println(err.Error())
 		return false
 	}
 	defer r.db.Close()
@@ -59,9 +56,11 @@ func (r *repository) GetAllUsers() []User {
 /*
 GetAllUsers returns all users from the user's table
 */
-func (r *repository) FindUserByUsername(username string) User {
-	var user User
-	r.db.Model(user).Where("username = ?", username).Select()
+func (r *repository) FindUserByUsername(username string) *User {
+	user := new(User)
+	err := r.db.Model(user).Where("username = ?", username).Select()
+	if err != nil {
+	}
 	r.db.Close()
 	return user
 }

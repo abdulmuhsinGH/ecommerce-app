@@ -2,20 +2,19 @@ package main
 
 import (
 	"ecormmerce-rest-api/pkg/auth"
+	"ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/storage/postgres"
-	"log"
-	"os"
 )
 
 func main() {
 	//go auth.Client()
 
-	logger := log.New(os.Stdout, "ecommerce_auth ", log.LstdFlags|log.Lshortfile)
+	logging := logging.New("ecommerce_auth:")
 
 	db, err := postgres.Connect()
 	if err != nil {
-		logger.Fatalf("postgres connection failed: %v", err)
+		logging.PrintFatal("postgres connection failed:", err)
 	}
-	go auth.Server(db, logger)
+	go auth.Server(db, logging)
 	auth.Client()
 }

@@ -11,7 +11,7 @@ import (
 
 // Service provides user adding operations.
 type Service interface {
-	Login(string, string) (users.User, error)
+	Login(string, string) (*users.User, error)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 	SignUp(users.User) error
@@ -46,14 +46,14 @@ func (s *service) ValidateToken(f http.HandlerFunc, srv *server.Server) http.Han
 /*
 Login authenticates users
 */
-func (s *service) Login(username string, password string) (users.User, error) {
+func (s *service) Login(username string, password string) (*users.User, error) {
 	user := s.userRepository.FindUserByUsername(username)
-	if (users.User{}) == user {
-		return users.User{}, errors.New("user does not exist")
+	if (&users.User{}) == user {
+		return &users.User{}, errors.New("user does not exist")
 	}
 	passwordMatched := s.CheckPasswordHash(password, user.Password)
 	if !passwordMatched {
-		return users.User{}, errors.New("password does not match")
+		return &users.User{}, errors.New("password does not match")
 	}
 
 	return user, nil

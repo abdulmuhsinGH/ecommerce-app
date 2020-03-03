@@ -36,7 +36,6 @@ Client for authentication
 func Client() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		u := config.AuthCodeURL("xyz")
-		fmt.Println(u)
 		http.Redirect(w, r, u, http.StatusFound)
 	})
 

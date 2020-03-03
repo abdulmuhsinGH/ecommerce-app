@@ -1,8 +1,8 @@
 package auth
 
 import (
+	"ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/users"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -10,6 +10,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
@@ -23,7 +24,7 @@ var authService Service
 /*
 Server for authentication
 */
-func Server(db *pg.DB, logger *log.Logger) {
+func Server(db *pg.DB, logging logging.Logging) {
 	//logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
 	router := mux.NewRouter()
 	userRepository := users.NewRepository(db)
@@ -58,17 +59,18 @@ func Server(db *pg.DB, logger *log.Logger) {
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
 
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		log.Println("Internal Error:", err.Error())
+		logging.Printlog("Internal Error:", err.Error())
 		return
 	})
 	//srv.Config
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
-		log.Println("Response Error:", re.Error.Error())
+		logging.Printlog("Response Error:", re.Error.Error())
 	})
-	authHandler := NewHandlers(logger, db, srv, authService)
+	authHandler := NewHandlers(logging, db, srv, authService)
 	authHandler.SetupRoutes(router)
 
-	log.Println("Server is running at 9096 port.")
+	logging.Printlog("AuthServer", "Server is running at 9096 port.")
+
 	log.Fatal(http.ListenAndServe(":9096", router))
 }
 
@@ -83,16 +85,13 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		if r.Form == nil {
 			r.ParseForm()
 		}
-		fmt.Println(uid)
 		store.Set("ReturnUri", r.Form)
 		store.Save()
-		//fmt.Println("ddd")
 		w.Header().Set("Location", "/auth/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
-	fmt.Println(uid)
-	userID = uid.(string)
+	userID = uid.(uuid.UUID).String()
 	store.Delete("LoggedInUserID")
 	store.Save()
 	return

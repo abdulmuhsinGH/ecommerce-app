@@ -2,51 +2,36 @@ package auth
 
 import (
 	"ecormmerce-rest-api/pkg/format"
+	logging "ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/users"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 
+	"github.com/go-pg/pg/v9"
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
-	"github.com/go-pg/pg/v9"
 	"gopkg.in/oauth2.v3/server"
 )
 
 var (
-	srv *server.Server
+	srv         *server.Server
+	authLogging logging.Logging
 )
 
 /*
 Handlers define auth
 */
 type Handlers struct {
-	logger *log.Logger
 }
 
-/*
-Resp interface for response structure
-*/
-type Resp map[string]interface{}
-
-/*
-Logger handles logs
-*/
-func (h *Handlers) handleLog(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-		defer h.logger.Printf("request processed in %s\n", time.Now().Sub(startTime))
-		next(w, r)
-	}
-}
 func (h *Handlers) handleToken(response http.ResponseWriter, request *http.Request) {
 	err := srv.HandleTokenRequest(response, request)
 	if err != nil {
+		authLogging.Printlog("Error: %s\n", err.Error())
 		http.Error(response, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -54,6 +39,7 @@ func (h *Handlers) handleToken(response http.ResponseWriter, request *http.Reque
 func (h *Handlers) handleUserAuthTest(response http.ResponseWriter, request *http.Request) {
 	token, err := srv.ValidationBearerToken(request)
 	if err != nil {
+		authLogging.Printlog("Error: %s\n", err.Error())
 		http.Error(response, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -72,14 +58,12 @@ func (h *Handlers) handleUserAuthTest(response http.ResponseWriter, request *htt
 HandleAddUser gets data from http request and sends to
 */
 func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("Hello World")
 	store, err := session.Start(nil, response, request)
 	if err != nil {
+		authLogging.Printlog("Error: %s\n", err.Error())
 		format.Send(response, 500, format.Message(false, "Error while starting session", nil))
-		//http.Error(response, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(store.Get("ReturnUri"))
 	var form url.Values
 	if v, ok := store.Get("ReturnUri"); ok {
 		form = v.(url.Values)
@@ -91,39 +75,9 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 
 	err = srv.HandleAuthorizeRequest(response, request)
 	if err != nil {
-		fmt.Println("e", err.Error())
+		authLogging.Printlog("Error: %s\n", err.Error())
 		format.Send(response, 500, format.Message(false, "Error handling authorization", nil))
 	}
-}
-
-/*
-HandleUserAuthorize handles user authorization
-*/
-func (h *Handlers) HandleUserAuthorize(response http.ResponseWriter, request *http.Request) {
-	store, err := session.Start(nil, response, request)
-	if err != nil {
-		return
-	}
-
-	uid, ok := store.Get("LoggedInUserID")
-	if !ok {
-		if request.Form == nil {
-			request.ParseForm()
-		}
-
-		store.Set("ReturnUri", request.Form)
-		store.Save()
-		fmt.Println(store.Get("ReturnUri"))
-		response.Header().Set("Location", "/auth/login")
-		response.WriteHeader(http.StatusFound)
-		return
-	}
-
-	userID := uid.(string)
-	fmt.Println(userID)
-	store.Delete("LoggedInUserID")
-	store.Save()
-	return
 }
 
 func (h *Handlers) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -137,6 +91,7 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := authService.Login(r.FormValue("username"), r.FormValue("password"))
 	if err != nil {
+		authLogging.Printlog("Error: %v", err.Error())
 		format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		return
 	}
@@ -152,15 +107,16 @@ func (h *Handlers) handleSignUp(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.Request) {
 	newUser := users.User{}
 	body, err := ioutil.ReadAll(request.Body)
-	fmt.Println(string(body))
+
 	err = json.Unmarshal([]byte(body), &newUser) //NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
-		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err.Error())
+		authLogging.Printlog("Error while decoding request body: %v", err.Error())
 		format.Send(response, 500, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
 	err = authService.SignUp(newUser)
 	if err != nil {
+		authLogging.Printlog("Error: %v", err.Error())
 		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		return
 	}
@@ -172,6 +128,7 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
+		authLogging.Printlog("Error: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -189,6 +146,7 @@ func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 	file, err := os.Open(filename)
 	if err != nil {
+
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -203,7 +161,7 @@ Logger handles logs
 func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
-		defer h.logger.Printf("request processed in %s\n", time.Now().Sub(startTime))
+		defer authLogging.Printlog("request processed in %s\n", time.Now().Sub(startTime).String())
 		next(w, r)
 	}
 }
@@ -212,23 +170,22 @@ func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/auth", h.handleLog(h.handleAuth)).Methods("GET")
-	mux.HandleFunc("/auth/login", h.handleLog(h.handleLogin)).Methods("GET")
-	mux.HandleFunc("/auth/login", h.handleLog(h.handlePostLogin)).Methods("POST")
-	mux.HandleFunc("/auth/signup", h.handleLog(h.handleSignUp)).Methods("GET")
-	mux.HandleFunc("/auth/signup", h.handleLog(h.handlePostSignUp)).Methods("POST")
-	mux.HandleFunc("/auth/authorize", h.handleLog(h.handleAuthorize)).Methods("GET", "POST")
-	mux.HandleFunc("/auth/token", h.handleLog(h.handleToken)).Methods("POST")
-	mux.HandleFunc("/auth/test", h.handleLog(h.handleUserAuthTest)).Methods("GET")
+	mux.HandleFunc("/auth", authLogging.Httplog(h.handleAuth)).Methods("GET")
+	mux.HandleFunc("/auth/login", authLogging.Httplog(h.handleLogin)).Methods("GET")
+	mux.HandleFunc("/auth/login", authLogging.Httplog(h.handlePostLogin)).Methods("POST")
+	mux.HandleFunc("/auth/signup", authLogging.Httplog(h.handleSignUp)).Methods("GET")
+	mux.HandleFunc("/auth/signup", authLogging.Httplog(h.handlePostSignUp)).Methods("POST")
+	mux.HandleFunc("/auth/authorize", authLogging.Httplog(h.handleAuthorize)).Methods("GET", "POST")
+	mux.HandleFunc("/auth/token", authLogging.Httplog(h.handleToken)).Methods("POST")
+	mux.HandleFunc("/auth/test", authLogging.Httplog(h.handleUserAuthTest)).Methods("GET")
 }
 
 /*
 NewHandlers initiates auth handler
 */
-func NewHandlers(logger *log.Logger, db *pg.DB, authServer *server.Server, service Service) *Handlers {
+func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, service Service) *Handlers {
 	srv = authServer
 	authService = service
-	return &Handlers{
-		logger: logger,
-	}
+	authLogging = logging
+	return &Handlers{}
 }

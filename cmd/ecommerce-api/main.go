@@ -1,11 +1,10 @@
 package main
 
 import (
+	"ecormmerce-rest-api/pkg/logging"
 	server "ecormmerce-rest-api/pkg/server"
 	postgres "ecormmerce-rest-api/pkg/storage/postgres"
 	users "ecormmerce-rest-api/pkg/users"
-	"log"
-	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -18,23 +17,24 @@ import (
 ) */
 
 func main() {
-	logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
+	logging := logging.New("ecommerce_api:")
 
 	db, err := postgres.Connect()
 	if err != nil {
-		logger.Fatalf("postgres connection failed: %v", err)
+		logging.PrintFatal("postgres connection failed:", err)
 	}
 
-	u := users.NewHandlers(logger, db)
+	u := users.NewHandlers(logging, db)
 
 	router := mux.NewRouter()
 
 	u.SetupRoutes(router)
 	srv := server.New(router, ":8080")
 
-	logger.Println("server starting")
+	logging.Printlog("server_status","starting")
 	err = srv.ListenAndServe()
 	if err != nil {
-		logger.Fatalf("server failed to start: %v", err)
+		logging.PrintFatal("server failed to start:", err)
+		logging.Printlog("server_status","closed")
 	}
 }
