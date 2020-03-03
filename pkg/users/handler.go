@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"github.com/go-pg/pg/v9"
 )
 
 /*
@@ -51,7 +51,7 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 		return
 	}
 
-	err = userService.AddUser(newUser)
+	err = userService.AddUser(&newUser)
 
 	if err != nil {
 		h.logger.Printf("User HandleAddUser; Error while saving user: %v", err.Error())
@@ -97,7 +97,7 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 /*
 NewHandlers initiates user handler
 */
-func NewHandlers(logger *log.Logger, db *gorm.DB) *Handlers {
+func NewHandlers(logger *log.Logger, db *pg.DB) *Handlers {
 	userRepository = NewRepository(db)
 	userService = NewService(userRepository)
 	return &Handlers{

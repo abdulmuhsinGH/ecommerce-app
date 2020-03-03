@@ -7,7 +7,7 @@ import (
 
 // Service provides user adding operations.
 type Service interface {
-	AddUser(User) error
+	AddUser(*User) error
 	GetAllUsers() []User
 	Login(string, string) (User, error)
 	HashPassword(string) (string, error)
@@ -28,7 +28,7 @@ func NewService(r Repository) Service {
 /*
 AddUser creates a new user
 */
-func (s *service) AddUser(user User) error {
+func (s *service) AddUser(user *User) error {
 	var err error
 	user.Password, err = s.HashPassword(user.Password)
 	if err != nil {

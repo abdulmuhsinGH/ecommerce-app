@@ -5,7 +5,6 @@ import (
 	"ecormmerce-rest-api/pkg/users"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,7 +14,7 @@ import (
 
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"github.com/go-pg/pg/v9"
 	"gopkg.in/oauth2.v3/server"
 )
 
@@ -154,18 +153,14 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 	newUser := users.User{}
 	body, err := ioutil.ReadAll(request.Body)
 	fmt.Println(string(body))
-	err = json.NewDecoder(request.Body).Decode(&newUser)
-	if err == io.EOF {
-		h.logger.Printf("End of File")
-	} else if err != nil {
+	err = json.Unmarshal([]byte(body), &newUser) //NewDecoder(request.Body).Decode(&newUser)
+	if err != nil {
 		h.logger.Printf("User HandleAddUser; Error while decoding request body: %v", err.Error())
 		format.Send(response, 500, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
 	err = authService.SignUp(newUser)
-	if err == io.EOF {
-		h.logger.Printf("End of File")
-	} else if err != nil {
+	if err != nil {
 		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		return
 	}
@@ -230,7 +225,7 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 /*
 NewHandlers initiates auth handler
 */
-func NewHandlers(logger *log.Logger, db *gorm.DB, authServer *server.Server, service Service) *Handlers {
+func NewHandlers(logger *log.Logger, db *pg.DB, authServer *server.Server, service Service) *Handlers {
 	srv = authServer
 	authService = service
 	return &Handlers{

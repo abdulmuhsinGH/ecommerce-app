@@ -69,7 +69,7 @@ func (s *service) SignUp(user users.User) error {
 		return err
 	}
 
-	status := s.userRepository.AddUser(user)
+	status := s.userRepository.AddUser(&user)
 	if !status {
 		return errors.New("not created")
 	}

@@ -14,7 +14,7 @@ func TestAddUser(t *testing.T) {
 	user.Gender = "d"
 	user.Username = "e"
 
-	err := userServiceTest.AddUser(user)
+	err := userServiceTest.AddUser(&user)
 	if err != nil {
 		t.Errorf("Test Failed; Users was not added")
 	}

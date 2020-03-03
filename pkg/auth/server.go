@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-pg/pg/v9"
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
@@ -23,7 +23,7 @@ var authService Service
 /*
 Server for authentication
 */
-func Server(db *gorm.DB, logger *log.Logger) {
+func Server(db *pg.DB, logger *log.Logger) {
 	//logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
 	router := mux.NewRouter()
 	userRepository := users.NewRepository(db)
@@ -52,7 +52,7 @@ func Server(db *gorm.DB, logger *log.Logger) {
 		if err != nil {
 			return "", err
 		}
-		return user.ID, nil
+		return user.ID.String(), nil
 	})
 
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
