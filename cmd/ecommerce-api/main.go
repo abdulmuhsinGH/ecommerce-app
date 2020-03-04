@@ -23,6 +23,7 @@ func main() {
 	if err != nil {
 		logging.PrintFatal("postgres connection failed:", err)
 	}
+	defer db.Close()
 
 	u := users.NewHandlers(logging, db)
 

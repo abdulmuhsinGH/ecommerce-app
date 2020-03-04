@@ -1,6 +1,8 @@
 package users
 
 import (
+	"ecormmerce-rest-api/pkg/logging"
+
 	"github.com/go-pg/pg/v9"
 )
 
@@ -17,11 +19,13 @@ type repository struct {
 	db *pg.DB
 }
 
+var userRepositoryLogging logging.Logging
+
 /*
 NewRepository creates a users repository with the necessary dependencies
 */
 func NewRepository(db *pg.DB) Repository {
-
+	userLogging = logging.New("user_reposiroty: ")
 	return &repository{db}
 
 }
@@ -30,17 +34,12 @@ func NewRepository(db *pg.DB) Repository {
 AddUser saves user to the user's table
 */
 func (r *repository) AddUser(user *User) bool {
-
-	//r.db.NewRecord(user)
 	err := r.db.Insert(user)
 	if err != nil {
 		return false
 	}
-	defer r.db.Close()
 	return true
-	/* defer r.db.Close()
 
-	return !r.db.NewRecord(user) */
 }
 
 /*
@@ -49,7 +48,6 @@ GetAllUsers returns all users from the user's table
 func (r *repository) GetAllUsers() []User {
 	var users []User
 	r.db.Select(&users)
-	r.db.Close()
 	return users
 }
 
@@ -60,7 +58,7 @@ func (r *repository) FindUserByUsername(username string) *User {
 	user := new(User)
 	err := r.db.Model(user).Where("username = ?", username).Select()
 	if err != nil {
+		userLogging.Printlog("FindUserByUsername_Error",err.Error())
 	}
-	r.db.Close()
 	return user
 }

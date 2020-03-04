@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		logging.PrintFatal("postgres connection failed:", err)
 	}
+	defer db.Close()
 	go auth.Server(db, logging)
 	auth.Client()
 }

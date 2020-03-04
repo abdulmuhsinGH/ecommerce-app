@@ -30,7 +30,8 @@ var (
 	}
 	globalToken *oauth2.Token // Non-concurrent security
 )
-/* 
+
+/*
 Client for authentication
 */
 func Client() {
@@ -87,8 +88,7 @@ func Client() {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
-
-		resp, err := http.Get(fmt.Sprintf("%s/test?access_token=%s", authServerURL, globalToken.AccessToken))
+		resp, err := http.Get(fmt.Sprintf("%s/auth/test?access_token=%s", authServerURL, globalToken.AccessToken))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

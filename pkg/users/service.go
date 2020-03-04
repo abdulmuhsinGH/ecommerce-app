@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"ecormmerce-rest-api/pkg/logging"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,11 +19,12 @@ type Service interface {
 type service struct {
 	userRepository Repository
 }
-
+var userServiceLogging logging.Logging
 /*
 NewService creates a users service with the necessary dependencies
 */
 func NewService(r Repository) Service {
+	userServiceLogging = logging.New("user_service:")
 	return &service{r}
 }
 
@@ -33,13 +35,13 @@ func (s *service) AddUser(user *User) error {
 	var err error
 	user.Password, err = s.HashPassword(user.Password)
 	if err != nil {
-		userLogging.Printlog("user_repository: Password Hash Error;", err.Error())
+		userServiceLogging.Printlog("Password Hash Error;", err.Error())
 		return err
 	}
 
 	status := s.userRepository.AddUser(user)
 	if !status {
-		userLogging.Printlog("user_repository:Add user Error;", err.Error())
+		userServiceLogging.Printlog("Add user Error;", err.Error())
 		return errors.New("not created")
 	}
 	return nil
