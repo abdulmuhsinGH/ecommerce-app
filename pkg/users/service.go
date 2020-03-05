@@ -10,7 +10,7 @@ import (
 // Service provides user adding operations.
 type Service interface {
 	AddUser(*User) error
-	GetAllUsers() []User
+	GetAllUsers() ([]User, error)
 	Login(string, string) (*User, error)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
@@ -51,9 +51,13 @@ func (s *service) AddUser(user *User) error {
 /*
 GetAllUsers gets all users
 */
-func (s *service) GetAllUsers() []User {
-	users := s.userRepository.GetAllUsers()
-	return users
+func (s *service) GetAllUsers() ([]User, error) {
+	users, err := s.userRepository.GetAllUsers()
+	if err != nil {
+		userServiceLogging.Printlog("GetAllUsers_Error;", err.Error())
+		return nil, err
+	}
+	return users, nil
 }
 
 /*

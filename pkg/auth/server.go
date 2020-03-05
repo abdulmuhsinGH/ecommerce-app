@@ -62,10 +62,10 @@ func Server(db *pg.DB, logging logging.Logging) {
 		logging.Printlog("Internal Error:", err.Error())
 		return
 	})
-	//srv.Config
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
 		logging.Printlog("Response Error:", re.Error.Error())
 	})
+
 	authHandler := NewHandlers(logging, db, srv, authService)
 	authHandler.SetupRoutes(router)
 

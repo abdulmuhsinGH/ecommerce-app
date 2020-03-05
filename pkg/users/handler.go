@@ -55,11 +55,14 @@ func (h *Handlers) handleGetAllUsers(response http.ResponseWriter, request *http
 	err := json.NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
 		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
-		//respond(response, message(false, "Error while decoding request body"))
 		return
 	}
 
-	users := userService.GetAllUsers()
+	users, err := userService.GetAllUsers()
+	if err != nil {
+		format.Send(response, 500, format.Message(false, "Error getting all users", nil))
+		return
+	}
 
 	if len(users) == 0 {
 		format.Send(response, 200, format.Message(false, "No users", nil))

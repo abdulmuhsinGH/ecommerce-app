@@ -22,7 +22,10 @@ func TestAddUser(t *testing.T) {
 
 func TestGetAllusers(t *testing.T) {
 
-	users := userServiceTest.GetAllUsers()
+	users, err := userServiceTest.GetAllUsers()
+	if err != nil {
+		t.Errorf("Test Failed; No users found")
+	}
 	if len(users) != 1 {
 		t.Errorf("Test Failed; No users found")
 	}

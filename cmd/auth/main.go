@@ -4,12 +4,19 @@ import (
 	"ecormmerce-rest-api/pkg/auth"
 	"ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/storage/postgres"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	//go auth.Client()
 
 	logging := logging.New("ecommerce_auth:")
+
+	err := godotenv.Load()
+	if err != nil {
+		logging.PrintFatal(".env file not found %v", err)
+	}
 
 	db, err := postgres.Connect()
 	if err != nil {

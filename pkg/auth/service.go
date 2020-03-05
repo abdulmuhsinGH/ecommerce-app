@@ -15,6 +15,7 @@ type Service interface {
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 	SignUp(users.User) error
+	SignUpViaGoogle(users.User) error
 }
 
 type service struct {
@@ -76,6 +77,25 @@ func (s *service) SignUp(user users.User) error {
 	return nil
 
 }
+
+/*
+SignUpViaGoogle creates a new user
+*/
+func (s *service) SignUpViaGoogle(user users.User) error {
+	var err error
+	user.Password, err = s.HashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
+	status := s.userRepository.FindOrAddUser(&user)
+	if !status {
+		return errors.New("not created")
+	}
+	return nil
+
+}
+
 
 /*
 HashPassword encrypts user password

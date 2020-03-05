@@ -12,7 +12,7 @@ require (
 	github.com/jinzhu/gorm v1.9.11
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.2.0
-	github.com/markbates/goth v1.59.0 // indirect
+	github.com/markbates/goth v1.59.0
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
