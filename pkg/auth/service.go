@@ -9,8 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/oauth2.v3/server"
 )
@@ -42,25 +44,24 @@ GenerateStateOauthCookie genearate a state for verifying request to prevent CSRF
 */
 func (s *service) GenerateStateOauthCookie(w http.ResponseWriter) string {
 	var expiration = time.Now().Add(365 * 24 * time.Hour)
-	/* store, err := session.Start(nil, w, r)
-	store.Set("ReturnUri", r.Form)
-	store.Save() */
 
 	b := make([]byte, 16)
 	rand.Read(b)
 	state := base64.URLEncoding.EncodeToString(b)
-	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expiration}
+	cookie := http.Cookie{Name: "oauth_state", Value: state, Expires: expiration}
 	http.SetCookie(w, &cookie)
+
+	w.Header().Add("Set-Cookie", "HttpOnly;Secure;SameSite=Strict")
 
 	return state
 }
-/* 
+
+/*
 GetUserDataFromGoogle feches user information from Google api
 */
 func (s *service) GetUserDataFromGoogle(code string) (users.User, error) {
 	const oauthGoogleURLAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
 	// Use code to get token and get user info from Google.
-	var user users.User
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		return users.User{}, fmt.Errorf("code exchange wrong: %s", err.Error())
@@ -70,11 +71,41 @@ func (s *service) GetUserDataFromGoogle(code string) (users.User, error) {
 		return users.User{}, fmt.Errorf("failed getting user info: %s", err.Error())
 	}
 	defer response.Body.Close()
-	err = json.NewDecoder(response.Body).Decode(&user) //ioutil.ReadAll(response.Body)
+
+	var userInfo googleUserInfo
+	err = json.NewDecoder(response.Body).Decode(&userInfo) //ioutil.ReadAll(response.Body)
 	if err != nil {
 		return users.User{}, fmt.Errorf("failed read response: %s", err.Error())
 	}
+	user := googleUserInfoToUserStruct(userInfo)
+
 	return user, nil
+}
+
+type googleUserInfo struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	Picture       string `json:"picture"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Locale        string `json:"locale"`
+}
+
+func googleUserInfoToUserStruct(userInfo googleUserInfo) users.User {
+	var user users.User
+	user.ID = uuid.NewV4()
+	user.EmailWork = userInfo.Email
+	user.Firstname = userInfo.GivenName
+	user.Lastname = userInfo.FamilyName
+	user.Username = strings.Split(userInfo.Email, "@")[0]
+	user.Password = userInfo.ID
+	user.Gender = "_"
+	user.Role = 1 //TODO find a way to assing a role. for users and customers. This is temporal
+	user.Status = userInfo.VerifiedEmail
+
+	return user
 }
 
 /*

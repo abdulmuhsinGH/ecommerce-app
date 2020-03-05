@@ -33,23 +33,36 @@ type Handlers struct {
 var googleOauthConfig *oauth2.Config
 
 func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
-
 	// Create oauthState cookie
 	oauthState := authService.GenerateStateOauthCookie(w)
-	u := googleOauthConfig.AuthCodeURL(oauthState)
-	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
-}
 
-func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
-	// Read oauthState from Cookie
-	oauthState, err := r.Cookie("oauthstate")
+	oauthStateTest, err := r.Cookie("oauth_state")
 	if err != nil {
 		authLogging.Printlog("google_oauth_error", err.Error())
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
 
-	if r.FormValue("state") != oauthState.Value {
+	authLogging.Printlog("debugging", oauthStateTest.Value)
+	
+	u := googleOauthConfig.AuthCodeURL(oauthState)
+	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
+}
+
+func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
+	//w.Header().Add("Set-Cookie", "HttpOnly;Secure;SameSite=Strict")
+	// Read oauthState from Cookie
+	oauthState := r.URL.Query().Get("state")
+
+	//requestQueries.Get()
+	/* oauthState, err := r.Cookie("oauth_state")
+	if err != nil {
+		authLogging.Printlog("google_oauth_error", err.Error())
+		http.Redirect(w, r, "/", http.StatusInternalServerError)
+		return
+	} */
+
+	if r.FormValue("state") != oauthState {
 		authLogging.Printlog("google_oauth_error", "invalid oauth google state")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
@@ -57,15 +70,17 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 
 	data, err := authService.GetUserDataFromGoogle(r.FormValue("code"))
 	if err != nil {
-		authLogging.Printlog("google_oauth_error", err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		authLogging.Printlog("google_oauth_get_user_data_error", err.Error())
+		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
 
+	authLogging.Printlog("debugging", data.ID.String())
+
 	err = authService.SignUpViaGoogle(data)
 	if err != nil {
-		authLogging.Printlog("google_oauth_error", err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		authLogging.Printlog("google_oauth_sign_up_users_error", err.Error())
+		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
 
@@ -227,7 +242,7 @@ func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, 
 		RedirectURL:  "http://127.0.0.1:9096/auth/google/callback",
 		ClientID:     os.Getenv("google_client_id"),
 		ClientSecret: os.Getenv("google_client_secret"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "profile"},
 		Endpoint:     google.Endpoint,
 	}
 	return &Handlers{}

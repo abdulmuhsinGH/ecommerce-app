@@ -51,7 +51,7 @@ func (r *repository) FindOrAddUser(user *User) bool {
 
 	isCreated, err := r.db.Model(user).
 		Column("id").
-		Where("email_work = ?email").
+		Where("email_work = ?email_work").
 		OnConflict("DO NOTHING"). // OnConflict is optional
 		Returning("id").
 		SelectOrInsert()
