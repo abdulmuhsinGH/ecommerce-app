@@ -54,14 +54,6 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 	// Read oauthState from Cookie
 	oauthState := r.URL.Query().Get("state")
 
-	//requestQueries.Get()
-	/* oauthState, err := r.Cookie("oauth_state")
-	if err != nil {
-		authLogging.Printlog("google_oauth_error", err.Error())
-		http.Redirect(w, r, "/", http.StatusInternalServerError)
-		return
-	} */
-
 	if r.FormValue("state") != oauthState {
 		authLogging.Printlog("google_oauth_error", "invalid oauth google state")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
