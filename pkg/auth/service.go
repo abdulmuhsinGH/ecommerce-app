@@ -23,7 +23,7 @@ type Service interface {
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 	SignUp(users.User) error
-	SignUpViaGoogle(users.User) error
+	SignUpViaGoogle(users.User) (*users.User, error)
 	GenerateStateOauthCookie(http.ResponseWriter) string
 	GetUserDataFromGoogle(string) (users.User, error)
 }
@@ -160,18 +160,19 @@ func (s *service) SignUp(user users.User) error {
 /*
 SignUpViaGoogle creates a new user
 */
-func (s *service) SignUpViaGoogle(user users.User) error {
+func (s *service) SignUpViaGoogle(user users.User) (*users.User, error) {
 	var err error
 	user.Password, err = s.HashPassword(user.Password)
 	if err != nil {
-		return err
+		return &users.User{}, err
 	}
 
-	status := s.userRepository.FindOrAddUser(&user)
-	if !status {
-		return errors.New("not created")
+	registeredUser, err := s.userRepository.FindOrAddUser(&user)
+	if err != nil {
+
+		return &users.User{}, err
 	}
-	return nil
+	return registeredUser, nil
 
 }
 

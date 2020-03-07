@@ -33,6 +33,11 @@ type Handlers struct {
 var googleOauthConfig *oauth2.Config
 
 func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(nil, w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// Create oauthState cookie
 	oauthState := authService.GenerateStateOauthCookie(w)
 
@@ -43,15 +48,30 @@ func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	var form url.Values
+	if v, ok := store.Get("ReturnUri"); ok {
+		
+		form = v.(url.Values)
+	}
+	r.Form = form
+
+	redirectURI := r.FormValue("redirect_uri")
+	clientID := r.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID)
+
 	authLogging.Printlog("debugging", oauthStateTest.Value)
-	
+
 	u := googleOauthConfig.AuthCodeURL(oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 }
 
 func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
-	//w.Header().Add("Set-Cookie", "HttpOnly;Secure;SameSite=Strict")
-	// Read oauthState from Cookie
+	store, err := session.Start(nil, w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	oauthState := r.URL.Query().Get("state")
 
 	if r.FormValue("state") != oauthState {
@@ -59,23 +79,35 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-
+	//ctx, err := r.Context()
 	data, err := authService.GetUserDataFromGoogle(r.FormValue("code"))
 	if err != nil {
 		authLogging.Printlog("google_oauth_get_user_data_error", err.Error())
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
-
-	authLogging.Printlog("debugging", data.ID.String())
-
-	err = authService.SignUpViaGoogle(data)
+	var form url.Values
+	if v, ok := store.Get("ReturnUri"); ok {
+		
+		form = v.(url.Values)
+	}
+	r.Form = form
+	authLogging.Printlog("form_values google cLLBACK", form.Encode())
+	user, err := authService.SignUpViaGoogle(data)
 	if err != nil {
 		authLogging.Printlog("google_oauth_sign_up_users_error", err.Error())
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
+	store.Set("LoggedInUserID", user.ID)
+	store.Save()
 
+	redirectURI := r.FormValue("redirect_uri")
+	clientID := r.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID)
+
+	w.Header().Set("Location", "/auth")
+	w.WriteHeader(http.StatusFound)
 }
 
 func (h *Handlers) handleToken(response http.ResponseWriter, request *http.Request) {
@@ -116,16 +148,21 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 	}
 	var form url.Values
 	if v, ok := store.Get("ReturnUri"); ok {
+		
 		form = v.(url.Values)
 	}
 	request.Form = form
-
+	authLogging.Printlog("form_values", form.Encode())
 	store.Delete("ReturnUri")
 	store.Save()
 
+	/* redirectURI := request.FormValue("redirect_uri")
+	clientID := request.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID) */
+
 	err = srv.HandleAuthorizeRequest(response, request)
 	if err != nil {
-		authLogging.Printlog("Error: %s\n", err.Error())
+		authLogging.Printlog("HandleAuthorizeRequestError:", err.Error())
 		format.Send(response, 500, format.Message(false, "Error handling authorization", nil))
 	}
 }
@@ -148,6 +185,10 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	store.Set("LoggedInUserID", user.ID)
 	store.Save()
+
+	redirectURI := r.FormValue("redirect_uri")
+	clientID := r.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID)
 
 	w.Header().Set("Location", "/auth")
 	w.WriteHeader(http.StatusFound)

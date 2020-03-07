@@ -2,6 +2,7 @@ package auth
 
 import (
 	"ecormmerce-rest-api/pkg/logging"
+	"fmt"
 	"ecormmerce-rest-api/pkg/users"
 	"log"
 	"net/http"
@@ -85,6 +86,7 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		if r.Form == nil {
 			r.ParseForm()
 		}
+		fmt.Println("return_uri", r.Form.Encode())
 		store.Set("ReturnUri", r.Form)
 		store.Save()
 		w.Header().Set("Location", "/auth/login")
