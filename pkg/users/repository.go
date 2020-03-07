@@ -13,7 +13,7 @@ type Repository interface {
 	AddUser(*User) bool
 	GetAllUsers() ([]User, error)
 	FindUserByUsername(string) *User
-	FindOrAddUser(*User) bool
+	FindOrAddUser(*User) (*User, error)
 }
 
 type repository struct {
@@ -47,19 +47,20 @@ func (r *repository) AddUser(user *User) bool {
 /*
 FindOrAddUser finds user or saves user if not found to the user's table
 */
-func (r *repository) FindOrAddUser(user *User) bool {
+func (r *repository) FindOrAddUser(user *User) (*User, error) {
 
-	isCreated, err := r.db.Model(user).
+	_, err := r.db.Model(user).
 		Column("id").
-		Where("email_work = ?email").
+		Where("email_work = ?email_work").
 		OnConflict("DO NOTHING"). // OnConflict is optional
 		Returning("id").
 		SelectOrInsert()
 	if err != nil {
 		userLogging.Printlog("FindORAddUser_Error", err.Error())
-		return false
+		return &User{}, err
 	}
-	return isCreated
+	
+	return user, nil
 
 }
 

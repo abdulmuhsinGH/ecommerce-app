@@ -1,14 +1,10 @@
 package auth
 
 import (
-	"context"
-	"crypto/rand"
 	"ecormmerce-rest-api/pkg/format"
 	logging "ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/users"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -34,94 +30,90 @@ Handlers define auth
 type Handlers struct {
 }
 
-var googleOauthConfig *oauth2.Config = &oauth2.Config{
-		RedirectURL:  "http://127.0.0.1:9096/auth/google/callback",
-		ClientID:     os.Getenv("google_client_id"),
-		ClientSecret: os.Getenv("google_client_secret"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-		Endpoint:     google.Endpoint,
-	}
-
-const oauthGoogleURLAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
+var googleOauthConfig *oauth2.Config
 
 func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
-
+	store, err := session.Start(nil, w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// Create oauthState cookie
-	oauthState := generateStateOauthCookie(w)
-	u := googleOauthConfig.AuthCodeURL(oauthState)
-	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
-}
+	oauthState := authService.GenerateStateOauthCookie(w)
 
-func generateStateOauthCookie(w http.ResponseWriter) string {
-	var expiration = time.Now().Add(365 * 24 * time.Hour)
-
-	b := make([]byte, 16)
-	rand.Read(b)
-	state := base64.URLEncoding.EncodeToString(b)
-	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expiration}
-	http.SetCookie(w, &cookie)
-
-	return state
-}
-
-func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
-	// Read oauthState from Cookie
-	oauthState, err := r.Cookie("oauthstate")
+	oauthStateTest, err := r.Cookie("oauth_state")
 	if err != nil {
 		authLogging.Printlog("google_oauth_error", err.Error())
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
 
-	if r.FormValue("state") != oauthState.Value {
+	var form url.Values
+	if v, ok := store.Get("ReturnUri"); ok {
+		
+		form = v.(url.Values)
+	}
+	r.Form = form
+
+	redirectURI := r.FormValue("redirect_uri")
+	clientID := r.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID)
+
+	authLogging.Printlog("debugging", oauthStateTest.Value)
+
+	u := googleOauthConfig.AuthCodeURL(oauthState)
+	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
+}
+
+func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(nil, w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	oauthState := r.URL.Query().Get("state")
+
+	if r.FormValue("state") != oauthState {
 		authLogging.Printlog("google_oauth_error", "invalid oauth google state")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-
-	data, err := getUserDataFromGoogle(r.FormValue("code"))
+	//ctx, err := r.Context()
+	data, err := authService.GetUserDataFromGoogle(r.FormValue("code"))
 	if err != nil {
-		authLogging.Printlog("google_oauth_error", err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		authLogging.Printlog("google_oauth_get_user_data_error", err.Error())
+		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
-
-	// GetOrCreate User in your db.
-	// Redirect or response with a token.
-	// More code .....
-	err = authService.SignUpViaGoogle(data)
+	var form url.Values
+	if v, ok := store.Get("ReturnUri"); ok {
+		
+		form = v.(url.Values)
+	}
+	r.Form = form
+	authLogging.Printlog("form_values google cLLBACK", form.Encode())
+	user, err := authService.SignUpViaGoogle(data)
 	if err != nil {
-		authLogging.Printlog("google_oauth_error", err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		authLogging.Printlog("google_oauth_sign_up_users_error", err.Error())
+		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
+	store.Set("LoggedInUserID", user.ID)
+	store.Save()
 
-	//fmt.Fprintf(w, "UserInfo: %s\n", data)
-}
+	redirectURI := r.FormValue("redirect_uri")
+	clientID := r.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID)
 
-func getUserDataFromGoogle(code string) (users.User, error) {
-	// Use code to get token and get user info from Google.
-	var user users.User
-	token, err := googleOauthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return users.User{}, fmt.Errorf("code exchange wrong: %s", err.Error())
-	}
-	response, err := http.Get(oauthGoogleURLAPI + token.AccessToken)
-	if err != nil {
-		return users.User{}, fmt.Errorf("failed getting user info: %s", err.Error())
-	}
-	defer response.Body.Close()
-	err = json.NewDecoder(response.Body).Decode(&user) //ioutil.ReadAll(response.Body)
-	if err != nil {
-		return users.User{}, fmt.Errorf("failed read response: %s", err.Error())
-	}
-	return user, nil
+	w.Header().Set("Location", "/auth")
+	w.WriteHeader(http.StatusFound)
 }
 
 func (h *Handlers) handleToken(response http.ResponseWriter, request *http.Request) {
 	err := srv.HandleTokenRequest(response, request)
 	if err != nil {
-		authLogging.Printlog("Error: %s\n", err.Error())
+		authLogging.Printlog("handle_token_Error: %s\n", err.Error())
 		http.Error(response, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -156,16 +148,21 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 	}
 	var form url.Values
 	if v, ok := store.Get("ReturnUri"); ok {
+		
 		form = v.(url.Values)
 	}
 	request.Form = form
-
+	authLogging.Printlog("form_values", form.Encode())
 	store.Delete("ReturnUri")
 	store.Save()
 
+	/* redirectURI := request.FormValue("redirect_uri")
+	clientID := request.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID) */
+
 	err = srv.HandleAuthorizeRequest(response, request)
 	if err != nil {
-		authLogging.Printlog("Error: %s\n", err.Error())
+		authLogging.Printlog("HandleAuthorizeRequestError:", err.Error())
 		format.Send(response, 500, format.Message(false, "Error handling authorization", nil))
 	}
 }
@@ -173,6 +170,7 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 func (h *Handlers) handleLogin(w http.ResponseWriter, r *http.Request) {
 	outputHTML(w, r, "pkg/auth/static/login.html")
 }
+
 func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
@@ -187,6 +185,10 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	store.Set("LoggedInUserID", user.ID)
 	store.Save()
+
+	redirectURI := r.FormValue("redirect_uri")
+	clientID := r.FormValue("client_id")
+	authLogging.Printlog(redirectURI, clientID)
 
 	w.Header().Set("Location", "/auth")
 	w.WriteHeader(http.StatusFound)
@@ -247,17 +249,6 @@ func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 }
 
 /*
-Logger handles logs
-*/
-func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
-		defer authLogging.Printlog("request processed in %s\n", time.Now().Sub(startTime).String())
-		next(w, r)
-	}
-}
-
-/*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
@@ -284,7 +275,7 @@ func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, 
 		RedirectURL:  "http://127.0.0.1:9096/auth/google/callback",
 		ClientID:     os.Getenv("google_client_id"),
 		ClientSecret: os.Getenv("google_client_secret"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "profile"},
 		Endpoint:     google.Endpoint,
 	}
 	return &Handlers{}
