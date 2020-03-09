@@ -4,11 +4,13 @@ import (
 	"ecormmerce-rest-api/pkg/format"
 	logging "ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/users"
+	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v9"
@@ -32,40 +34,54 @@ type Handlers struct {
 
 var googleOauthConfig *oauth2.Config
 
-func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
+func getReturnURIFromSession(w http.ResponseWriter, r *http.Request) (string,error) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Create oauthState cookie
-	oauthState := authService.GenerateStateOauthCookie(w)
-
-	oauthStateTest, err := r.Cookie("oauth_state")
-	if err != nil {
-		authLogging.Printlog("google_oauth_error", err.Error())
-		http.Redirect(w, r, "/", http.StatusInternalServerError)
-		return
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		return "", err
 	}
 
 	var form url.Values
 	if v, ok := store.Get("ReturnUri"); ok {
-		
+
 		form = v.(url.Values)
 	}
 	r.Form = form
 
-	redirectURI := r.FormValue("redirect_uri")
-	clientID := r.FormValue("client_id")
-	authLogging.Printlog(redirectURI, clientID)
+	return form.Encode(), nil
+}
 
-	authLogging.Printlog("debugging", oauthStateTest.Value)
+func getReturnURIFromState(state string) (url.Values, error) {
+	decodedStateInByte, err := base64.URLEncoding.DecodeString(state)
+	if err != nil {
+		return nil, err
+	}
+	decodedState := string(decodedStateInByte)
+	returnURI := strings.Split(decodedState, " ")[0]
 
-	u := googleOauthConfig.AuthCodeURL(oauthState)
-	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
+	parsedString, err := url.ParseQuery(returnURI)
+	if err != nil {
+		authLogging.Printlog("google_oauth_return_uri_error", err.Error())
+		return nil, err
+	}
+	return parsedString, nil
+}
+
+func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
+	formEncoded, err := getReturnURIFromSession(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	oauthState := authService.GenerateState(w, formEncoded)
+
+	newURL := googleOauthConfig.AuthCodeURL(oauthState)
+	http.Redirect(w, r, newURL, http.StatusTemporaryRedirect)
 }
 
 func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
+
 	store, err := session.Start(nil, w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -74,37 +90,36 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 
 	oauthState := r.URL.Query().Get("state")
 
+	parsedString, err := getReturnURIFromState(oauthState)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	store.Set("ReturnUri", parsedString)
+
 	if r.FormValue("state") != oauthState {
 		authLogging.Printlog("google_oauth_error", "invalid oauth google state")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	//ctx, err := r.Context()
+	
 	data, err := authService.GetUserDataFromGoogle(r.FormValue("code"))
 	if err != nil {
 		authLogging.Printlog("google_oauth_get_user_data_error", err.Error())
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
-	var form url.Values
-	if v, ok := store.Get("ReturnUri"); ok {
-		
-		form = v.(url.Values)
-	}
-	r.Form = form
-	authLogging.Printlog("form_values google cLLBACK", form.Encode())
+
 	user, err := authService.SignUpViaGoogle(data)
 	if err != nil {
 		authLogging.Printlog("google_oauth_sign_up_users_error", err.Error())
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 		return
 	}
+
 	store.Set("LoggedInUserID", user.ID)
 	store.Save()
-
-	redirectURI := r.FormValue("redirect_uri")
-	clientID := r.FormValue("client_id")
-	authLogging.Printlog(redirectURI, clientID)
 
 	w.Header().Set("Location", "/auth")
 	w.WriteHeader(http.StatusFound)
@@ -148,7 +163,7 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 	}
 	var form url.Values
 	if v, ok := store.Get("ReturnUri"); ok {
-		
+
 		form = v.(url.Values)
 	}
 	request.Form = form
