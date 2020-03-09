@@ -2,15 +2,15 @@ package auth
 
 import (
 	"context"
-	"crypto/rand"
 	"ecormmerce-rest-api/pkg/users"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
-	"time"
 
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -24,7 +24,7 @@ type Service interface {
 	CheckPasswordHash(string, string) bool
 	SignUp(users.User) error
 	SignUpViaGoogle(users.User) (*users.User, error)
-	GenerateStateOauthCookie(http.ResponseWriter) string
+	GenerateState(http.ResponseWriter, string) string
 	GetUserDataFromGoogle(string) (users.User, error)
 }
 
@@ -40,20 +40,13 @@ func NewAuthService(r users.Repository) Service {
 }
 
 /*
-GenerateStateOauthCookie genearate a state for verifying request to prevent CSRF
+GenerateState genearate a state for verifying request to prevent CSRF
 */
-func (s *service) GenerateStateOauthCookie(w http.ResponseWriter) string {
-	var expiration = time.Now().Add(365 * 24 * time.Hour)
-
-	b := make([]byte, 16)
-	rand.Read(b)
-	state := base64.URLEncoding.EncodeToString(b)
-	cookie := http.Cookie{Name: "oauth_state", Value: state, Expires: expiration}
-	http.SetCookie(w, &cookie)
-
-	w.Header().Add("Set-Cookie", "HttpOnly;Secure;SameSite=Strict")
-
-	return state
+func (s *service) GenerateState(w http.ResponseWriter, formDetails string) string {
+	q := strconv.Itoa(rand.Intn(100))
+	a := formDetails + " " + q
+	encodedState := base64.URLEncoding.EncodeToString([]byte(a))
+	return encodedState
 }
 
 /*
