@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strconv"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/gorilla/securecookie"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/oauth2.v3/server"
@@ -24,13 +26,17 @@ type Service interface {
 	CheckPasswordHash(string, string) bool
 	SignUp(users.User) error
 	SignUpViaGoogle(users.User) (*users.User, error)
-	GenerateState(http.ResponseWriter, string) string
+	GenerateState(http.ResponseWriter) string
 	GetUserDataFromGoogle(string) (users.User, error)
 }
 
 type service struct {
 	userRepository users.Repository
 }
+/* 
+SecuredCookie instance for encoding and decoding cookies
+*/
+var SecuredCookie *securecookie.SecureCookie
 
 /*
 NewAuthService creates a auth service with the necessary dependencies
@@ -42,11 +48,28 @@ func NewAuthService(r users.Repository) Service {
 /*
 GenerateState genearate a state for verifying request to prevent CSRF
 */
-func (s *service) GenerateState(w http.ResponseWriter, formDetails string) string {
-	q := strconv.Itoa(rand.Intn(100))
-	a := formDetails + " " + q
-	encodedState := base64.URLEncoding.EncodeToString([]byte(a))
-	return encodedState
+func (s *service) GenerateState(w http.ResponseWriter) string {
+	var expiration = time.Now().Add(365 * 24 * time.Hour)
+	SecuredCookie = securecookie.New([]byte(os.Getenv("session_key")), []byte(os.Getenv("state_hash_key")))
+
+	b := make([]byte, 16)
+	rand.Read(b)
+	state := base64.URLEncoding.EncodeToString(b)
+	encodedState, err := SecuredCookie.Encode("oauth-state", state)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	cookie := http.Cookie{
+		Name:    "oauth-state",
+		Expires: expiration,
+		Value:   encodedState,
+		/* Path:     "/",
+		Secure:   true,
+		HttpOnly: true, */
+	}
+
+	http.SetCookie(w, &cookie)
+	return state
 }
 
 /*

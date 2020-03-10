@@ -44,7 +44,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 	clientStore.Set("222222", &models.Client{
 		ID:     "222222",
 		Secret: "22222222",
-		Domain: "http://localhost:9094",
+		Domain: "http://127.0.0.1:9094",
 	})
 	manager.MapClientStorage(clientStore)
 

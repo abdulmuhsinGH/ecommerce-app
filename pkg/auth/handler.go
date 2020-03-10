@@ -4,13 +4,12 @@ import (
 	"ecormmerce-rest-api/pkg/format"
 	logging "ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-rest-api/pkg/users"
-	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v9"
@@ -26,6 +25,8 @@ var (
 	authLogging logging.Logging
 )
 
+//var s *securecookie.SecureCookie = securecookie.New([]byte(os.Getenv("session_key")), []byte(os.Getenv("state_hash_key")))
+
 /*
 Handlers define auth
 */
@@ -34,76 +35,59 @@ type Handlers struct {
 
 var googleOauthConfig *oauth2.Config
 
-func getReturnURIFromSession(w http.ResponseWriter, r *http.Request) (string,error) {
+func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
+	oauthState := authService.GenerateState(w)
+	oauthStateTest, err := r.Cookie("oauth-state")
+	if err != nil {
+		authLogging.Printlog("1cookie err", err.Error())
+	} else {
+		authLogging.Printlog("1cookie", oauthStateTest.Value)
+	}
+
+	newURL := googleOauthConfig.AuthCodeURL(oauthState)
+
+	http.Redirect(w, r, newURL, http.StatusTemporaryRedirect)
+}
+
+func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
+
+	oauthState, err := r.Cookie("oauth-state")
+	if err != nil {
+		authLogging.Printlog("cookie err", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var decodedState string
+
+	err = SecuredCookie.Decode("oauth-state", oauthState.Value, &decodedState)
+	if err != nil{
+		authLogging.Printlog("cookie err", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	store, err := session.Start(nil, w, r)
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		return "", err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var form url.Values
 	if v, ok := store.Get("ReturnUri"); ok {
 
 		form = v.(url.Values)
-	}
-	r.Form = form
-
-	return form.Encode(), nil
-}
-
-func getReturnURIFromState(state string) (url.Values, error) {
-	decodedStateInByte, err := base64.URLEncoding.DecodeString(state)
-	if err != nil {
-		return nil, err
-	}
-	decodedState := string(decodedStateInByte)
-	returnURI := strings.Split(decodedState, " ")[0]
-
-	parsedString, err := url.ParseQuery(returnURI)
-	if err != nil {
-		authLogging.Printlog("google_oauth_return_uri_error", err.Error())
-		return nil, err
-	}
-	return parsedString, nil
-}
-
-func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
-	formEncoded, err := getReturnURIFromSession(w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		fmt.Println("form", form.Encode())
 	}
 
-	oauthState := authService.GenerateState(w, formEncoded)
+	store.Set("ReturnUri", form)
 
-	newURL := googleOauthConfig.AuthCodeURL(oauthState)
-	http.Redirect(w, r, newURL, http.StatusTemporaryRedirect)
-}
-
-func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Request) {
-
-	store, err := session.Start(nil, w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	oauthState := r.URL.Query().Get("state")
-
-	parsedString, err := getReturnURIFromState(oauthState)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	store.Set("ReturnUri", parsedString)
-
-	if r.FormValue("state") != oauthState {
+	if r.FormValue("state") != decodedState {
 		authLogging.Printlog("google_oauth_error", "invalid oauth google state")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	
+
 	data, err := authService.GetUserDataFromGoogle(r.FormValue("code"))
 	if err != nil {
 		authLogging.Printlog("google_oauth_get_user_data_error", err.Error())
@@ -167,7 +151,7 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 		form = v.(url.Values)
 	}
 	request.Form = form
-	authLogging.Printlog("form_values", form.Encode())
+
 	store.Delete("ReturnUri")
 	store.Save()
 
@@ -275,8 +259,8 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/auth/authorize", authLogging.Httplog(h.handleAuthorize)).Methods("GET", "POST")
 	mux.HandleFunc("/auth/token", authLogging.Httplog(h.handleToken)).Methods("POST")
 	mux.HandleFunc("/auth/test", authLogging.Httplog(h.handleUserAuthTest)).Methods("GET")
-	mux.HandleFunc("/auth/google/login", authLogging.Httplog(h.handlePostLoginWithGoogle))
-	mux.HandleFunc("/auth/google/callback", authLogging.Httplog(h.handleGoogleAuthCallback))
+	mux.HandleFunc("/auth/google/login", h.handlePostLoginWithGoogle)
+	mux.HandleFunc("/auth/google/callback", h.handleGoogleAuthCallback)
 }
 
 /*
@@ -293,5 +277,8 @@ func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, 
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "profile"},
 		Endpoint:     google.Endpoint,
 	}
+
+	//s = securecookie.New([]byte(os.Getenv("session_key")), []byte(os.Getenv("state_hash_key")))
+
 	return &Handlers{}
 }

@@ -9,8 +9,10 @@ require (
 	github.com/go-session/session v3.1.2+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
+	github.com/gorilla/securecookie v1.1.1
 	github.com/jinzhu/gorm v1.9.11
 	github.com/joho/godotenv v1.3.0
+	github.com/klauspost/compress v1.8.2
 	github.com/lib/pq v1.2.0
 	github.com/markbates/goth v1.59.0
 	github.com/satori/go.uuid v1.2.0

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	authServerURL = "http://localhost:9096"
+	authServerURL = "http://127.0.0.1:9096"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
 		ClientID:     "222222",
 		ClientSecret: "22222222",
 		Scopes:       []string{"all"},
-		RedirectURL:  "http://localhost:9094/oauth2",
+		RedirectURL:  "http://127.0.0.1:9094/oauth2",
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  authServerURL + "/auth/authorize",
 			TokenURL: authServerURL + "/auth/token",
