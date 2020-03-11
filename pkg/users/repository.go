@@ -59,7 +59,7 @@ func (r *repository) FindOrAddUser(user *User) (*User, error) {
 		userLogging.Printlog("FindORAddUser_Error", err.Error())
 		return &User{}, err
 	}
-	
+
 	return user, nil
 
 }
@@ -70,7 +70,7 @@ GetAllUsers returns all users from the user's table
 func (r *repository) GetAllUsers() ([]User, error) {
 	var users []User
 	err := r.db.Select(&users)
-	if err !=nil {
+	if err != nil {
 		userLogging.Printlog("GetAllusers_Error", err.Error())
 		return nil, err
 	}
