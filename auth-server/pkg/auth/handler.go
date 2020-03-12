@@ -165,7 +165,7 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 }
 
 func (h *Handlers) handleLogin(w http.ResponseWriter, r *http.Request) {
-	outputHTML(w, r, "pkg/auth/static/login.html")
+	outputHTML(w, r, "auth-server/pkg/auth/static/login.html")
 }
 
 func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
@@ -192,7 +192,7 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) handleSignUp(w http.ResponseWriter, r *http.Request) {
-	outputHTML(w, r, "pkg/auth/static/signup.html")
+	outputHTML(w, r, "auth-server/pkg/auth/static/signup.html")
 }
 func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.Request) {
 	newUser := users.User{}
@@ -229,7 +229,7 @@ func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	outputHTML(w, r, "pkg/auth/static/auth.html")
+	outputHTML(w, r, "auth-server/pkg/auth/static/auth.html")
 }
 
 // outputHTML renders static html files

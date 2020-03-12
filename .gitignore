@@ -18,3 +18,6 @@ Gopkg.toml
 *.out
 auth-server/bin/auth-server
 bin/auth_server
+
+
+admin-client/node_modules
