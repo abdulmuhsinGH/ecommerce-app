@@ -6,55 +6,44 @@
       dark
     >
       <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+        <h3>Ankara Ecommerce Admin</h3>
       </div>
 
       <v-spacer></v-spacer>
 
       <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
+        @click="login"
         target="_blank"
         text
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+        <span class="mr-2"> Login/Sign up </span>
       </v-btn>
     </v-app-bar>
 
     <v-content>
-      <HelloWorld/>
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+// import HelloWorld from './components/HelloWorld.vue';
+// import axios from 'axios';
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
   },
-
   data: () => ({
-    //
   }),
+  methods: {
+    login: () => {
+      // client_id=222222&redirect_uri=http%3A%2F%2F127.0.0.1%3A9094%2Foauth2&response_type=code
+      // &scope=all&state=xyz
+      window.location.replace(`${process.env.VUE_APP_AuthURL}?client_id=${process.env.VUE_APP_ClientID}&
+      redirect_uri=${process.env.VUE_APP_RedirectURL}&response_type=code&scope=all&state=xyz`);
+    },
+  },
 };
 </script>

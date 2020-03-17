@@ -3,6 +3,7 @@ package auth
 import (
 	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/users"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -19,7 +20,10 @@ import (
 	"gopkg.in/oauth2.v3/store"
 )
 
-var authService Service
+var (
+	authService Service
+	manager     *manage.Manager
+)
 
 /*
 Server for authentication
@@ -30,7 +34,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 	userRepository := users.NewRepository(db)
 	authService = NewAuthService(userRepository)
 
-	manager := manage.NewManager() //manage.NewDefaultManager()
+	manager = manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
 	// token store
@@ -46,6 +50,14 @@ func Server(db *pg.DB, logging logging.Logging) {
 		Domain: "http://127.0.0.1:9094",
 	})
 	manager.MapClientStorage(clientStore)
+
+	adminClientStore := store.NewClientStore()
+	adminClientStore.Set("3333333", &models.Client{
+		ID:     "3333333",
+		Secret: "22222222",
+		Domain: "http://localhost:8080",
+	})
+	manager.MapClientStorage(adminClientStore)
 
 	srv := server.NewServer(server.NewConfig(), manager)
 	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
@@ -75,6 +87,42 @@ func Server(db *pg.DB, logging logging.Logging) {
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+	//store.NewClientStore().GetByID("")
+	clientID := r.URL.Query()
+	if clientID.Get("client_id") == "3333333" {
+		q, err := manager.GetClient("3333333")
+		if err != nil {
+			adminClientStore := store.NewClientStore()
+			adminClientStore.Set("3333333", &models.Client{
+				ID:     "3333333",
+				Secret: "22222222",
+				Domain: "http://localhost:8080",
+			})
+			manager.MapClientStorage(adminClientStore)
+			fmt.Println("authorizrh", err.Error())
+		} else {
+			fmt.Println("authirze", q.GetDomain())
+		}
+	} else if clientID.Get("client_id") == "222222" {
+		q, err := manager.GetClient("222222")
+		if err != nil {
+			fmt.Println("authorizrh", err.Error())
+			clientStore := store.NewClientStore()
+			clientStore.Set("222222", &models.Client{
+				ID:     "222222",
+				Secret: "22222222",
+				Domain: "http://127.0.0.1:9094",
+			})
+			manager.MapClientStorage(clientStore)
+			
+		} else {
+			fmt.Println("authirze", q.GetDomain())
+		}
+	}
+	
+
+	
+
 	store, err := session.Start(nil, w, r)
 	if err != nil {
 		return
@@ -87,6 +135,7 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		}
 		store.Set("ReturnUri", r.Form)
 		store.Save()
+		fmt.Println("form", r.Form.Encode())
 		w.Header().Set("Location", "/auth/login")
 		w.WriteHeader(http.StatusFound)
 		return
