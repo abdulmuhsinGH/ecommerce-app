@@ -20,3 +20,4 @@ auth-server/bin/auth_server
 bin/auth_server
 
 admin-client/node_modules
+auth-server/bin/auth_server
