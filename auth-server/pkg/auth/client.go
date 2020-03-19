@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -18,16 +19,7 @@ const (
 )
 
 var (
-	config = oauth2.Config{
-		ClientID:     "222222",
-		ClientSecret: "22222222",
-		Scopes:       []string{"all"},
-		RedirectURL:  "http://127.0.0.1:9094/oauth2",
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  authServerURL + "/auth/authorize",
-			TokenURL: authServerURL + "/auth/token",
-		},
-	}
+	config      oauth2.Config
 	globalToken *oauth2.Token // Non-concurrent security
 )
 
@@ -35,6 +27,17 @@ var (
 Client for authentication
 */
 func Client() {
+	config = oauth2.Config{
+		ClientID:     os.Getenv("test_client_id"),
+		ClientSecret: os.Getenv("test_client_secret"),
+		Scopes:       []string{"all"},
+		RedirectURL:  os.Getenv("test_client_domain") + "/oauth2",
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  authServerURL + "/auth/authorize",
+			TokenURL: authServerURL + "/auth/token",
+		},
+	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		u := config.AuthCodeURL("xyz")
 		fmt.Println("u", u)

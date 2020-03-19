@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v9"
@@ -21,8 +22,10 @@ import (
 )
 
 var (
-	authService Service
-	manager     *manage.Manager
+	authService      Service
+	manager          *manage.Manager
+	testClientStore  *store.ClientStore
+	adminClientStore *store.ClientStore
 )
 
 /*
@@ -42,32 +45,34 @@ func Server(db *pg.DB, logging logging.Logging) {
 
 	// generate jwt access token
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte("00000000"), jwt.SigningMethodHS512))
-
-	clientStore := store.NewClientStore()
-	clientStore.Set("222222", &models.Client{
-		ID:     "222222",
-		Secret: "22222222",
-		Domain: "http://127.0.0.1:9094",
+	fmt.Println("Hello auth server")
+	testClientStore = store.NewClientStore()
+	testClientStore.Set(os.Getenv("test_client_id"), &models.Client{
+		ID:     os.Getenv("test_client_id"),
+		Secret: os.Getenv("test_client_secret"),
+		Domain: os.Getenv("test_client_domain"),
 	})
-	manager.MapClientStorage(clientStore)
+	manager.MapClientStorage(testClientStore)
 
-	adminClientStore := store.NewClientStore()
-	adminClientStore.Set("3333333", &models.Client{
-		ID:     "3333333",
-		Secret: "22222222",
-		Domain: "http://localhost:8080",
+	adminClientStore = store.NewClientStore()
+	adminClientStore.Set(os.Getenv("admin_client_id"), &models.Client{
+		ID:     os.Getenv("admin_client_id"),
+		Secret: os.Getenv("admin_client_secret"),
+		Domain: os.Getenv("admin_client_domain"),
 	})
+
 	manager.MapClientStorage(adminClientStore)
 
 	srv := server.NewServer(server.NewConfig(), manager)
-	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
+	/* srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
 		user, err := authService.Login(username, password)
 		if err != nil {
 			return "", err
 		}
 		return user.ID.String(), nil
-	})
+	}) */
 
+	srv.SetClientInfoHandler(setClientInfoHandler)
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
 
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
@@ -86,42 +91,45 @@ func Server(db *pg.DB, logging logging.Logging) {
 	log.Fatal(http.ListenAndServe(":9096", router))
 }
 
-func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-	//store.NewClientStore().GetByID("")
-	clientID := r.URL.Query()
-	if clientID.Get("client_id") == "3333333" {
-		q, err := manager.GetClient("3333333")
+func setClientInfoHandler(r *http.Request) (clientID, clientSecret string, err error) {
+	fmt.Println("Hello set client info")
+
+	clientInfo := r.URL.Query()
+
+	if clientInfo.Get("client_id") == os.Getenv("admin_client_id") {
+		_, err := manager.GetClient(os.Getenv("admin_client_id"))
 		if err != nil {
-			adminClientStore := store.NewClientStore()
-			adminClientStore.Set("3333333", &models.Client{
-				ID:     "3333333",
-				Secret: "22222222",
-				Domain: "http://localhost:8080",
+			//adminClientStore := store.NewClientStore()
+			adminClientStore.Set(os.Getenv("admin_client_id"), &models.Client{
+				ID:     os.Getenv("admin_client_id"),
+				Secret: os.Getenv("admin_client_secret"),
+				Domain: os.Getenv("admin_client_domain"),
 			})
 			manager.MapClientStorage(adminClientStore)
-			fmt.Println("authorizrh", err.Error())
-		} else {
-			fmt.Println("authirze", q.GetDomain())
 		}
-	} else if clientID.Get("client_id") == "222222" {
-		q, err := manager.GetClient("222222")
+	} else if clientInfo.Get("client_id") == os.Getenv("test_client_id") {
+
+		_, err := manager.GetClient(os.Getenv("test_client_id"))
 		if err != nil {
 			fmt.Println("authorizrh", err.Error())
-			clientStore := store.NewClientStore()
-			clientStore.Set("222222", &models.Client{
-				ID:     "222222",
-				Secret: "22222222",
-				Domain: "http://127.0.0.1:9094",
+			//testClientStore := store.NewClientStore()
+			testClientStore.Set(os.Getenv("test_client_id"), &models.Client{
+				ID:     os.Getenv("test_client_id"),
+				Secret: os.Getenv("test_client_secret"),
+				Domain: os.Getenv("test_client_domain"),
 			})
-			manager.MapClientStorage(clientStore)
-			
-		} else {
-			fmt.Println("authirze", q.GetDomain())
+			manager.MapClientStorage(testClientStore)
 		}
 	}
-	
+	clientID = clientInfo.Get("client_id")
+	clientSecret = clientInfo.Get("clinet_secret")
 
-	
+	return
+}
+
+func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+	//setClientStore(r)
+	fmt.Println("Hello user authorize")
 
 	store, err := session.Start(nil, w, r)
 	if err != nil {

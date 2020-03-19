@@ -1,6 +1,6 @@
 -- Schema is work in progress
 
-CREATE TABLE user_roles(
+CREATE TABLE IF NOT EXISTS user_roles(
 	id integer primary key not NULL,
 	role_name VARCHAR(100) UNIQUE not null,
 	description text  NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE user_roles(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id uuid DEFAULT uuid_generate_v4(),
     username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
@@ -36,7 +36,7 @@ CREATE TABLE users (
 	
 );
 
-CREATE TABLE customers(
+CREATE TABLE IF NOT EXISTS customers(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
@@ -57,13 +57,13 @@ CREATE TABLE customers(
 	updated_by TEXT
 );
 
-CREATE TABLE address_type(
+CREATE TABLE IF NOT EXISTS address_type(
 	id int PRIMARY key not null,
 	address_name varchar(100) UNIQUE NOT NULL,
 	address_description TEXT
 );
 
-CREATE TABLE addresses(
+CREATE TABLE IF NOT EXISTS addresses(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid REFERENCES customers(id),
 	region varchar(100),
@@ -78,7 +78,7 @@ CREATE TABLE addresses(
 	updated_by TEXT
 );
 
-create table customer_address(
+create table IF NOT EXISTS customer_address(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid REFERENCES customers(id),
 	address_id uuid REFERENCES ADDRESSES(id),
@@ -88,7 +88,7 @@ create table customer_address(
 	
 );
 
-CREATE TABLE payment_types(
+CREATE TABLE IF NOT EXISTS payment_types(
 	id int PRIMARY key not null,
 	payment_name varchar(100) not null UNIQUE,
 	payment_description text,
@@ -97,7 +97,7 @@ CREATE TABLE payment_types(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE table payment_vendor(
+CREATE table IF NOT EXISTS payment_vendor(
 	id int PRIMARY key not null,
 	payment_vendor_name varchar(100) UNIQUE NOT NULL,
 	status boolean NOT NULL,
@@ -106,7 +106,7 @@ CREATE table payment_vendor(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE customer_payment_types(
+CREATE TABLE IF NOT EXISTS customer_payment_types(
 	id uuid PRIMARY KEY NOT NULL,
 	customer_id uuid NOT NULL REFERENCES customers(id),
 	payment_vendor_id int not null REFERENCES payment_vendor(id),
@@ -117,7 +117,7 @@ CREATE TABLE customer_payment_types(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE cart_type(
+CREATE TABLE IF NOT EXISTS cart_type(
 	id int not null PRIMARY key,
 	name varchar(100) not null,
 	description text,
@@ -126,7 +126,7 @@ CREATE TABLE cart_type(
 	deleted_at TIMESTAMPTZ
 );
 
-create table carts(
+create table IF NOT EXISTS carts(
 	id uuid PRIMARY KEY NOT NULL,
 	customer_id uuid not null REFERENCES customers(id),
 	cart_items json not null,
@@ -137,19 +137,19 @@ create table carts(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE order_status(
+CREATE TABLE IF NOT EXISTS order_status(
 	id int PRIMARY KEY NOT NULL,
 	name varchar(100) UNIQUE not null,
 	DESCRIPTION text
 );
 
-CREATE TABLE delivery_status(
+CREATE TABLE IF NOT EXISTS delivery_status(
 	id int PRIMARY KEY NOT NULL,
 	name varchar(100) UNIQUE not null,
 	DESCRIPTION text
 );
 
-CREATE TABLE orders(
+CREATE TABLE IF NOT EXISTS orders(
 	id uuid PRIMARY key not null,
 	customer_id uuid REFERENCES customers(id),
 	cart_id uuid REFERENCES carts(id),
@@ -163,7 +163,7 @@ CREATE TABLE orders(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE product_brands(
+CREATE TABLE IF NOT EXISTS product_brands(
 	id serial not null PRIMARY KEY,
 	name VARCHAR(100) not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -171,7 +171,7 @@ CREATE TABLE product_brands(
 	deleted_at TIMESTAMPTZ
 );
 
-create TABLE products(
+create TABLE IF NOT EXISTS products(
 	id uuid PRIMARY key not null,
 	name text not null,
 	category int not null,
@@ -184,7 +184,7 @@ create TABLE products(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE order_items(
+CREATE TABLE IF NOT EXISTS order_items(
 	id uuid primary key not null,
 	order_id uuid REFERENCES orders(id),
 	product_id uuid REFERENCES products(id),
@@ -197,7 +197,7 @@ CREATE TABLE order_items(
 	deleted_at TIMESTAMPTZ
 );
 
-create TABLE payments(
+create TABLE IF NOT EXISTS payments(
 	id uuid PRIMARY key not null,
 	order_id uuid REFERENCES orders(id),
 	payment_type integer not null REFERENCES  payment_types(id),
@@ -209,7 +209,7 @@ create TABLE payments(
 	deleted_at TIMESTAMPTZ
 );
 
-create table inventory(
+create table IF NOT EXISTS inventory(
 	id uuid PRIMARY key not null,
 	product_id uuid REFERENCES products(id),
 	quantity integer not null,
@@ -219,7 +219,7 @@ create table inventory(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE product_categories(
+CREATE TABLE IF NOT EXISTS product_categories(
 	id serial not null PRIMARY key,
 	name varchar(100) not null,
 	description text,
@@ -227,4 +227,12 @@ CREATE TABLE product_categories(
 	updated_by VARCHAR(100),
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS oauth_clients (
+  id     TEXT  NOT NULL,
+  secret TEXT  NOT NULL,
+  domain TEXT  NOT NULL,
+  data   JSONB NOT NULL,
+  CONSTRAINT oauth_clients_pkey PRIMARY KEY (id)
 );
