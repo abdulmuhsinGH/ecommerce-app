@@ -28,7 +28,7 @@
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue';
-// import axios from 'axios';
+import axios from 'axios';
 
 export default {
   name: 'App',
@@ -36,11 +36,52 @@ export default {
   },
   data: () => ({
   }),
+  mounted() {
+  },
+  watch: {
+    '$route.query.code': {
+      handler(code) {
+        console.log(code);
+        console.log(this.$cookies.get('state'));
+        console.log(this.$route.query.state);
+        console.log(this.$route.query.state === this.$cookies.get('state'));
+        axios.post(process.env.VUE_APP_TokenURL, {
+          client_id: `${process.env.VUE_APP_ClientID}`,
+          client_secret: `${process.env.VUE_APP_ClientSecret}`,
+          code,
+          state: this.$route.query.state,
+          redirect_uri: `${process.env.VUE_APP_RedirectURL}`,
+          grant_type: 'authorization_code',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          params: {
+            client_id: `${process.env.VUE_APP_ClientID}`,
+            client_secret: `${process.env.VUE_APP_ClientSecret}`,
+            code,
+            state: this.$route.query.state,
+            redirect_uri: `${process.env.VUE_APP_RedirectURL}`,
+            grant_type: 'authorization_code',
+          },
+        }).then((response) => {
+          console.log({ response });
+          this.$cookies.remove('state');
+          // TODO make it secure on production
+          this.$cookies.set('ank_tkn_val', JSON.stringify(response.data), '1d');
+        }).catch((err) => {
+          console.log({ err });
+        });
+      },
+    },
+  },
   methods: {
     login() {
       // client_id=222222&redirect_uri=http%3A%2F%2F127.0.0.1%3A9094%2Foauth2&response_type=code
       // &scope=all&state=xyz
       const state = this.randomString();
+      this.$cookies.set('state', state, '1d');
       window.location.replace(`${process.env.VUE_APP_AuthURL}?client_id=${process.env.VUE_APP_ClientID}&
       redirect_uri=${process.env.VUE_APP_RedirectURL}&response_type=code&scope=all&state=${state}`);
     },

@@ -37,6 +37,7 @@ Httplog handles how long it takes for a request to process
 func (l logging) Httplog(next http.HandlerFunc) http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		startTime := time.Now()
+		// response.Header().Add("Access-Control-Allow-Origin", "*")
 		defer l.logger.Printf("%s request processed in %s\n", request.URL.Path,time.Now().Sub(startTime))
 		next(response, request)
 	}

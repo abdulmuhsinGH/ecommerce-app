@@ -2,6 +2,7 @@ package auth
 
 import (
 	"ecormmerce-rest-api/auth-server/pkg/logging"
+	"ecormmerce-rest-api/auth-server/pkg/cors"
 	"ecormmerce-rest-api/auth-server/pkg/users"
 	"fmt"
 	"log"
@@ -59,6 +60,18 @@ func Server(db *pg.DB, logging logging.Logging) {
 	})
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
 
+	srv.SetClientInfoHandler(func(r *http.Request) (clientID, clientSecret string, err error) {
+		clientID = r.FormValue("client_id")
+		clientSecret = r.FormValue("client_secret")
+		fmt.Println(r.FormValue("grant_type"))
+		if clientID == "" || clientSecret == "" {
+			err = errors.ErrAccessDenied
+			return 
+		}
+
+		return
+	})
+
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 		logging.Printlog("Internal Error:", err.Error())
 		return
@@ -72,7 +85,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 
 	logging.Printlog("AuthServer", "Server is running at 9096 port.")
 
-	log.Fatal(http.ListenAndServe(":9096", router))
+	log.Fatal(http.ListenAndServe(":9096", cors.CORS(router)))
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
