@@ -136,7 +136,6 @@ func (s *service) ValidateToken(next http.HandlerFunc, srv *server.Server) http.
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		next(w, r)
 	})
 }
