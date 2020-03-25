@@ -3,8 +3,10 @@ package users
 import (
 	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"errors"
+	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/oauth2.v3/server"
 )
 
 // Service provides user adding operations.
@@ -14,6 +16,7 @@ type Service interface {
 	Login(string, string) (*User, error)
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
+	ValidateToken(http.HandlerFunc, *server.Server) http.HandlerFunc
 }
 
 type service struct {
@@ -48,6 +51,20 @@ func (s *service) AddUser(user *User) error {
 	}
 	return nil
 
+}
+
+/*
+ValidateToken checks if user token is valid and authorises user to access route
+*/
+func (s *service) ValidateToken(next http.HandlerFunc, srv *server.Server) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := srv.ValidationBearerToken(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		next(w, r)
+	})
 }
 
 /*
