@@ -276,19 +276,5 @@ func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, 
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "profile"},
 		Endpoint:     google.Endpoint,
 	}
-
-	/* config = oauth2.Config{
-		ClientID:     os.Getenv("test_client_id"),
-		ClientSecret: os.Getenv("test_client_secret"),
-		Scopes:       []string{"all"},
-		RedirectURL:  os.Getenv("test_client_domain") + "/oauth2",
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  authServerURL + "/auth/authorize",
-			TokenURL: authServerURL + "/auth/token",
-		},
-	} */
-
-	//s = securecookie.New([]byte(os.Getenv("session_key")), []byte(os.Getenv("state_hash_key")))
-
 	return &Handlers{}
 }

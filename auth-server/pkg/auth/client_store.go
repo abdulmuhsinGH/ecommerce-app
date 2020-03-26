@@ -42,7 +42,6 @@ func (c *ClientStore) GetByID(ID string) (oauth2.ClientInfo, error) {
 		fmt.Println("oc", err.Error())
 		return nil, err
 	}
-	fmt.Println(oauthClient)
 	clientInfo := c.toClientInfo(oauthClient)
 	if err != nil {
 		fmt.Println("ci", err.Error())
@@ -56,6 +55,6 @@ func (c *ClientStore) toClientInfo(data OauthClient) oauth2.ClientInfo {
 	cm.ID = data.ID
 	cm.Secret = data.Secret
 	cm.Domain = data.Domain
-	//err := json.Unmarshal(data, &cm)
+
 	return &cm
 }

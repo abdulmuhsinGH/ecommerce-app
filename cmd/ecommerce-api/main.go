@@ -7,7 +7,6 @@ import (
 	users "ecormmerce-rest-api/pkg/users"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 )
 
 /* var (
@@ -32,10 +31,10 @@ func main() {
 	u.SetupRoutes(router)
 	srv := server.New(router, ":8080")
 
-	logging.Printlog("server_status","starting")
+	logging.Printlog("server_status", "starting")
 	err = srv.ListenAndServe()
 	if err != nil {
 		logging.PrintFatal("server failed to start:", err)
-		logging.Printlog("server_status","closed")
+		logging.Printlog("server_status", "closed")
 	}
 }

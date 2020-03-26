@@ -1,12 +1,13 @@
 package users
 
 import (
-	"ecormmerce-rest-api/pkg/format"
-	"ecormmerce-rest-api/pkg/logging"
 	"encoding/json"
 	"net/http"
 
 	"github.com/go-pg/pg/v9"
+
+	"ecormmerce-rest-api/pkg/logging"
+
 	"github.com/gorilla/mux"
 )
 
@@ -16,9 +17,16 @@ Handlers define user
 type Handlers struct {
 }
 
-var userRepository Repository
-var userService Service
-var userLogging logging.Logging
+var (
+	userRepository     Repository
+	userService        Service
+	userHandlerLogging logging.Logging
+)
+
+/*
+Resp interface for response structure
+*/
+type Resp map[string]interface{}
 
 /*
 HandleAddUser gets data from http request and sends to
@@ -29,63 +37,66 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 
 	err := json.NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
-		userLogging.Printlog("User HandleAddUser; Error while decoding request body: %v", err.Error())
-		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
+		userHandlerLogging.Printlog("User HandleAddUser; Error while decoding request body:", err.Error())
+		respond(response, message(false, "Error while decoding request body"))
+		return
+	}
+
+	err = userService.AddUser(&newUser)
+	if err != nil {
+		userHandlerLogging.Printlog("User HandleAddUser; Error while saving user: %v", err.Error())
+		respond(response, message(false, "Error while saving user"))
+		return
+	}
+	respond(response, message(true, "User saved"))
+
+}
+
+/*
+HandleGetUsers gets data from http request and sends to
+*/
+func (h *Handlers) handleGetUsers(response http.ResponseWriter, request *http.Request) {
+
+	newUser := User{}
+
+	err := json.NewDecoder(request.Body).Decode(&newUser)
+	if err != nil {
+		respond(response, message(false, "Error while decoding request body"))
 		return
 	}
 
 	err = userService.AddUser(&newUser)
 
 	if err != nil {
-		userLogging.Printlog("User HandleAddUser; Error while saving user: %v", err.Error())
-		format.Send(response, 400, format.Message(false, "Error while saving user", nil))
+		respond(response, message(false, "Error while saving user"))
 		return
 	}
-	format.Send(response, 200, format.Message(false, "User Saved", nil))
+	respond(response, message(true, "User saved"))
 
 }
 
-/*
-HandleGetAllUsers gets data from http request and sends to
-*/
-func (h *Handlers) handleGetAllUsers(response http.ResponseWriter, request *http.Request) {
-
-	newUser := User{}
-
-	err := json.NewDecoder(request.Body).Decode(&newUser)
-	if err != nil {
-		format.Send(response, 400, format.Message(false, "Error while decoding request body", nil))
-		return
-	}
-
-	users, err := userService.GetAllUsers()
-	if err != nil {
-		format.Send(response, 500, format.Message(false, "Error getting all users", nil))
-		return
-	}
-
-	if len(users) == 0 {
-		format.Send(response, 200, format.Message(false, "No users", nil))
-		return
-	}
-	format.Send(response, 200, format.Message(false, "all Users", users))
-
+func respond(response http.ResponseWriter, data Resp) {
+	response.Header().Set("Content-Type", "application/json")
+	response.WriteHeader(http.StatusOK)
+	json.NewEncoder(response).Encode(data)
+}
+func message(status bool, message string) Resp {
+	return Resp{"status": status, "message": message}
 }
 
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/users/new", userLogging.Httplog(h.handleAddUser)).Methods("POST")
-	mux.HandleFunc("/api/users/all", userLogging.Httplog(h.handleGetAllUsers)).Methods("GET")
+	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((h.handleAddUser))).Methods("POST")
 }
 
 /*
 NewHandlers initiates user handler
 */
-func NewHandlers(logging logging.Logging, db *pg.DB) *Handlers {
+func NewHandlers(logger logging.Logging, db *pg.DB) *Handlers {
 	userRepository = NewRepository(db)
 	userService = NewService(userRepository)
-	userLogging = logging
+	userHandlerLogging = logger
 	return &Handlers{}
 }

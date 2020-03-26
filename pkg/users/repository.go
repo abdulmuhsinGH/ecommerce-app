@@ -26,7 +26,7 @@ var userRepositoryLogging logging.Logging
 NewRepository creates a users repository with the necessary dependencies
 */
 func NewRepository(db *pg.DB) Repository {
-	userLogging = logging.New("user_reposiroty: ")
+	userRepositoryLogging = logging.New("user_reposiroty: ")
 	return &repository{db}
 
 }
@@ -37,7 +37,7 @@ AddUser saves user to the user's table
 func (r *repository) AddUser(user *User) bool {
 	err := r.db.Insert(user)
 	if err != nil {
-		userLogging.Printlog("AddUser_Error", err.Error())
+		userRepositoryLogging.Printlog("AddUser_Error", err.Error())
 		return false
 	}
 	return true
@@ -56,7 +56,7 @@ func (r *repository) FindOrAddUser(user *User) (*User, error) {
 		Returning("id").
 		SelectOrInsert()
 	if err != nil {
-		userLogging.Printlog("FindORAddUser_Error", err.Error())
+		userRepositoryLogging.Printlog("FindORAddUser_Error", err.Error())
 		return &User{}, err
 	}
 
@@ -71,7 +71,7 @@ func (r *repository) GetAllUsers() ([]User, error) {
 	var users []User
 	err := r.db.Select(&users)
 	if err != nil {
-		userLogging.Printlog("GetAllusers_Error", err.Error())
+		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
 		return nil, err
 	}
 	return users, nil
@@ -84,7 +84,7 @@ func (r *repository) FindUserByUsername(username string) *User {
 	user := new(User)
 	err := r.db.Model(user).Where("username = ?", username).Select()
 	if err != nil {
-		userLogging.Printlog("FindUserByUsername_Error", err.Error())
+		userRepositoryLogging.Printlog("FindUserByUsername_Error", err.Error())
 	}
 	return user
 }

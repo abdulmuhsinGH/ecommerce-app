@@ -19,5 +19,6 @@ require (
 	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	golang.org/x/tools v0.0.0-20191218040434-6f9e13bbec44 // indirect
+	google.golang.org/genproto v0.0.0-20190404172233-64821d5d2107
 	gopkg.in/oauth2.v3 v3.12.0
 )

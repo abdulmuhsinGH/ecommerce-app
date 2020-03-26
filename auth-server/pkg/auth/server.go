@@ -1,12 +1,13 @@
 package auth
 
 import (
-	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/cors"
+	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/users"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v9"
@@ -23,8 +24,6 @@ import (
 var (
 	authService      Service
 	manager          *manage.Manager
-	testClientStore  *store.ClientStore
-	adminClientStore *store.ClientStore
 )
 
 /*
@@ -43,9 +42,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager.MustTokenStorage(store.NewMemoryTokenStore())
 
 	// generate jwt access token
-	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte("00000000"), jwt.SigningMethodHS512))
-	fmt.Println("Hello auth server")
-
+	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("jwt_secret")), jwt.SigningMethodHS512))
 	clientStore := NewClientStore(db)
 
 	manager.MapClientStorage(clientStore)
