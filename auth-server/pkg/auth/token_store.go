@@ -48,7 +48,7 @@ func (t *TokenStore) Create(info oauth2.TokenInfo) error {
 		Refresh:   info.GetRefresh(),
 	}
 
-	return t.db.Insert(oauthToken)
+	return t.db.Insert(&oauthToken)
 
 }
 
