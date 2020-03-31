@@ -45,7 +45,10 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("jwt_secret")), jwt.SigningMethodHS512))
 	clientStore := NewClientStore(db)
 
+	tokenStore := NewTokenStore(db)
+
 	manager.MapClientStorage(clientStore)
+	manager.MapTokenStorage(tokenStore)
 
 	srv := server.NewServer(server.NewConfig(), manager)
 	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {

@@ -12,17 +12,17 @@ const state = {
 const getters = {
   getProfile(state) {
     if (!state.profile.id) {
-      state.profile = JSON.parse(window.$cookies.get('ank_tkn_val'));
+      state.profile = JSON.parse(window.atob(window.$cookies.get('ank_tkn_val')));
     }
     return state.profile;
   },
   isProfileLoaded: (state) => !!state.profile && !!state.profile.name,
-  isAuthenticated: (state) => (!!state.token && !!state.token.access_token),
+  isAuthenticated: (state) => (!!state.token && !!state.token.length > 0),
   isAdmin: (state) => (state.profile.user_type === 'admin'),
   authStatus: (state) => state.status,
   getHeaders: (state) => state.headers,
   getToken(state) {
-    state.token = window.$cookies.get('ank_tkn_val');
+    return state.token;
   },
 };
 
@@ -47,7 +47,7 @@ const mutations = {
   },
   logout() {
     window.$cookies.remove('ank_tkn_val');
-    state.token = '';
+    state.token = null;
     state.headers = {};
     state.profile = {};
   },

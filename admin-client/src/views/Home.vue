@@ -1,22 +1,22 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <admin-drawer></admin-drawer>
+    <v-content>
+      <router-view></router-view>
+    </v-content>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue';
+import AdminDrawer from '../components/AdminDrawer.vue';
 
 export default {
   name: 'Home',
   components: {
-    HelloWorld,
+    AdminDrawer,
   },
   mounted() {
     console.log('mounted admin dashboard');
-    console.log(this.$cookies.get('ank_tkn_val'));
     if (!this.$store.getters.isAuthenticated) {
       this.$router.replace('/');
     }

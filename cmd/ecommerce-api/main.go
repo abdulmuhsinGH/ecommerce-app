@@ -29,7 +29,7 @@ func main() {
 	router := mux.NewRouter()
 
 	u.SetupRoutes(router)
-	srv := server.New(router, ":8080")
+	srv := server.New(router, ":8081")
 
 	logging.Printlog("server_status", "starting")
 	err = srv.ListenAndServe()

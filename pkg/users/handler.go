@@ -2,10 +2,14 @@ package users
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-pg/pg/v9"
+	"gopkg.in/oauth2.v3/server"
 
+	"ecormmerce-rest-api/pkg/auth"
+	"ecormmerce-rest-api/pkg/format"
 	"ecormmerce-rest-api/pkg/logging"
 
 	"github.com/gorilla/mux"
@@ -21,6 +25,7 @@ var (
 	userRepository     Repository
 	userService        Service
 	userHandlerLogging logging.Logging
+	authServer         *server.Server
 )
 
 /*
@@ -38,17 +43,17 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 	err := json.NewDecoder(request.Body).Decode(&newUser)
 	if err != nil {
 		userHandlerLogging.Printlog("User HandleAddUser; Error while decoding request body:", err.Error())
-		respond(response, message(false, "Error while decoding request body"))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
 
 	err = userService.AddUser(&newUser)
 	if err != nil {
 		userHandlerLogging.Printlog("User HandleAddUser; Error while saving user: %v", err.Error())
-		respond(response, message(false, "Error while saving user"))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving user", nil))
 		return
 	}
-	respond(response, message(true, "User saved"))
+	format.Send(response, http.StatusOK, format.Message(true, "User saved", nil))
 
 }
 
@@ -57,38 +62,35 @@ HandleGetUsers gets data from http request and sends to
 */
 func (h *Handlers) handleGetUsers(response http.ResponseWriter, request *http.Request) {
 
-	newUser := User{}
-
-	err := json.NewDecoder(request.Body).Decode(&newUser)
+	users, err := userService.GetAllUsers()
 	if err != nil {
-		respond(response, message(false, "Error while decoding request body"))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "error getting all users", nil))
 		return
 	}
-
-	err = userService.AddUser(&newUser)
-
-	if err != nil {
-		respond(response, message(false, "Error while saving user"))
-		return
-	}
-	respond(response, message(true, "User saved"))
+	format.Send(response, http.StatusOK, format.Message(true, "All users", users)) // respond(response, message(true, "User saved"))
 
 }
 
-func respond(response http.ResponseWriter, data Resp) {
-	response.Header().Set("Content-Type", "application/json")
-	response.WriteHeader(http.StatusOK)
-	json.NewEncoder(response).Encode(data)
-}
-func message(status bool, message string) Resp {
-	return Resp{"status": status, "message": message}
+func validateToken(next http.HandlerFunc) http.HandlerFunc {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("at", r.FormValue("access_token"))
+		_, err := authServer.ValidationBearerToken(r)
+		if err != nil {
+			format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
+			//http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		next(w, r)
+	})
 }
 
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((h.handleAddUser))).Methods("POST")
+	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((validateToken(h.handleAddUser)))).Methods("POST")
+	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((validateToken(h.handleGetUsers)))).Methods("GET")
 }
 
 /*
@@ -98,5 +100,7 @@ func NewHandlers(logger logging.Logging, db *pg.DB) *Handlers {
 	userRepository = NewRepository(db)
 	userService = NewService(userRepository)
 	userHandlerLogging = logger
+	authServer = auth.New()
+
 	return &Handlers{}
 }
