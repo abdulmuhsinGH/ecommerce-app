@@ -106,6 +106,30 @@ func (t *TokenStore) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
 	return tokenInfo, nil
 }
 
+/*
+RemoveByAccess return client details using id
+*/
+func (t *TokenStore) RemoveByAccess(access string) error {
+	oauthToken := TokenStoreInfo{Access: access}
+	return t.db.Delete(oauthToken)
+}
+
+/*
+RemoveByCode return client details using id
+*/
+func (t *TokenStore) RemoveByCode(code string) error {
+	oauthToken := TokenStoreInfo{Code: code}
+	return t.db.Delete(oauthToken)
+}
+
+/*
+RemoveByRefresh return client details using id
+*/
+func (t *TokenStore) RemoveByRefresh(refresh string) error {
+	oauthToken := TokenStoreInfo{Refresh: refresh}
+	return t.db.Delete(oauthToken)
+}
+
 func (t *TokenStore) toTokenInfo(data TokenStoreInfo) oauth2.TokenInfo {
 	var tk models.Token
 	tk.Access = data.Access
