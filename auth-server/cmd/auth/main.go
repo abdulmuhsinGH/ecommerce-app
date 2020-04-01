@@ -23,6 +23,6 @@ func main() {
 		logging.PrintFatal("postgres connection failed:", err)
 	}
 	defer db.Close()
-	auth.Server(db, logging)
-	//auth.Client()
+	go auth.Server(db, logging)
+	auth.Client()
 }

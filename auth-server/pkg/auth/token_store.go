@@ -18,12 +18,12 @@ type TokenStore struct {
 }
 
 /*
-TokenStoreInfo is model for the oauth_clients table
+OauthToken is model for the oauth_clients table
 */
-type TokenStoreInfo struct {
+type OauthToken struct {
 	ID        uuid.UUID              `db:"id"`
 	CreatedAt time.Time              `db:"created_at"`
-	ExpiresIn time.Duration          `db:"expires_at"`
+	ExpiresAt time.Time              `db:"expires_at"`
 	Code      string                 `db:"code"`
 	Access    string                 `db:"access"`
 	Refresh   string                 `db:"refresh"`
@@ -41,14 +41,36 @@ func NewTokenStore(db *pg.DB) *TokenStore {
 Create inserts token inf
 */
 func (t *TokenStore) Create(info oauth2.TokenInfo) error {
-	oauthToken := TokenStoreInfo{
-		Access:    info.GetAccess(),
-		Code:      info.GetCode(),
-		ExpiresIn: info.GetAccessExpiresIn(),
-		Refresh:   info.GetRefresh(),
-	}
 
-	return t.db.Insert(&oauthToken)
+	oauthToken := &OauthToken{
+	}
+	fmt.Println(info.GetCode(), info.GetAccess(), info.GetRefresh(), info.GetAccessExpiresIn())
+
+	if code := info.GetCode(); code != "" {
+		fmt.Println("Hello")
+		oauthToken.Code = code
+		oauthToken.ExpiresAt = info.GetCodeCreateAt().Add(info.GetCodeExpiresIn())
+
+	} else {
+		fmt.Println("Hello World")
+		oauthToken.Access = info.GetAccess()
+		oauthToken.ExpiresAt = info.GetAccessCreateAt().Add(info.GetAccessExpiresIn())
+
+		if refresh := info.GetRefresh(); refresh != "" {
+			fmt.Println("Hello World 2")
+			oauthToken.Refresh = info.GetRefresh()
+			oauthToken.ExpiresAt = info.GetRefreshCreateAt().Add(info.GetRefreshExpiresIn())
+		}
+	}
+	err := t.db.Model(&oauthToken).
+		Where("oauth_tokens.access = ?", oauthToken.Access).
+		Select()
+	
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	//fmt.Println(err.Error())
+	return err
 
 }
 
@@ -56,8 +78,10 @@ func (t *TokenStore) Create(info oauth2.TokenInfo) error {
 GetByAccess return client details using id
 */
 func (t *TokenStore) GetByAccess(access string) (oauth2.TokenInfo, error) {
-	oauthToken := TokenStoreInfo{Access: access}
-	err := t.db.Select(&oauthToken)
+	oauthToken := OauthToken{Access: access}
+	err := t.db.Model(&oauthToken).
+		Where("oauth_tokens.access = ?", oauthToken.Access).
+		Select()
 	if err != nil {
 		fmt.Println("oc", err.Error())
 		return nil, err
@@ -74,8 +98,10 @@ func (t *TokenStore) GetByAccess(access string) (oauth2.TokenInfo, error) {
 GetByCode return client details using id
 */
 func (t *TokenStore) GetByCode(code string) (oauth2.TokenInfo, error) {
-	oauthToken := TokenStoreInfo{Code: code}
-	err := t.db.Select(&oauthToken)
+	oauthToken := OauthToken{Code: code}
+	err := t.db.Model(&oauthToken).
+		Where("oauth_tokens.code = ?", oauthToken.Code).
+		Select()
 	if err != nil {
 		fmt.Println("oc", err.Error())
 		return nil, err
@@ -92,8 +118,10 @@ func (t *TokenStore) GetByCode(code string) (oauth2.TokenInfo, error) {
 GetByRefresh return client details using id
 */
 func (t *TokenStore) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
-	oauthToken := TokenStoreInfo{Refresh: refresh}
-	err := t.db.Select(&oauthToken)
+	oauthToken := OauthToken{Refresh: refresh}
+	err := t.db.Model(&oauthToken).
+						Where("oauth_tokens.refresh = ?", oauthToken.Refresh).
+						Select()
 	if err != nil {
 		fmt.Println("oc", err.Error())
 		return nil, err
@@ -110,32 +138,32 @@ func (t *TokenStore) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
 RemoveByAccess return client details using id
 */
 func (t *TokenStore) RemoveByAccess(access string) error {
-	oauthToken := TokenStoreInfo{Access: access}
-	return t.db.Delete(oauthToken)
+	oauthToken := OauthToken{Access: access}
+	return t.db.Delete(&oauthToken)
 }
 
 /*
 RemoveByCode return client details using id
 */
 func (t *TokenStore) RemoveByCode(code string) error {
-	oauthToken := TokenStoreInfo{Code: code}
-	return t.db.Delete(oauthToken)
+	oauthToken := OauthToken{Code: code}
+	return t.db.Delete(&oauthToken)
 }
 
 /*
 RemoveByRefresh return client details using id
 */
 func (t *TokenStore) RemoveByRefresh(refresh string) error {
-	oauthToken := TokenStoreInfo{Refresh: refresh}
-	return t.db.Delete(oauthToken)
+	oauthToken := OauthToken{Refresh: refresh}
+	return t.db.Delete(&oauthToken)
 }
 
-func (t *TokenStore) toTokenInfo(data TokenStoreInfo) oauth2.TokenInfo {
+func (t *TokenStore) toTokenInfo(data OauthToken) oauth2.TokenInfo {
 	var tk models.Token
-	tk.Access = data.Access
-	tk.Code = data.Code
-	tk.Refresh = data.Refresh
-	// tk.AccessExpiresIn = data.ExpiresAt
+	tk.SetAccess(data.Access)
+	tk.SetCode(data.Code)
+	tk.SetRefresh(data.Refresh)
+	tk.SetAccessExpiresIn(data.CreatedAt.Sub(data.ExpiresAt))
 
 	return &tk
 }

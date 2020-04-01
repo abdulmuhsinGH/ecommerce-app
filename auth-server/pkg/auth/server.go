@@ -18,12 +18,11 @@ import (
 	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
-	"gopkg.in/oauth2.v3/store"
 )
 
 var (
-	authService      Service
-	manager          *manage.Manager
+	authService Service
+	manager     *manage.Manager
 )
 
 /*
@@ -39,16 +38,16 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
 	// token store
-	manager.MustTokenStorage(store.NewMemoryTokenStore())
+	//manager.MustTokenStorage(store.NewMemoryTokenStore())
 
 	// generate jwt access token
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("jwt_secret")), jwt.SigningMethodHS512))
-	clientStore := NewClientStore(db)
 
 	tokenStore := NewTokenStore(db)
-
-	manager.MapClientStorage(clientStore)
 	manager.MapTokenStorage(tokenStore)
+
+	clientStore := NewClientStore(db)
+	manager.MapClientStorage(clientStore)
 
 	srv := server.NewServer(server.NewConfig(), manager)
 	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
@@ -66,7 +65,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 		fmt.Println(r.FormValue("grant_type"))
 		if clientID == "" || clientSecret == "" {
 			err = errors.ErrAccessDenied
-			return 
+			return
 		}
 
 		return
