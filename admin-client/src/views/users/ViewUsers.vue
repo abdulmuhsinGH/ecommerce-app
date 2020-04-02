@@ -32,7 +32,7 @@ export default {
     UserDatatable,
   },
   mounted() {
-    this.getAllusers();
+    // this.getAllusers();
   },
   data: () => ({
     dialog: false,

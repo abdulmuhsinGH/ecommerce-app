@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-data-table :headers="headers" :items="desserts" sort-by="calories" class="elevation-2">
+    <v-data-table :headers="headers" :items="users" sort-by="username" class="elevation-2">
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Users</v-toolbar-title>
@@ -19,19 +19,47 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
+                      <v-text-field v-model="editedItem.username" label="Username"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
+                      <v-text-field v-model="editedItem.firstname" label="Firstname"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
+                      <v-text-field
+                        v-model="editedItem.middlename"
+                        label="Middlename"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
+                      <v-text-field v-model="editedItem.lastname" label="Lastname"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
+                      <v-text-field
+                        v-model="editedItem.email_work"
+                        label="Work Email"></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.phone_work"
+                        label="Work phone"></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.phone_personal"
+                        label="Personal Phone"></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field v-model="editedItem.gender" label="Gender"></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                       <v-select
+                        v-model="editedItem.status"
+                        :items="[{text: 'Active', value: true},
+                          {text: 'Inactive', value: false}]"
+                        menu-props="auto"
+                        label="Select Status"
+                        hide-details
+                        single-line
+                      ></v-select>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -62,38 +90,55 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'UserDatatable',
   data: () => ({
     dialog: false,
     headers: [
       {
-        text: 'Dessert (100g serving)',
+        text: 'Username',
         align: 'start',
         sortable: false,
-        value: 'name',
+        value: 'username',
       },
-      { text: 'Calories', value: 'calories' },
-      { text: 'Fat (g)', value: 'fat' },
-      { text: 'Carbs (g)', value: 'carbs' },
-      { text: 'Protein (g)', value: 'protein' },
+      { text: 'Firstname', value: 'firstname' },
+      { text: 'Middlename', value: 'middlename' },
+      { text: 'Lastname', value: 'lastname' },
+      { text: 'Work Email', value: 'email_work' },
+      { text: 'Work Phone', value: 'phone_work' },
+      { text: 'Personal Email', value: 'email_personal' },
+      { text: 'Personal Phone', value: 'phone_personal' },
+      { text: 'Gender', value: 'gender' },
+      { text: 'Status', value: 'status' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
-    desserts: [],
+    users: [],
     editedIndex: -1,
     editedItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      username: '',
+      firstname: '',
+      middlename: '',
+      lastname: '',
+      email_work: '',
+      phone_work: '',
+      email_personal: '',
+      phone_personal: '',
+      gender: '',
+      status: true,
     },
     defaultItem: {
-      name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      username: '',
+      firstname: '',
+      middlename: '',
+      lastname: '',
+      email_work: '',
+      phone_work: '',
+      email_personal: '',
+      phone_personal: '',
+      gender: '',
+      status: true,
     },
   }),
 
@@ -112,94 +157,36 @@ export default {
   },
 
   created() {
-    this.initialize();
+    this.getAllusers();
   },
   methods: {
-    initialize() {
-      this.desserts = [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: 'Eclair',
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: 'Cupcake',
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: 'Gingerbread',
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: 'Jelly bean',
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: 'Lollipop',
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: 'Honeycomb',
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: 'Donut',
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: 'KitKat',
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
+    async getAllusers() {
+      try {
+        console.log(this.$store.getters.getToken);
+        const token = JSON.parse(window.atob(this.$store.getters.getToken));
+        // console.log({ token });
+        const response = await axios.get('http://localhost:8081/api/users', {
+          params: {
+            access_token: token.access_token,
+          },
+        });
+        console.log({ response });
+        this.users = response.data.data;
+      } catch (error) {
+        console.error({ error });
+      }
     },
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.users.indexOf(item);
       this.editedItem = { ...item };
       this.dialog = true;
     },
     deleteItem(item) {
-      const index = this.desserts.indexOf(item);
+      const index = this.users.indexOf(item);
       // eslint-disable-next-line
       const status = window.confirm('Are you sure you want to delete this item?');
       if (status) {
-        this.desserts.splice(index, 1);
+        this.users.splice(index, 1);
       }
     },
     close() {
@@ -211,9 +198,9 @@ export default {
     },
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.users[this.editedIndex], this.editedItem);
       } else {
-        this.desserts.push(this.editedItem);
+        this.users.push(this.editedItem);
       }
       this.close();
     },

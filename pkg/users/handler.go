@@ -2,7 +2,6 @@ package users
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-pg/pg/v9"
@@ -74,7 +73,6 @@ func (h *Handlers) handleGetUsers(response http.ResponseWriter, request *http.Re
 func validateToken(next http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("at", r.FormValue("access_token"))
 		_, err := authServer.ValidationBearerToken(r)
 		if err != nil {
 			format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
