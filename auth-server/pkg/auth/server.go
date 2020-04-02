@@ -4,10 +4,13 @@ import (
 	"ecormmerce-rest-api/auth-server/pkg/cors"
 	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/users"
+	authstore "ecormmerce-rest-api/auth-store"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+
+	"github.com/go-redis/redis"
+	oredis "gopkg.in/go-oauth2/redis.v3"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v9"
@@ -18,7 +21,6 @@ import (
 	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
-	"gopkg.in/oauth2.v3/store"
 )
 
 var (
@@ -30,6 +32,7 @@ var (
 Server for authentication
 */
 func Server(db *pg.DB, logging logging.Logging) {
+
 	//logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
 	router := mux.NewRouter()
 	userRepository := users.NewRepository(db)
@@ -39,11 +42,15 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
 	// token store
-	manager.MustTokenStorage(store.NewMemoryTokenStore())
+	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		DB:   15,
+	}))
 
-	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("jwt_secret")), jwt.SigningMethodHS512))
+	clientStore := authstore.NewClientStore(db)
+	//defer tokenStore.Close()
+	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte("rhjiuytrtyhjkoiuygf"), jwt.SigningMethodHS512))
 
-	clientStore := NewClientStore(db)
 	manager.MapClientStorage(clientStore)
 
 	srv := server.NewServer(server.NewConfig(), manager)

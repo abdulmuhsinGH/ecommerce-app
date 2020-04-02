@@ -42,7 +42,7 @@ export default {
       try {
         console.log(this.$store.getters.getToken);
         const token = JSON.parse(window.atob(this.$store.getters.getToken));
-        console.log({ token });
+        // console.log({ token });
         const response = await axios.get('http://localhost:8081/api/users', {
           params: {
             access_token: token.access_token,

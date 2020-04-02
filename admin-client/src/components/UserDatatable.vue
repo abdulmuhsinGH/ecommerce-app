@@ -196,6 +196,7 @@ export default {
     },
     deleteItem(item) {
       const index = this.desserts.indexOf(item);
+      // eslint-disable-next-line
       const status = window.confirm('Are you sure you want to delete this item?');
       if (status) {
         this.desserts.splice(index, 1);

@@ -26,7 +26,7 @@ var userRepositoryLogging logging.Logging
 NewRepository creates a users repository with the necessary dependencies
 */
 func NewRepository(db *pg.DB) Repository {
-	userRepositoryLogging = logging.New("user_reposiroty: ")
+	userRepositoryLogging = logging.New("user_repository: ")
 	return &repository{db}
 
 }
@@ -69,7 +69,10 @@ GetAllUsers returns all users from the user's table
 */
 func (r *repository) GetAllUsers() ([]User, error) {
 	var users []User
-	err := r.db.Select(&users)
+	err := r.db.Model(&users).
+		Column("username", "firstname", "middlename", "lastname", "email_work", "phone_work", 
+			"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by").
+		Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
 		return nil, err

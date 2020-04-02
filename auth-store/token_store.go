@@ -1,4 +1,4 @@
-package auth
+package authstore
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v9"
+	uuid "github.com/satori/go.uuid"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
 )
@@ -14,13 +15,17 @@ import (
 TokenStore is an interface for this
 */
 type TokenStore struct {
-	db *pg.DB
+	db         *pg.DB
+	gcDisabled bool
+	gcInterval time.Duration
+	ticker     *time.Ticker
 }
 
 /*
 OauthToken is model for the oauth_clients table
 */
 type OauthToken struct {
+	ID        uuid.UUID `db:"id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 	ExpiresAt time.Time `db:"expires_at"`
@@ -34,7 +39,43 @@ type OauthToken struct {
 NewTokenStore sets up the client store object
 */
 func NewTokenStore(db *pg.DB) (*TokenStore, error) {
-	return &TokenStore{db}, nil
+	store := &TokenStore{
+		db:         db,
+		gcInterval: 10 * time.Minute,
+	}
+
+	/* if !store.gcDisabled {
+		store.ticker = time.NewTicker(store.gcInterval)
+		go store.gc()
+	} */
+
+	return store, nil
+
+}
+
+// Close close the store
+func (t *TokenStore) Close() error {
+	if !t.gcDisabled {
+		t.ticker.Stop()
+	}
+	return nil
+}
+
+func (t *TokenStore) clean() {
+	now := time.Now()
+	ot := &OauthToken{
+		ExpiresAt: now,
+	}
+	_, err := t.db.Model(ot).Where("expires_at<= ?expires_at").Delete() // Exec(context.Background(), fmt.Sprintf("DELETE FROM %s WHERE expires_at <= $1", s.tableName), now)
+	if err != nil {
+		fmt.Println("Error deleting tokens")
+	}
+}
+
+func (t *TokenStore) gc() {
+	for range t.ticker.C {
+		t.clean()
+	}
 }
 
 /*
@@ -49,7 +90,7 @@ func (t *TokenStore) Create(info oauth2.TokenInfo) error {
 	item := &OauthToken{
 		Data: string(tk),
 	}
-
+	fmt.Println(item.Data)
 	if code := info.GetCode(); code != "" {
 		item.Code = code
 		item.ExpiresAt = info.GetCodeCreateAt().Add(info.GetCodeExpiresIn())
@@ -88,18 +129,21 @@ func (t *TokenStore) GetByAccess(access string) (oauth2.TokenInfo, error) {
 GetByCode return client details using id
 */
 func (t *TokenStore) GetByCode(code string) (oauth2.TokenInfo, error) {
-	fmt.Println(code)
-	var oauthToken OauthToken
+	fmt.Println("c", code)
+	oauthToken := OauthToken{
+		Code: code,
+	}
 
 	err := t.db.Model(&oauthToken).
 		Where("code = ?", code).
+		Limit(1).
 		Select()
 	if err != nil {
-		//fmt.Println("coc", err.Error())
+		fmt.Println("coc", err.Error())
 		return nil, err
 	}
+	fmt.Println(oauthToken.ID)
 	return t.toTokenInfo(oauthToken), nil
-
 }
 
 /*
@@ -151,5 +195,4 @@ func (t *TokenStore) toTokenInfo(data OauthToken) oauth2.TokenInfo {
 		return nil
 	}
 	return &tm
-
 }

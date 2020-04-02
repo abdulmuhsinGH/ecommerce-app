@@ -1,11 +1,9 @@
 package auth
 
 import (
-	"os"
-
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v9"
-	"gopkg.in/oauth2.v3/generates"
+	"github.com/go-redis/redis"
+	oredis "gopkg.in/go-oauth2/redis.v3"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
 )
@@ -18,18 +16,13 @@ var (
 New for authentication
 */
 func New(db *pg.DB) *server.Server {
-
 	manager = manage.NewDefaultManager()
-	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
-	tokenStore,_ := NewTokenStore(db)
+	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+		Addr: "127.0.0.1:6379",
+		DB:   15,
+	}))
 
-	manager.MapTokenStorage(tokenStore)
+	return server.NewServer(server.NewConfig(), manager)
 
-	// generate jwt access token
-	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("jwt_secret")), jwt.SigningMethodHS512))
-
-	srv := server.NewServer(server.NewConfig(), manager)
-
-	return srv
 }
