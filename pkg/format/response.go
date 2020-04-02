@@ -15,6 +15,7 @@ Send sends response of a request
 */
 func Send(response http.ResponseWriter, status int, data Resp) {
 	response.Header().Set("Content-Type", "application/json")
+	response.Header().Set("Access-Control-Allow-Origin", "*")
 	response.WriteHeader(status)
 	json.NewEncoder(response).Encode(data)
 }

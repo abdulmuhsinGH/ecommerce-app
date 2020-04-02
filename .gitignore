@@ -16,5 +16,10 @@ Gopkg.toml
 *.test
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+auth-server/bin/auth_server
+bin/auth_server
 
-auth_server
+admin-client/node_modules
+auth-server/bin/auth_server
+bin/ecormmerce_api
+bin/ecormmerce_rest_api
