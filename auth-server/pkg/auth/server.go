@@ -18,6 +18,7 @@ import (
 	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
+	"gopkg.in/oauth2.v3/store"
 )
 
 var (
@@ -38,13 +39,9 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
 	// token store
-	//manager.MustTokenStorage(store.NewMemoryTokenStore())
+	manager.MustTokenStorage(store.NewMemoryTokenStore())
 
-	// generate jwt access token
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("jwt_secret")), jwt.SigningMethodHS512))
-
-	tokenStore := NewTokenStore(db)
-	manager.MapTokenStorage(tokenStore)
 
 	clientStore := NewClientStore(db)
 	manager.MapClientStorage(clientStore)

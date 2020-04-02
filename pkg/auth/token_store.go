@@ -1,11 +1,11 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/go-pg/pg/v9"
-	uuid "github.com/satori/go.uuid"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
 )
@@ -18,37 +18,52 @@ type TokenStore struct {
 }
 
 /*
-TokenStoreInfo is model for the oauth_clients table
+OauthToken is model for the oauth_clients table
 */
-type TokenStoreInfo struct {
-	ID        uuid.UUID              `db:"id"`
-	CreatedAt time.Time              `db:"created_at"`
-	ExpiresIn time.Duration          `db:"expires_at"`
-	Code      string                 `db:"code"`
-	Access    string                 `db:"access"`
-	Refresh   string                 `db:"refresh"`
-	Data      map[string]interface{} `db:"data"`
+type OauthToken struct {
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	ExpiresAt time.Time `db:"expires_at"`
+	Code      string    `db:"code"`
+	Access    string    `db:"access"`
+	Refresh   string    `db:"refresh"`
+	Data      string    `db:"data"`
 }
 
 /*
 NewTokenStore sets up the client store object
 */
-func NewTokenStore(db *pg.DB) *TokenStore {
-	return &TokenStore{db}
+func NewTokenStore(db *pg.DB) (*TokenStore, error) {
+	return &TokenStore{db}, nil
 }
 
 /*
 Create inserts token inf
 */
 func (t *TokenStore) Create(info oauth2.TokenInfo) error {
-	oauthToken := TokenStoreInfo{
-		Access:    info.GetAccess(),
-		Code:      info.GetCode(),
-		ExpiresIn: info.GetAccessExpiresIn(),
-		Refresh:   info.GetRefresh(),
+
+	jv, err := json.Marshal(info)
+	if err != nil {
+		return err
+	}
+	item := &OauthToken{
+		Data: string(jv),
 	}
 
-	return t.db.Insert(&oauthToken)
+	if code := info.GetCode(); code != "" {
+		item.Code = code
+		item.ExpiresAt = info.GetCodeCreateAt().Add(info.GetCodeExpiresIn())
+	} else {
+		item.Access = info.GetAccess()
+		item.ExpiresAt = info.GetAccessCreateAt().Add(info.GetAccessExpiresIn())
+
+		if refresh := info.GetRefresh(); refresh != "" {
+			item.Refresh = info.GetRefresh()
+			item.ExpiresAt = info.GetRefreshCreateAt().Add(info.GetRefreshExpiresIn())
+		}
+	}
+
+	return t.db.Insert(item)
 
 }
 
@@ -56,86 +71,84 @@ func (t *TokenStore) Create(info oauth2.TokenInfo) error {
 GetByAccess return client details using id
 */
 func (t *TokenStore) GetByAccess(access string) (oauth2.TokenInfo, error) {
-	oauthToken := TokenStoreInfo{Access: access}
-	err := t.db.Select(&oauthToken)
+	fmt.Println(access)
+	oauthToken := OauthToken{}
+	err := t.db.Model(&oauthToken).
+		Where("access = ?", access).
+		Select()
 	if err != nil {
-		fmt.Println("oc", err.Error())
+		fmt.Println("aoc", err.Error())
 		return nil, err
 	}
-	tokenInfo := t.toTokenInfo(oauthToken)
-	if err != nil {
-		fmt.Println("ci", err.Error())
-		return nil, err
-	}
-	return tokenInfo, nil
+	return t.toTokenInfo(oauthToken), nil
+
 }
 
 /*
 GetByCode return client details using id
 */
 func (t *TokenStore) GetByCode(code string) (oauth2.TokenInfo, error) {
-	oauthToken := TokenStoreInfo{Code: code}
-	err := t.db.Select(&oauthToken)
+	fmt.Println(code)
+	var oauthToken OauthToken
+
+	err := t.db.Model(&oauthToken).
+		Where("code = ?", code).
+		Select()
 	if err != nil {
-		fmt.Println("oc", err.Error())
+		//fmt.Println("coc", err.Error())
 		return nil, err
 	}
-	tokenInfo := t.toTokenInfo(oauthToken)
-	if err != nil {
-		fmt.Println("ci", err.Error())
-		return nil, err
-	}
-	return tokenInfo, nil
+	return t.toTokenInfo(oauthToken), nil
+
 }
 
 /*
 GetByRefresh return client details using id
 */
 func (t *TokenStore) GetByRefresh(refresh string) (oauth2.TokenInfo, error) {
-	oauthToken := TokenStoreInfo{Refresh: refresh}
-	err := t.db.Select(&oauthToken)
+	fmt.Println(refresh)
+	oauthToken := OauthToken{}
+	err := t.db.Model(&oauthToken).
+		Where("refresh = ?", refresh).
+		Select()
 	if err != nil {
-		fmt.Println("oc", err.Error())
+		fmt.Println("roc", err.Error())
 		return nil, err
 	}
-	tokenInfo := t.toTokenInfo(oauthToken)
-	if err != nil {
-		fmt.Println("ci", err.Error())
-		return nil, err
-	}
-	return tokenInfo, nil
+	return t.toTokenInfo(oauthToken), nil
 }
 
 /*
 RemoveByAccess return client details using id
 */
 func (t *TokenStore) RemoveByAccess(access string) error {
-	oauthToken := TokenStoreInfo{Access: access}
-	return t.db.Delete(oauthToken)
+	oauthToken := OauthToken{Access: access}
+	_, err := t.db.Model(&oauthToken).Where("access= ?access").Delete()
+	return err
 }
 
 /*
 RemoveByCode return client details using id
 */
 func (t *TokenStore) RemoveByCode(code string) error {
-	oauthToken := TokenStoreInfo{Code: code}
-	return t.db.Delete(oauthToken)
+	oauthToken := OauthToken{Code: code}
+	return t.db.Delete(&oauthToken)
 }
 
 /*
 RemoveByRefresh return client details using id
 */
 func (t *TokenStore) RemoveByRefresh(refresh string) error {
-	oauthToken := TokenStoreInfo{Refresh: refresh}
-	return t.db.Delete(oauthToken)
+	oauthToken := OauthToken{Refresh: refresh}
+	_, err := t.db.Model(&oauthToken).Where("refresh= ?refresh").Delete()
+	return err
 }
 
-func (t *TokenStore) toTokenInfo(data TokenStoreInfo) oauth2.TokenInfo {
-	var tk models.Token
-	tk.Access = data.Access
-	tk.Code = data.Code
-	tk.Refresh = data.Refresh
-	// tk.AccessExpiresIn = data.ExpiresAt
+func (t *TokenStore) toTokenInfo(data OauthToken) oauth2.TokenInfo {
+	var tm models.Token
+	err := json.Unmarshal([]byte(data.Data), &tm); if err != nil {
+		return nil
+	}
+	return &tm
 
-	return &tk
 }

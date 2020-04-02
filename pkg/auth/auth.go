@@ -22,7 +22,7 @@ func New(db *pg.DB) *server.Server {
 	manager = manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
-	tokenStore := NewTokenStore(db)
+	tokenStore,_ := NewTokenStore(db)
 
 	manager.MapTokenStorage(tokenStore)
 
