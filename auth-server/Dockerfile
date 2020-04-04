@@ -12,12 +12,12 @@ COPY go.sum .
 
 RUN go mod download
 
-COPY . /authserver
+COPY . /auth-server
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o auth-server/bin/auth-server /auth-server/cmd/auth/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /auth-server/cmd/auth/main.go
 
 # final stage
 FROM scratch
-COPY --from=builder /auth-server/bin/auth-server /auth-server
+COPY --from=builder /auth-server/main /authserver
 EXPOSE 9096
 ENTRYPOINT ["/auth-server"]

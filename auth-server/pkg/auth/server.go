@@ -4,10 +4,10 @@ import (
 	"ecormmerce-rest-api/auth-server/pkg/cors"
 	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/users"
-	authstore "ecormmerce-rest-api/auth-store"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-redis/redis"
 	oredis "gopkg.in/go-oauth2/redis.v3"
@@ -43,11 +43,11 @@ func Server(db *pg.DB, logging logging.Logging) {
 
 	// token store
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: "127.0.0.1:6379",
+		Addr: os.Getenv("redis_server_ip") + os.Getenv("redis_server_port"),
 		DB:   15,
 	}))
 
-	clientStore := authstore.NewClientStore(db)
+	clientStore := NewClientStore(db)
 	//defer tokenStore.Close()
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte("rhjiuytrtyhjkoiuygf"), jwt.SigningMethodHS512))
 
