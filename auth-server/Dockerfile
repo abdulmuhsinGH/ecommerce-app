@@ -14,6 +14,8 @@ RUN go mod download
 
 COPY . /auth-server
 
+# RUN rm -r vendor
+
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /auth-server/cmd/auth/main.go
 
 # final stage

@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"os"
+
 	"github.com/go-pg/pg/v9"
 	"github.com/go-redis/redis"
 	oredis "gopkg.in/go-oauth2/redis.v3"
@@ -19,7 +21,8 @@ func New(db *pg.DB) *server.Server {
 	manager = manage.NewDefaultManager()
 
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: "127.0.0.1:6379",
+		Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+		Password: os.Getenv("REDIS_SERVER_PASS"),
 		DB:   15,
 	}))
 

@@ -1,0 +1,7 @@
+/authserver
+
+/admin-client
+
+node_modules
+.git
+.gitignore

@@ -5,6 +5,7 @@ import (
 	server "ecormmerce-rest-api/pkg/server"
 	postgres "ecormmerce-rest-api/pkg/storage/postgres"
 	users "ecormmerce-rest-api/pkg/users"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -29,7 +30,7 @@ func main() {
 	router := mux.NewRouter()
 
 	u.SetupRoutes(router)
-	srv := server.New(router, ":8081")
+	srv := server.New(router, ":"+ os.Getenv("PORT"))
 
 	logging.Printlog("server_status", "starting")
 	err = srv.ListenAndServe()

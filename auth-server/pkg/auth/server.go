@@ -43,13 +43,12 @@ func Server(db *pg.DB, logging logging.Logging) {
 
 	// token store
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: os.Getenv("redis_server_ip") + os.Getenv("redis_server_port"),
+		Addr: os.Getenv("REDIS_SERVER_HOST") + os.Getenv("REDIS_SERVER_PORT"),
 		DB:   15,
 	}))
 
 	clientStore := NewClientStore(db)
-	//defer tokenStore.Close()
-	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte("rhjiuytrtyhjkoiuygf"), jwt.SigningMethodHS512))
+	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("JWT_SECRET")), jwt.SigningMethodHS512))
 
 	manager.MapClientStorage(clientStore)
 

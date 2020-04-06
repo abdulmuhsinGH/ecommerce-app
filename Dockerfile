@@ -19,5 +19,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /ecormmerce-rest-api/cmd/ecom
 # final stage
 FROM scratch
 COPY --from=builder /ecormmerce-rest-api/main /ecormmerce-rest-api
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["/ecormmerce-rest-api"]

@@ -52,7 +52,7 @@ GenerateState genearate a state for verifying request to prevent CSRF
 */
 func (s *service) GenerateState(w http.ResponseWriter) string {
 	var expiration = time.Now().Add(365 * 24 * time.Hour)
-	SecuredCookie = securecookie.New([]byte(os.Getenv("session_key")), []byte(os.Getenv("state_hash_key")))
+	SecuredCookie = securecookie.New([]byte(os.Getenv("SESSION_KEY")), []byte(os.Getenv("STATE_HASH_KEY")))
 
 	b := make([]byte, 16)
 	rand.Read(b)

@@ -36,13 +36,6 @@ var googleOauthConfig *oauth2.Config
 
 func (h *Handlers) handlePostLoginWithGoogle(w http.ResponseWriter, r *http.Request) {
 	oauthState := authService.GenerateState(w)
-	oauthStateTest, err := r.Cookie("oauth-state")
-	if err != nil {
-		authLogging.Printlog("1cookie err", err.Error())
-	} else {
-		authLogging.Printlog("1cookie", oauthStateTest.Value)
-	}
-
 	newURL := googleOauthConfig.AuthCodeURL(oauthState)
 
 	http.Redirect(w, r, newURL, http.StatusTemporaryRedirect)
@@ -52,7 +45,7 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 
 	oauthState, err := r.Cookie("oauth-state")
 	if err != nil {
-		authLogging.Printlog("cookie err", err.Error())
+		authLogging.Printlog("getting_cookie_err", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -271,8 +264,8 @@ func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, 
 	authLogging = logging
 	googleOauthConfig = &oauth2.Config{
 		RedirectURL:  "http://127.0.0.1:9096/auth/google/callback",
-		ClientID:     os.Getenv("google_client_id"),
-		ClientSecret: os.Getenv("google_client_secret"),
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_ID"),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "profile"},
 		Endpoint:     google.Endpoint,
 	}

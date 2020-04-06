@@ -27,7 +27,7 @@ func CORS(next http.Handler) http.Handler {
 		if o := r.Header.Get(origin); o != "" {
 			w.Header().Set(allowOrigin, o)
 		} else {
-			w.Header().Set(allowOrigin, os.Getenv("resource_allowed_origin"))
+			w.Header().Set(allowOrigin, os.Getenv("RESOURCE_ALLOWED_ORIGIN"))
 		}
 
 		// Set other headers

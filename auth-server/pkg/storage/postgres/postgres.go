@@ -18,17 +18,11 @@ func Connect() (*pg.DB, error) {
 
 	var (
 		// local db credential
-		DbHost     = os.Getenv("db_host")
-		DbUser     = os.Getenv("db_user")
-		DbPassword = os.Getenv("db_pass")
-		DbName     = os.Getenv("db_name")
-		DbPort     = os.Getenv("db_port")
-
-		// docker compose db credentials
-		/* DbHost     = os.Getenv("POSTGRES_HOST")
-		DbUser     = os.Getenv("POSTGRES_USER")
-		DbPassword = os.Getenv("POSTGRES_PASSWORD")
-		DbName     = os.Getenv("POSTGRESS_DB") */
+		DbHost     = os.Getenv("DB_HOST")
+		DbUser     = os.Getenv("DB_USER")
+		DbPassword = os.Getenv("DB_PASS")
+		DbName     = os.Getenv("DB_NAME")
+		DbPort     = os.Getenv("DB_PORT")
 	)
 	// open a connection to the database
 	dbInfo := pg.Options{
