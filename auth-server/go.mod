@@ -4,7 +4,9 @@ go 1.13
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-pg/migrations v6.7.3+incompatible
 	github.com/go-pg/migrations/v7 v7.1.9
+	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-session/session v3.1.2+incompatible

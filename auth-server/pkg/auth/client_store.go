@@ -33,6 +33,15 @@ func NewClientStore(db *pg.DB) *ClientStore {
 }
 
 /*
+Create inserts new client info
+*/
+func (c *ClientStore) Create(info OauthClient) error {
+	_, err := c.db.Model(&info).SelectOrInsert()
+
+	return err
+}
+
+/*
 GetByID return client details using id
 */
 func (c *ClientStore) GetByID(ID string) (oauth2.ClientInfo, error) {

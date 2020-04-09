@@ -45,7 +45,7 @@ func main() {
 		fmt.Printf("version is %d\n", oldVersion)
 	}
 
-	defer db.Close()
+	//defer db.Close()
 	auth.Server(db, logging)
 }
 
