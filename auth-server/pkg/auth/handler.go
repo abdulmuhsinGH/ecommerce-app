@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"ecormmerce-rest-api/auth-server/pkg/clientstore"
 	"ecormmerce-rest-api/auth-server/pkg/format"
 	logging "ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/users"
@@ -209,6 +210,25 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 	format.Send(response, http.StatusCreated, format.Message(true, "User Created", nil))
 }
 
+func (h *Handlers) handleAddClient(response http.ResponseWriter, request *http.Request) {
+	oauthClient := clientstore.OauthClient{}
+	body, err := ioutil.ReadAll(request.Body)
+
+	err = json.Unmarshal([]byte(body), &oauthClient) //NewDecoder(request.Body).Decode(&newUser)
+	if err != nil {
+		authLogging.Printlog("Error while decoding request body: %v", err.Error())
+		format.Send(response, 500, format.Message(false, "Error while decoding request body", nil))
+		return
+	}
+	err = authService.AddOuathClient(oauthClient)
+	if err != nil {
+		authLogging.Printlog("Error: %v", err.Error())
+		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+		return
+	}
+	format.Send(response, http.StatusCreated, format.Message(true, "Client Created", nil))
+}
+
 func (h *Handlers) handleAuth(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
@@ -253,6 +273,7 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/auth/test", authLogging.Httplog(authService.ValidateToken(h.handleUserAuthTest, srv))).Methods("GET")
 	mux.HandleFunc("/auth/google/login", authLogging.Httplog(h.handlePostLoginWithGoogle))
 	mux.HandleFunc("/auth/google/callback", authLogging.Httplog(h.handleGoogleAuthCallback))
+	mux.HandleFunc("/auth/client", authLogging.Httplog(authService.ValidateToken(h.handleAddClient, srv))).Methods("POST")
 }
 
 /*

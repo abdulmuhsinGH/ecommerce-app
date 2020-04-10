@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"ecormmerce-rest-api/auth-server/pkg/clientstore"
 	"ecormmerce-rest-api/auth-server/pkg/cors"
 	"ecormmerce-rest-api/auth-server/pkg/logging"
 	"ecormmerce-rest-api/auth-server/pkg/users"
@@ -33,22 +34,33 @@ Server for authentication
 */
 func Server(db *pg.DB, logging logging.Logging) {
 
+	clientStore := clientstore.New(db)
+
 	//logger := log.New(os.Stdout, "ecommerce_api ", log.LstdFlags|log.Lshortfile)
 	router := mux.NewRouter()
 	userRepository := users.NewRepository(db)
-	authService = NewAuthService(userRepository)
+	authService = NewAuthService(userRepository, clientStore)
 
 	manager = manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
 	// token store
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+		Addr:     os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
 		Password: os.Getenv("REDIS_SERVER_PASS"),
-		DB:   15,
+		DB:       15,
 	}))
 
-	clientStore := NewClientStore(db)
+	
+
+	// create client store for admin dashboard. NB set env variables for ADMIN CLIENT before building
+	_ = clientStore.Create(clientstore.OauthClient{
+		ID:     os.Getenv("ADMIN_CLIENT_ID"),
+		Secret: os.Getenv("ADMIN_CLIENT_SECRET"),
+		Domain: os.Getenv("ADMIN_CLIENT_DOMAIN"),
+		Data:   nil,
+	})
+
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("JWT_SECRET")), jwt.SigningMethodHS512))
 
 	//clientStore.Create

@@ -1,4 +1,4 @@
-package auth
+package clientstore
 
 import (
 	"fmt"
@@ -26,9 +26,9 @@ type OauthClient struct {
 }
 
 /*
-NewClientStore sets up the client store object
+New sets up the client store object
 */
-func NewClientStore(db *pg.DB) *ClientStore {
+func New(db *pg.DB) *ClientStore {
 	return &ClientStore{db}
 }
 

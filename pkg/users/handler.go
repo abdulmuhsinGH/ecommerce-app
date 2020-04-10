@@ -98,7 +98,7 @@ func NewHandlers(logger logging.Logging, db *pg.DB) *Handlers {
 	userRepository = NewRepository(db)
 	userService = NewService(userRepository)
 	userHandlerLogging = logger
-	authServer = auth.New(db)
+	authServer = auth.New()
 
 	return &Handlers{}
 }
