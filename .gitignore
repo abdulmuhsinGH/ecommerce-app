@@ -4,7 +4,7 @@ main
 .env
 Gopkg.lock
 Gopkg.toml
-/vendor
+*/vendor
 
 # Binaries for programs and plugins
 *.exe
