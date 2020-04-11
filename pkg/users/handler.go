@@ -7,9 +7,9 @@ import (
 	"github.com/go-pg/pg/v9"
 	"gopkg.in/oauth2.v3/server"
 
-	"ecormmerce-rest-api/pkg/auth"
-	"ecormmerce-rest-api/pkg/format"
-	"ecormmerce-rest-api/pkg/logging"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/format"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 
 	"github.com/gorilla/mux"
 )

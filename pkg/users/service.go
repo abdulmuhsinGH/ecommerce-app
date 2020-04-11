@@ -1,7 +1,7 @@
 package users
 
 import (
-	"ecormmerce-rest-api/pkg/logging"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
 	"net/http"
 
@@ -101,7 +101,7 @@ func (s *service) CheckPasswordHash(password, hash string) bool {
 ValidateToken checks if user token is valid and authorises user to access route
 */
 func (s *service) ValidateToken(next http.HandlerFunc, srv *server.Server) http.HandlerFunc {
-	
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userServiceLogging.Printlog("d", r.FormValue("access_token"))
 		_, err := srv.ValidationBearerToken(r)

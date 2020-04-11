@@ -1,9 +1,8 @@
-module ecormmerce-rest-api
+module ecormmerce-app/ecormmerce-rest-api
 
 go 1.13
 
 require (
-	ecormmerce-rest-api/auth-server v0.0.0
 	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-redis/redis v6.15.7+incompatible
@@ -17,5 +16,3 @@ require (
 	gopkg.in/go-oauth2/redis.v3 v3.2.1
 	gopkg.in/oauth2.v3 v3.12.0
 )
-
-replace ecormmerce-rest-api/auth-server v0.0.0 => ./auth-server

@@ -1,7 +1,7 @@
 package users
 
 import (
-	"ecormmerce-rest-api/pkg/logging"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 
 	"github.com/go-pg/pg/v9"
 )
@@ -70,7 +70,7 @@ GetAllUsers returns all users from the user's table
 func (r *repository) GetAllUsers() ([]User, error) {
 	var users []User
 	err := r.db.Model(&users).
-		Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work", 
+		Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
 			"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by").
 		Select()
 	if err != nil {

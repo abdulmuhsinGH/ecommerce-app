@@ -20,7 +20,7 @@ func Connect() (*pg.DB, error) {
 		// local db credential
 		DbHost     = os.Getenv("DB_HOST")
 		DbUser     = os.Getenv("DB_USER")
-		DbPassword = os.Getenv("DBB_PASS")
+		DbPassword = os.Getenv("DB_PASS")
 		DbName     = os.Getenv("DB_NAME")
 		DbPort     = os.Getenv("DB_PORT")
 	)
