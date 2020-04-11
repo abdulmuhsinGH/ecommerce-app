@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"ecormmerce-app/auth-server/pkg/clientstore"
 	"ecormmerce-app/auth-server/pkg/format"
 	logging "ecormmerce-app/auth-server/pkg/logging"
 	"ecormmerce-app/auth-server/pkg/users"
@@ -208,7 +209,7 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 }
 
 func (h *Handlers) handleAddClient(response http.ResponseWriter, request *http.Request) {
-	oauthClient := OauthClient{}
+	oauthClient := clientstore.OauthClient{}
 	body, err := ioutil.ReadAll(request.Body)
 
 	err = json.Unmarshal([]byte(body), &oauthClient) //NewDecoder(request.Body).Decode(&newUser)

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/go-redis/redis"
@@ -18,7 +19,8 @@ New for authentication
 */
 func New() *server.Server {
 	manager = manage.NewDefaultManager()
-
+	fmt.Println(os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"))
+	fmt.Println(os.Getenv("REDIS_SERVER_PASS"))
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
 		Addr:     os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
 		Password: os.Getenv("REDIS_SERVER_PASS"),

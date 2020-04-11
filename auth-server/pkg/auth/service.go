@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"ecormmerce-app/auth-server/pkg/clientstore"
 	"ecormmerce-app/auth-server/pkg/users"
 	"encoding/base64"
 	"encoding/json"
@@ -27,14 +28,14 @@ type Service interface {
 	SignUp(users.User) error
 	SignUpViaGoogle(users.User) (*users.User, error)
 	GenerateState(http.ResponseWriter) string
-	AddOuathClient(OauthClient) error
+	AddOuathClient(clientstore.OauthClient) error
 	GetUserDataFromGoogle(string) (users.User, error)
 	ValidateToken(http.HandlerFunc, *server.Server) http.HandlerFunc
 }
 
 type service struct {
 	userRepository users.Repository
-	clientStore    *ClientStore
+	clientStore    *clientstore.ClientStore
 }
 
 /*
@@ -45,7 +46,7 @@ var SecuredCookie *securecookie.SecureCookie
 /*
 NewAuthService creates a auth service with the necessary dependencies
 */
-func NewAuthService(r users.Repository, c *ClientStore) Service {
+func NewAuthService(r users.Repository, c *clientstore.ClientStore) Service {
 	return &service{r, c}
 }
 
@@ -179,7 +180,7 @@ func (s *service) SignUp(user users.User) error {
 /*
 AddOuathClient creates a new user
 */
-func (s *service) AddOuathClient(oauthClient OauthClient) error {
+func (s *service) AddOuathClient(oauthClient clientstore.OauthClient) error {
 
 	return s.clientStore.Create(oauthClient)
 
