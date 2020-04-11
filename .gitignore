@@ -21,6 +21,6 @@ bin/auth_server
 
 admin-client/node_modules
 auth-server/bin/auth_server
-bin/ecormmerce_api
-bin/ecormmerce_rest_api
-bin/ecormmerce_rest_api
+ecormmerce-rest-api/bin/ecormmerce_api
+ecormmerce-rest-api/bin/ecormmerce_rest_api
+
