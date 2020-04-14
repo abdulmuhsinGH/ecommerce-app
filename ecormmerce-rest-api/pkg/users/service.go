@@ -60,7 +60,8 @@ func (s *service) GetAllUsers() ([]User, error) {
 	users, err := s.userRepository.GetAllUsers()
 	if err != nil {
 		userServiceLogging.Printlog("GetAllUsers_Error;", err.Error())
-		return nil, err
+		panic(err)
+		//return nil, err
 	}
 	return users, nil
 }

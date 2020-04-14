@@ -75,7 +75,8 @@ func (r *repository) GetAllUsers() ([]User, error) {
 		Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
-		return nil, err
+		panic(err)
+		//return nil, err
 	}
 	return users, nil
 }
