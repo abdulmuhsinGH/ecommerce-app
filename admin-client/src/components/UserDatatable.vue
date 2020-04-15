@@ -162,15 +162,12 @@ export default {
   methods: {
     async getAllusers() {
       try {
-        console.log(this.$store.getters.getToken);
         const token = JSON.parse(window.atob(this.$store.getters.getToken));
-        // console.log({ token });
         const response = await axios.get('http://localhost:8081/api/users', {
           params: {
             access_token: token.access_token,
           },
         });
-        console.log({ response });
         this.users = response.data.data;
       } catch (error) {
         console.error({ error });

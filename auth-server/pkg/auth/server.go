@@ -49,7 +49,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 	fmt.Println(os.Getenv("REDIS_SERVER_PASS"))
 	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
 		Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
-		// Password: os.Getenv("REDIS_SERVER_PASS"),
+		Password: os.Getenv("REDIS_SERVER_PASS"),
 		DB: 15,
 	}))
 

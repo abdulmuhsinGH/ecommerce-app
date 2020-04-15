@@ -27,10 +27,10 @@ const getters = {
 };
 
 const actions = {
-  getTokenProfile: (context, token) => {
+  /* getTokenProfile: (context, token) => {
     // Trying to get the user's profile from the token
     console.log(context, token);
-  },
+  }, */
 };
 
 const mutations = {

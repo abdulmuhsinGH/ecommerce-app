@@ -10,6 +10,7 @@ ENV PATH /admin-client/node_modules/.bin:$PATH
 # install and cache app dependencies
 COPY package.json /admin-client/package.json
 RUN npm install
+COPY . .
 RUN npm install @vue/cli@3.7.0 -g
 
 # start app

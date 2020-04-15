@@ -3,9 +3,9 @@ FROM golang:1.13.2-alpine3.10 as builder
 
 ENV GO111MODULE=on
 
-RUN mkdir -p /ecormmerce-app/ecormmerce-rest-api
+RUN mkdir -p /ecormmerce-rest-api
 
-WORKDIR /ecormmerce-app/ecormmerce-rest-api
+WORKDIR /ecormmerce-rest-api
 
 COPY go.mod .
 COPY go.sum .
@@ -18,6 +18,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /ecormmerce-app/ecormmerce-re
 
 # final stage
 FROM scratch
-COPY --from=builder /ecormmerce-app/ecormmerce-rest-api/main /ecormmerce-app/ecormmerce-rest-api
+COPY --from=builder /ecormmerce-app/ecormmerce-rest-api/main /ecormmerce-rest-api
 EXPOSE 8081
-ENTRYPOINT ["/ecormmerce-app/ecormmerce-rest-api"]
+ENTRYPOINT ["/ecormmerce-rest-api"]

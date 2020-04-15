@@ -16,10 +16,11 @@ COPY . /auth-server
 
 # RUN rm -r vendor
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /auth-server/cmd/auth/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /ecormmerce-app/auth-server/cmd/auth/main.go
 
 # final stage
 FROM scratch
-COPY --from=builder /auth-server/main /authserver
+COPY --from=builder /ecormmerce-app/auth-server/main /auth-server
+COPY ./view/ /view/
 EXPOSE 9096
 ENTRYPOINT ["/auth-server"]

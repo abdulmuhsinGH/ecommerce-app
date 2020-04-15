@@ -48,11 +48,6 @@ export default {
     ],
   }),
   mounted() {
-    if (this.$route.path !== '/') {
-      console.log('not homepage');
-    } else {
-      console.log('is homepage');
-    }
   },
   watch: {
     '$route.query.code': {

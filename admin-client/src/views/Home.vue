@@ -16,13 +16,11 @@ export default {
     AdminDrawer,
   },
   mounted() {
-    console.log('mounted admin dashboard');
     if (!this.$store.getters.isAuthenticated) {
       this.$router.replace('/');
     }
   },
   beforeMount() {
-    console.log(this.$store.getters.isAuthenticated);
   },
 };
 </script>

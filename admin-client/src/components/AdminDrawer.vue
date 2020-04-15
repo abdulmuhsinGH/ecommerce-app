@@ -115,7 +115,6 @@ export default {
   }),
   methods: {
     goTo(route) {
-      console.log('hello');
       this.$router.push(route);
     },
   },

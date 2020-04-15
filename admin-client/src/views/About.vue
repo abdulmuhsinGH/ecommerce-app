@@ -24,7 +24,6 @@ export default {
     auth,
   ],
   mounted: () => {
-    console.log('mounted');
   },
   methods: {
   },
