@@ -27,3 +27,4 @@ ecormmerce-rest-api/bin/ecormmerce_rest_api
 redis.config
 */redis.config
 ecormmerce-rest-api/bin/ecommerce_api
+redis.conf

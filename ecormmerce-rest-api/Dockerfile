@@ -1,5 +1,6 @@
 # build stage
 FROM golang:1.13.2-alpine3.10 as builder
+RUN apk add --no-cache ca-certificates openssl
 
 ENV GO111MODULE=on
 
@@ -19,5 +20,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /ecormmerce-app/ecormmerce-re
 # final stage
 FROM scratch
 COPY --from=builder /ecormmerce-app/ecormmerce-rest-api/main /ecormmerce-rest-api
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 EXPOSE 8081
 ENTRYPOINT ["/ecormmerce-rest-api"]

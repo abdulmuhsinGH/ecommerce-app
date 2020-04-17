@@ -2,19 +2,20 @@ version: '3'
 
 services:
   ecormmercedbdev:
-    container_name: ecormmercedb-dev
+    container_name: ecormmercedbdev
     image: postgres
     environment:
       GET_HOST_FROM: dns
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-    hostname: ecormmercedb-dev
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    hostname: ecormmercedbdev
     ports:
       - 5434:5434
     volumes:
       - ./sql/init_db.sql:/docker-entrypoint-initdb.d/1-init_db.sql
       - ./sql/schema.sql:/docker-entrypoint-initdb.d/2-schema.sql
+      - ./sql/seed.sql:/docker-entrypoint-initdb.d/3-seed.sql
     networks:
       - ecormmercenetdev
 
@@ -29,15 +30,16 @@ services:
     environment:
       GET_HOSTS_FROM: dns
       DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_NAME}
+      DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       DB_PORT: ${DB_PORT_DOCKER}
-      DB_HOST: ${DB_HOST_DOCKER}
+      DB_HOST: ${DB_HOST_DOCKER_DEV}
       ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
       ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
       ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
       JWT_SECRET: ${JWT_SECRET}
       REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_DOCKER_DEV}
+      REDIS_SERVER_PASS: ${REDIS_SERVER_PASS}
       REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_DOCKER}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
@@ -61,7 +63,7 @@ services:
     container_name: auth-server-dev
     image: abdulmuhsin/auth-server-dev:v1
     hostname: auth-server-dev
-    env_file: .env
+    # env_file: .env
     build: 
       context: ./auth-server
       dockerfile: Dockerfile-dev
@@ -71,12 +73,15 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       DB_PORT: ${DB_PORT_DOCKER}
-      DB_HOST: ${DB_HOST_DOCKER}
+      DB_HOST: ${DB_HOST_DOCKER_DEV}
+      SESSION_KEY: ${SESSION_KEY}
+      STATE_HASH_KEY: ${STATE_HASH_KEY}
       ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
       ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
       ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
       JWT_SECRET: ${JWT_SECRET}
       REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_DOCKER_DEV}
+      REDIS_SERVER_PASS: ${REDIS_SERVER_PASS}
       REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_DOCKER}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
@@ -100,7 +105,7 @@ services:
     container_name: admin-client-dev
     image: abdulmuhsin/admin-client-dev:v1
     hostname: admin-client-dev
-    env_file: admin-client/.env
+    env_file: ./admin-client/docker-dev.env
     build: 
       context: ./admin-client
       dockerfile: Dockerfile-dev
@@ -116,13 +121,13 @@ services:
   redisdbdev:
     image: "redis:alpine"
     container_name: redisdbdev
-    command: redis-server
-    hostname: redisdb-dev
+    command: redis-server --requirepass ${REDIS_SERVER_PASS}
+    hostname: redisdbdev
     ports:
       - "6379:6379"
     volumes:
       - $PWD/redis-data:/var/lib/redis
-      - ./redis.config:/usr/local/etc/redis/redis.conf
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
     environment:
       - REDIS_REPLICATION_MODE=master
     networks:

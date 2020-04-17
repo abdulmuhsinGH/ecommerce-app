@@ -189,16 +189,18 @@ func (h *Handlers) handleSignUp(w http.ResponseWriter, r *http.Request) {
 	outputHTML(w, r, "/signup.html")
 }
 func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.Request) {
-	newUser := users.User{}
-	body, err := ioutil.ReadAll(request.Body)
-
-	err = json.Unmarshal([]byte(body), &newUser) //NewDecoder(request.Body).Decode(&newUser)
-	if err != nil {
-		authLogging.Printlog("Error while decoding request body: %v", err.Error())
-		format.Send(response, 500, format.Message(false, "Error while decoding request body", nil))
-		return
+	//body, err := ioutil.ReadAll(request.Body)
+	//authLogging.Printlog("request_body: ", string(body))
+	newUser := users.User{
+		Firstname: request.FormValue("firstname"),
+		Username: request.FormValue("username"),
+		EmailWork: request.FormValue("username"),
+		Lastname:  request.FormValue("lastname"),
+		Gender:    request.FormValue("gender"),
+		Password:  request.FormValue("password"),
 	}
-	err = authService.SignUp(newUser)
+
+	err := authService.SignUp(newUser)
 	if err != nil {
 		authLogging.Printlog("Error: %v", err.Error())
 		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
