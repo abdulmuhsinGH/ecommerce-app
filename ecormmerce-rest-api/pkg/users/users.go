@@ -25,13 +25,15 @@ type User struct {
 	Status        bool      `json:"status"`
 	LastLogin     time.Time `json:"last_login"`
 	UpdatedBy     string    `json:"updated_by"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	DeletedAt     time.Time `pg:",soft_delete"`
 }
 
 /*
 UserRole defines the properties of roles a user can have
 */
 type UserRole struct {
-	ID          int    `sql:"type:integer;primary_key;" json:"id"`
+	ID          int    `pg:"type:integer;primary_key;" json:"id"`
 	RoleName    string `json:"role_name"`
 	Description string `json:"description"`
 	Comment     string `json:"comment"`

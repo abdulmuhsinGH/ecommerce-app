@@ -17,6 +17,9 @@ type Service interface {
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 	ValidateToken(http.HandlerFunc, *server.Server) http.HandlerFunc
+	GetAllUserRoles() ([]UserRole, error)
+	UpdateUser(user *User) error
+	DeleteUser(user *User) error
 }
 
 type service struct {
@@ -44,10 +47,38 @@ func (s *service) AddUser(user *User) error {
 		return err
 	}
 
-	status := s.userRepository.AddUser(user)
-	if !status {
+	user, err = s.userRepository.FindOrAddUser(user)
+	if err != nil {
 		userServiceLogging.Printlog("Add user Error;", err.Error())
 		return errors.New("not created")
+	}
+	return nil
+
+}
+
+/*
+UpdateUser creates a new user
+*/
+func (s *service) UpdateUser(user *User) error {
+	var err error
+
+	user, err = s.userRepository.UpdateUser(user)
+	if err != nil {
+		userServiceLogging.Printlog("Add user Error;", err.Error())
+		return errors.New("not updated")
+	}
+	return nil
+
+}
+
+/*
+DeleteUser creates a new user
+*/
+func (s *service) DeleteUser(user *User) error {
+	result := s.userRepository.DeleteUser(user)
+	if !result {
+		userServiceLogging.Printlog("delete user Error;", "user not deleted")
+		return errors.New("not deleted")
 	}
 	return nil
 
@@ -64,6 +95,19 @@ func (s *service) GetAllUsers() ([]User, error) {
 		//return nil, err
 	}
 	return users, nil
+}
+
+/*
+GetAllUserRoles gets all user roles
+*/
+func (s *service) GetAllUserRoles() ([]UserRole, error) {
+	userRoles, err := s.userRepository.GetAllUserRoles()
+	if err != nil {
+		userServiceLogging.Printlog("GetAllUsers_Error;", err.Error())
+		panic(err)
+		//return nil, err
+	}
+	return userRoles, nil
 }
 
 /*

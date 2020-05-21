@@ -14,6 +14,9 @@ type Repository interface {
 	GetAllUsers() ([]User, error)
 	FindUserByUsername(string) *User
 	FindOrAddUser(*User) (*User, error)
+	GetAllUserRoles() ([]UserRole, error)
+	UpdateUser(user *User) (*User, error)
+	DeleteUser(user *User) bool
 }
 
 type repository struct {
@@ -45,9 +48,25 @@ func (r *repository) AddUser(user *User) bool {
 }
 
 /*
+Update a user's info
+*/
+func (r *repository) UpdateUser(user *User) (*User, error) {
+	_, err := r.db.Model(user).Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
+		"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by", "updated_at").Update()
+	if err != nil {
+		userRepositoryLogging.Printlog("UpdateUser_Error", err.Error())
+		return &User{}, err
+	}
+	return user, nil
+
+}
+
+/*
 FindOrAddUser finds user or saves user if not found to the user's table
 */
 func (r *repository) FindOrAddUser(user *User) (*User, error) {
+	//TODO set user role
+	// user.Role = 1
 
 	_, err := r.db.Model(user).
 		Column("id").
@@ -65,13 +84,26 @@ func (r *repository) FindOrAddUser(user *User) (*User, error) {
 }
 
 /*
+DeleteUser saves user to the user's table
+*/
+func (r *repository) DeleteUser(user *User) bool {
+	err := r.db.Delete(user)
+	if err != nil {
+		userRepositoryLogging.Printlog("DeleteUser_Error", err.Error())
+		return false
+	}
+	return true
+
+}
+
+/*
 GetAllUsers returns all users from the user's table
 */
 func (r *repository) GetAllUsers() ([]User, error) {
 	var users []User
 	err := r.db.Model(&users).
 		Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
-			"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by").
+			"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by", "updated_at").
 		Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
@@ -79,6 +111,22 @@ func (r *repository) GetAllUsers() ([]User, error) {
 		//return nil, err
 	}
 	return users, nil
+}
+
+/*
+GetAllUserRoles returns all user roles from the user_roles table
+*/
+func (r *repository) GetAllUserRoles() ([]UserRole, error) {
+	var userRoles []UserRole
+	err := r.db.Model(&userRoles).
+		Column("id", "role_name", "description").
+		Select()
+	if err != nil {
+		userRepositoryLogging.Printlog("GetAlluserRoles_Error", err.Error())
+		panic(err)
+		//return nil, err
+	}
+	return userRoles, nil
 }
 
 /*

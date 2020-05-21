@@ -2,7 +2,10 @@ package users
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/go-pg/pg/v9"
 	"gopkg.in/oauth2.v3/server"
@@ -36,7 +39,7 @@ type Resp map[string]interface{}
 HandleAddUser gets data from http request and sends to
 */
 func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Request) {
-
+	fmt.Println("add new users")
 	newUser := User{}
 
 	err := json.NewDecoder(request.Body).Decode(&newUser)
@@ -48,11 +51,58 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 
 	err = userService.AddUser(&newUser)
 	if err != nil {
-		userHandlerLogging.Printlog("User HandleAddUser; Error while saving user: %v", err.Error())
+		userHandlerLogging.Printlog("User HandleUpdateUser; Error while saving user: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving user", nil))
 		return
 	}
 	format.Send(response, http.StatusOK, format.Message(true, "User saved", nil))
+
+}
+
+/*
+HandleUpdateUser gets data from http request and sends to
+*/
+func (h *Handlers) handleUpdateUser(response http.ResponseWriter, request *http.Request) {
+	fmt.Println("add new users")
+	user := User{}
+
+	err := json.NewDecoder(request.Body).Decode(&user)
+	if err != nil {
+		userHandlerLogging.Printlog("User HandleUpdateUser; Error while decoding request body:", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
+		return
+	}
+
+	err = userService.UpdateUser(&user)
+	if err != nil {
+		userHandlerLogging.Printlog("User HandleUpdateUser; Error while updating user: %v", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating user", nil))
+		return
+	}
+	format.Send(response, http.StatusOK, format.Message(true, "User updated", nil))
+
+}
+
+/*
+HandleDeleteUser gets data from http request and sends to
+*/
+func (h *Handlers) handleDeleteUser(response http.ResponseWriter, request *http.Request) {
+	user := User{}
+
+	uuid, err := uuid.FromString(mux.Vars(request)["id"])
+	if err != nil {
+		userHandlerLogging.Printlog("User HandleUpdateUser; Error while converting string to uuid:", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
+		return
+	}
+	user.ID = uuid
+	err = userService.DeleteUser(&user)
+	if err != nil {
+		userHandlerLogging.Printlog("User HandleUpdateUser; Error while deleting user: %v", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while deleting user", nil))
+		return
+	}
+	format.Send(response, http.StatusOK, format.Message(true, "User deleted", nil))
 
 }
 
@@ -67,6 +117,20 @@ func (h *Handlers) handleGetUsers(response http.ResponseWriter, request *http.Re
 		return
 	}
 	format.Send(response, http.StatusOK, format.Message(true, "All users", users)) // respond(response, message(true, "User saved"))
+
+}
+
+/*
+HandleGetUserRoles gets data from http request and sends to
+*/
+func (h *Handlers) handleGetUserRoles(response http.ResponseWriter, request *http.Request) {
+
+	userRoles, err := userService.GetAllUserRoles()
+	if err != nil {
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "error getting all user roles", nil))
+		return
+	}
+	format.Send(response, http.StatusOK, format.Message(true, "All user roles", userRoles)) // respond(response, message(true, "User saved"))
 
 }
 
@@ -89,6 +153,9 @@ SetupRoutes sets up routes to respective handlers
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((validateToken(h.handleAddUser)))).Methods("POST")
 	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((validateToken(h.handleGetUsers)))).Methods("GET")
+	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((validateToken(h.handleUpdateUser)))).Methods("PUT")
+	mux.HandleFunc("/api/users/{id}", userHandlerLogging.Httplog((validateToken(h.handleDeleteUser)))).Methods("DELETE")
+	mux.HandleFunc("/api/users/roles", userHandlerLogging.Httplog((validateToken(h.handleGetUserRoles)))).Methods("GET")
 }
 
 /*
