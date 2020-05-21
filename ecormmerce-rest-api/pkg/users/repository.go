@@ -16,7 +16,7 @@ type Repository interface {
 	FindOrAddUser(*User) (*User, error)
 	GetAllUserRoles() ([]UserRole, error)
 	UpdateUser(user *User) (*User, error)
-	DeleteUser(user *User) bool
+	DeleteUser(user *User) error
 }
 
 type repository struct {
@@ -52,7 +52,7 @@ Update a user's info
 */
 func (r *repository) UpdateUser(user *User) (*User, error) {
 	_, err := r.db.Model(user).Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
-		"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by", "updated_at").Update()
+		"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by", "updated_at").WherePK().Update()
 	if err != nil {
 		userRepositoryLogging.Printlog("UpdateUser_Error", err.Error())
 		return &User{}, err
@@ -86,13 +86,13 @@ func (r *repository) FindOrAddUser(user *User) (*User, error) {
 /*
 DeleteUser saves user to the user's table
 */
-func (r *repository) DeleteUser(user *User) bool {
-	err := r.db.Delete(user)
+func (r *repository) DeleteUser(user *User) error {
+	_, err := r.db.Model(user).WherePK().Delete()
 	if err != nil {
 		userRepositoryLogging.Printlog("DeleteUser_Error", err.Error())
-		return false
+		return err
 	}
-	return true
+	return nil
 
 }
 
@@ -107,9 +107,9 @@ func (r *repository) GetAllUsers() ([]User, error) {
 		Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
-		panic(err)
-		//return nil, err
+		return nil, err
 	}
+
 	return users, nil
 }
 
@@ -123,8 +123,7 @@ func (r *repository) GetAllUserRoles() ([]UserRole, error) {
 		Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAlluserRoles_Error", err.Error())
-		panic(err)
-		//return nil, err
+		return nil, err
 	}
 	return userRoles, nil
 }

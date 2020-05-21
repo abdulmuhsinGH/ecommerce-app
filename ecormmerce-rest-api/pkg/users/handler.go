@@ -51,7 +51,6 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 
 	err = userService.AddUser(&newUser)
 	if err != nil {
-		userHandlerLogging.Printlog("User HandleUpdateUser; Error while saving user: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving user", nil))
 		return
 	}
@@ -75,7 +74,6 @@ func (h *Handlers) handleUpdateUser(response http.ResponseWriter, request *http.
 
 	err = userService.UpdateUser(&user)
 	if err != nil {
-		userHandlerLogging.Printlog("User HandleUpdateUser; Error while updating user: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating user", nil))
 		return
 	}
@@ -98,7 +96,6 @@ func (h *Handlers) handleDeleteUser(response http.ResponseWriter, request *http.
 	user.ID = uuid
 	err = userService.DeleteUser(&user)
 	if err != nil {
-		userHandlerLogging.Printlog("User HandleUpdateUser; Error while deleting user: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while deleting user", nil))
 		return
 	}

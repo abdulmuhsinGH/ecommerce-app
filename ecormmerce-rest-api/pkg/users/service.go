@@ -49,7 +49,6 @@ func (s *service) AddUser(user *User) error {
 
 	user, err = s.userRepository.FindOrAddUser(user)
 	if err != nil {
-		userServiceLogging.Printlog("Add user Error;", err.Error())
 		return errors.New("not created")
 	}
 	return nil
@@ -64,7 +63,6 @@ func (s *service) UpdateUser(user *User) error {
 
 	user, err = s.userRepository.UpdateUser(user)
 	if err != nil {
-		userServiceLogging.Printlog("Add user Error;", err.Error())
 		return errors.New("not updated")
 	}
 	return nil
@@ -75,9 +73,8 @@ func (s *service) UpdateUser(user *User) error {
 DeleteUser creates a new user
 */
 func (s *service) DeleteUser(user *User) error {
-	result := s.userRepository.DeleteUser(user)
-	if !result {
-		userServiceLogging.Printlog("delete user Error;", "user not deleted")
+	err := s.userRepository.DeleteUser(user)
+	if err != nil {
 		return errors.New("not deleted")
 	}
 	return nil
@@ -90,9 +87,7 @@ GetAllUsers gets all users
 func (s *service) GetAllUsers() ([]User, error) {
 	users, err := s.userRepository.GetAllUsers()
 	if err != nil {
-		userServiceLogging.Printlog("GetAllUsers_Error;", err.Error())
-		panic(err)
-		//return nil, err
+		return nil, err
 	}
 	return users, nil
 }
@@ -103,10 +98,9 @@ GetAllUserRoles gets all user roles
 func (s *service) GetAllUserRoles() ([]UserRole, error) {
 	userRoles, err := s.userRepository.GetAllUserRoles()
 	if err != nil {
-		userServiceLogging.Printlog("GetAllUsers_Error;", err.Error())
-		panic(err)
-		//return nil, err
+		return nil, err
 	}
+	
 	return userRoles, nil
 }
 
@@ -148,7 +142,6 @@ ValidateToken checks if user token is valid and authorises user to access route
 func (s *service) ValidateToken(next http.HandlerFunc, srv *server.Server) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userServiceLogging.Printlog("d", r.FormValue("access_token"))
 		_, err := srv.ValidationBearerToken(r)
 		if err != nil {
 			userServiceLogging.Printlog("validate_token_error", err.Error())

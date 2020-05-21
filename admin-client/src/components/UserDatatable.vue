@@ -194,6 +194,7 @@ export default {
         this.users = response.data.data;
       } catch (error) {
         console.error({ error });
+        eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
       }
     },
     async getAllUserRoles() {
@@ -227,7 +228,7 @@ export default {
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
         console.log({ error });
-        eventBus.emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
+        eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
       }
     },
     close() {
@@ -251,7 +252,7 @@ export default {
         this.close();
       } catch (error) {
         console.log({ error });
-        eventBus.emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
+        eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
         this.close();
       }
     },

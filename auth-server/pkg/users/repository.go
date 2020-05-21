@@ -15,7 +15,6 @@ type Repository interface {
 	GetAllUsers() ([]User, error)
 	FindUserByUsername(string) *User
 	FindOrAddUser(*User) (*User, error)
-	DeleteUser(user *User) bool
 }
 
 type repository struct {
