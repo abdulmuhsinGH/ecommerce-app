@@ -19,7 +19,7 @@ import (
 func main() {
 	logging := logging.New("ecommerce_api:")
 
-	db, err := postgres.Connect()
+	db, err := postgres.Connect(os.Getenv("DB_NAME"))
 	if err != nil {
 		logging.PrintFatal("postgres connection failed:", err)
 	}

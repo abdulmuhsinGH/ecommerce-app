@@ -11,7 +11,7 @@ import (
 /*
 Connect opens a connection to the postgres database
 */
-func Connect() (*pg.DB, error) {
+func Connect(dbName string) (*pg.DB, error) {
 	err := godotenv.Load()
 	if err != nil {
 	}
@@ -21,7 +21,6 @@ func Connect() (*pg.DB, error) {
 		DbHost     = os.Getenv("DB_HOST")
 		DbUser     = os.Getenv("DB_USER")
 		DbPassword = os.Getenv("DB_PASS")
-		DbName     = os.Getenv("DB_NAME")
 		DbPort     = os.Getenv("DB_PORT")
 	)
 	// open a connection to the database
@@ -29,7 +28,7 @@ func Connect() (*pg.DB, error) {
 		Addr:     DbHost + ":" + DbPort,
 		User:     DbUser,
 		Password: DbPassword,
-		Database: DbName,
+		Database: dbName,
 	}
 	db := pg.Connect(&dbInfo)
 

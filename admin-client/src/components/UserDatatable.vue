@@ -96,8 +96,7 @@
     </v-data-table>
     <div class="text-center pt-2">
       <v-btn color="primary" class="mr-2">Import Users</v-btn>
-      <v-btn color="primary" >Sort next column</v-btn>
-      <snackbar-component message="Hello Wolrd" message-type="success"></snackbar-component>
+      <snackbar-component></snackbar-component>
     </div>
   </div>
 </template>

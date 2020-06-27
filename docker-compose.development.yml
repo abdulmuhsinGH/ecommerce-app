@@ -54,9 +54,6 @@ services:
     depends_on:
     - ecormmercedbdev
     - redisdbdev
-    links:
-    - ecormmercedbdev
-    - redisdbdev
     labels:
       kompose.service.type: LoadBalancer
 
@@ -94,9 +91,6 @@ services:
     ports:
     - 9096:9096
     depends_on:
-    - ecormmercedbdev
-    - redisdbdev
-    links:
     - ecormmercedbdev
     - redisdbdev
     labels:

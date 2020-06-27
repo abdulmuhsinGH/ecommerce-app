@@ -4,6 +4,7 @@ import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/oauth2.v3/server"
@@ -61,6 +62,7 @@ UpdateUser creates a new user
 func (s *service) UpdateUser(user *User) error {
 	var err error
 
+	user.UpdatedAt = time.Now()
 	user, err = s.userRepository.UpdateUser(user)
 	if err != nil {
 		return errors.New("not updated")
@@ -100,7 +102,7 @@ func (s *service) GetAllUserRoles() ([]UserRole, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return userRoles, nil
 }
 
