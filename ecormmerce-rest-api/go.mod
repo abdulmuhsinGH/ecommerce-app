@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/go-pg/migrations/v7 v7.1.9
+	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/gorilla/mux v1.7.4
