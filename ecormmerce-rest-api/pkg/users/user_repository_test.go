@@ -13,12 +13,54 @@ import (
 var dbTest *pg.DB
 var userRepositoryTest Repository
 
+func setupTestCase(t *testing.T, db *pg.DB) func(t *testing.T) {
+	t.Log("setup test case")
+	err := db.Insert(&UserRole{
+		ID:          1,
+		RoleName:    "admin",
+		Description: "admin",
+	})
+	if err != nil {
+		t.Errorf("Test Failed; Could not insert user role seed data: \n" + err.Error())
+	}
+
+	err = db.Insert(&User{
+		Firstname: "test first name",
+		Lastname:  "test last name",
+		Password:  "test password",
+		Gender:    "d",
+		Username:  "test.username",
+		EmailWork: "test@email.com",
+		PhoneWork: "02933482",
+		Role:      1,
+		Status:    true,
+	})
+
+	if err != nil {
+		t.Errorf("Test Failed; Could not insert  user seed data: \n" + err.Error())
+	}
+
+	return func(t *testing.T) {
+		t.Log("teardown test case")
+		_, err = db.Model((*User)(nil)).Exec(`TRUNCATE TABLE ?TableName`)
+		if err != nil {
+			t.Errorf("Test Failed; Users Table truncate failed")
+		}
+
+		_, err := db.Model((*UserRole)(nil)).Exec(`TRUNCATE TABLE ?TableName cascade`)
+		if err != nil {
+			t.Errorf("Test Failed; User Roles Table truncate failed")
+		}
+
+	}
+}
+
 func pgOptions() pg.Options {
 	return pg.Options{
 		Addr:            os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT"),
 		User:            os.Getenv("DB_USER"),
 		Password:        os.Getenv("DB_PASS"),
-		Database:        os.Getenv("DB_NAME"),
+		Database:        os.Getenv("DB_TEST_NAME"),
 		MaxRetries:      1,
 		MinRetryBackoff: -1,
 
@@ -53,22 +95,25 @@ func TestAddUser(t *testing.T) {
 	defer dbTest.Close()
 	userRepositoryTest = NewRepository(dbTest)
 	// var user User
+
+	teardownTestCase := setupTestCase(t, dbTest)
+	defer teardownTestCase(t)
 	user := User{
 		Firstname: "a",
-		Lastname: "b",
-		Password: "c",
-		Gender: "d",
-		Username: "f",
+		Lastname:  "b",
+		Password:  "c",
+		Gender:    "d",
+		Username:  "w",
 		EmailWork: "e",
 		PhoneWork: "1",
-		Role: 1,
-		Status: true,
+		Role:      1,
+		Status:    true,
 	}
 	status := userRepositoryTest.AddUser(&user)
 	if !status {
 		t.Errorf("Test Failed; Users was not added")
 	}
-	
+
 }
 
 func TestAddUserWithoutEmail(t *testing.T) {
@@ -86,20 +131,20 @@ func TestAddUserWithoutEmail(t *testing.T) {
 	userRepositoryTest = NewRepository(dbTest)
 	user := User{
 		Firstname: "a",
-		Lastname: "b",
-		Password: "c",
-		Gender: "d",
-		Username: "qwerty",
+		Lastname:  "b",
+		Password:  "c",
+		Gender:    "d",
+		Username:  "qwerty",
 		PhoneWork: "1",
-		Role: 1,
-		Status: true,
+		Role:      1,
+		Status:    true,
 	}
 
 	status := userRepositoryTest.AddUser(&user)
 	if status {
 		t.Errorf("Test Failed; Users added. User Added Without Email")
 	}
-	
+
 }
 
 func TestAddUserWithoutRole(t *testing.T) {
@@ -116,19 +161,19 @@ func TestAddUserWithoutRole(t *testing.T) {
 	userRepositoryTest = NewRepository(dbTest)
 	user := User{
 		Firstname: "a",
-		Lastname: "b",
-		Password: "c",
-		Gender: "d",
-		Username: "asdf",
+		Lastname:  "b",
+		Password:  "c",
+		Gender:    "d",
+		Username:  "asdf",
 		EmailWork: "e",
-		Status: true,
+		Status:    true,
 	}
 
 	status := userRepositoryTest.AddUser(&user)
 	if status {
 		t.Errorf("Test Failed; Users added. User Added Without Role")
 	}
-	
+
 }
 
 func TestGetAllusers(t *testing.T) {
@@ -145,6 +190,9 @@ func TestGetAllusers(t *testing.T) {
 	defer dbTest.Close()
 	userRepositoryTest = NewRepository(dbTest)
 
+	teardownTestCase := setupTestCase(t, dbTest)
+	defer teardownTestCase(t)
+
 	users, err := userRepositoryTest.GetAllUsers()
 	if err != nil {
 		t.Errorf("Test Failed; No users found")
@@ -152,4 +200,5 @@ func TestGetAllusers(t *testing.T) {
 	if len(users) < 1 {
 		t.Errorf("Test Failed; No users found")
 	}
+	t.Log(len(users))
 }
