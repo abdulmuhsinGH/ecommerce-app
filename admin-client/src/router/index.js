@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import ViewUsers from '../views/users/ViewUsers.vue';
+import ViewProducts from '../views/users/Viewproducts.vue';
 import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
@@ -28,6 +29,11 @@ const routes = [
         path: '/dashboard/users',
         name: 'Users',
         component: ViewUsers,
+      },
+      {
+        path: '/dashboard/products',
+        name: 'Product',
+        component: ViewProducts,
       },
     ],
   },

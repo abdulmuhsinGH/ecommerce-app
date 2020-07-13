@@ -6,6 +6,7 @@ require (
 	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-redis/redis v6.15.7+incompatible
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.9 // indirect
