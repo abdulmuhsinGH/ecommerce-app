@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/cors"
 	"net/http"
 	"time"
 
@@ -40,7 +41,7 @@ func New(mux *mux.Router, serverAddress string) *http.Server {
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		TLSConfig:    tlsConfig,
-		Handler:      mux,
+		Handler:      cors.CORS(mux),
 	}
 	return srv
 }

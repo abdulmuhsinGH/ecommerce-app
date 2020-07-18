@@ -1,7 +1,7 @@
 const auth = {
   methods: {
     login() {
-      const state = this.randomString();
+      const state = this.generateState();
       this.$cookies.set('state', state, '1d');
       window.location.replace(`${process.env.VUE_APP_AuthURL}?client_id=${process.env.VUE_APP_ClientID}&
       redirect_uri=${process.env.VUE_APP_RedirectURL}&response_type=code&scope=all&state=${state}`);
@@ -12,7 +12,7 @@ const auth = {
         this.$router.go('/');
       }
     },
-    randomString(length = 16, chars = 'aA#') {
+    generateState(length = 16, chars = 'aA#') {
       let mask = '';
       let result = '';
       if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';

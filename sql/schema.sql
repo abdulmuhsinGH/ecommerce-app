@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS user_roles(
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    id uuid DEFAULT uuid_generate_v4(),
-    username varchar(25) UNIQUE NOT NULL, 
+  id uuid DEFAULT uuid_generate_v4(),
+  username varchar(25) UNIQUE NOT NULL, 
 	password text NOT NULL, 
 	firstname varchar(100) NOT NULL,
 	middlename varchar(100), 
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
 	role integer NOT NULL REFERENCES user_roles(id) ,
 	status BOOLEAN NOT NULL,
 	last_login TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
 	updated_by TEXT,

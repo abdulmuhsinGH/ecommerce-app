@@ -29,5 +29,5 @@ redis.config
 ecormmerce-rest-api/bin/ecommerce_api
 redis.conf
 
-postgres-data/
-redis-data/
+/postgres-data
+/redis-data

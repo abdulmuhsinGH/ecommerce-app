@@ -9,6 +9,7 @@ import (
 	users "ecormmerce-app/ecormmerce-rest-api/pkg/users"
 	"os"
 
+	"github.com/go-pg/pg/v9"
 	"github.com/gorilla/mux"
 )
 
@@ -21,7 +22,23 @@ import (
 func main() {
 	logging := logging.New("ecommerce_api:")
 
-	db, err := postgres.Connect()
+	var (
+		// local db credential
+		DbHost     = os.Getenv("DB_HOST")
+		DbUser     = os.Getenv("DB_USER")
+		DbPassword = os.Getenv("DB_PASS")
+		DbPort     = os.Getenv("DB_PORT")
+		DbName     = os.Getenv("DB_NAME")
+	)
+
+	dbInfo := pg.Options{
+		Addr:     DbHost + ":" + DbPort,
+		User:     DbUser,
+		Password: DbPassword,
+		Database: DbName,
+	}
+
+	db, err := postgres.Connect(dbInfo)
 	if err != nil {
 		logging.PrintFatal("postgres connection failed:", err)
 	}

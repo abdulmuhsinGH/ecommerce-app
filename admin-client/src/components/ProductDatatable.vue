@@ -105,7 +105,7 @@ export default {
       { text: 'Updated By', value: 'updated_by' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
-    users: [],
+    products: [],
     brands: [],
     categories: [],
     editedIndex: -1,
@@ -166,7 +166,7 @@ export default {
         // eslint-disable-next-line
         const status = window.confirm('Are you sure you want to delete this item?');
         if (status) {
-          responseData = await this.deleteItem('api/users/', this.users[index].id);
+          responseData = await this.deleteItem('api/products/', this.users[index].id);
           this.users.splice(index, 1);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
@@ -186,10 +186,10 @@ export default {
       try {
         let responseData;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/users', this.editedItem);
+          responseData = await this.updateItem('api/products', this.editedItem);
           Object.assign(this.users[this.editedIndex], this.editedItem);
         } else {
-          responseData = await this.createItem('api/users/new', this.editedItem);
+          responseData = await this.createItem('api/products/new', this.editedItem);
           this.users.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
