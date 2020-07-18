@@ -150,7 +150,7 @@ export default {
             access_token: token.access_token,
           },
         });
-        this.users = response.data.data;
+        this.products = response.data.data;
       } catch (error) {
         console.error({ error });
         eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
