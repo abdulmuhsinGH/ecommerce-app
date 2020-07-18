@@ -145,7 +145,7 @@ export default {
     async getAllProducts() {
       try {
         const token = JSON.parse(window.atob(this.$store.getters.getToken));
-        const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/users`, {
+        const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/products`, {
           params: {
             access_token: token.access_token,
           },
