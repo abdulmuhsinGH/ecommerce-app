@@ -138,6 +138,8 @@ export default {
   },
   mounted() {
     this.getAllProducts();
+    this.getAllBrands();
+    this.getAllCategories();
   },
   methods: {
     async getAllProducts() {
@@ -158,6 +160,32 @@ export default {
       this.editedIndex = this.users.indexOf(item);
       this.editedItem = { ...item };
       this.dialog = true;
+    },
+    async getAllBrands() {
+      try {
+        const token = JSON.parse(window.atob(this.$store.getters.getToken));
+        const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/brands`, {
+          params: {
+            access_token: token.access_token,
+          },
+        });
+        this.brands = response.data.data;
+      } catch (error) {
+        console.error({ error });
+      }
+    },
+    async getAllCategories() {
+      try {
+        const token = JSON.parse(window.atob(this.$store.getters.getToken));
+        const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/categories`, {
+          params: {
+            access_token: token.access_token,
+          },
+        });
+        this.categories = response.data.data;
+      } catch (error) {
+        console.error({ error });
+      }
     },
     async deleteProduct(item) {
       try {
