@@ -4,8 +4,6 @@ import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // Service provides Brand adding operations.
@@ -14,7 +12,7 @@ type Service interface {
 	GetAllBrands() ([]Brand, error)
 	UpdateBrand(Brand *Brand) error
 	DeleteBrand(Brand *Brand) error
-	GetBrandByID(ID uuid.UUID) (Brand, error)
+	GetBrandByID(ID int) (Brand, error)
 	GetBrandsByName(name string) ([]Brand, error)
 }
 
@@ -86,7 +84,7 @@ func (s *service) GetAllBrands() ([]Brand, error) {
 /*
 GetBrandByID gets all Brands
 */
-func (s *service) GetBrandByID(ID uuid.UUID) (Brand, error) {
+func (s *service) GetBrandByID(ID int) (Brand, error) {
 	brand, err := s.brandRepository.GetBrandByID(ID)
 	if err != nil {
 		return Brand{}, err

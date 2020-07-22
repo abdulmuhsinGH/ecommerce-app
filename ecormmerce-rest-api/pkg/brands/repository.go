@@ -4,7 +4,6 @@ import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 
 	"github.com/go-pg/pg/v9"
-	"github.com/google/uuid"
 )
 
 /*
@@ -16,7 +15,7 @@ type Repository interface {
 	AddBrand(*Brand) (*Brand, error)
 	UpdateBrand(*Brand) (*Brand, error)
 	DeleteBrand(*Brand) error
-	GetBrandByID(uuid.UUID) (Brand, error)
+	GetBrandByID(int) (Brand, error)
 	GetBrandsByName(string) ([]Brand, error)
 }
 
@@ -93,7 +92,7 @@ func (r *repository) GetAllBrands() ([]Brand, error) {
 /*
 GetBrandByID returns a Brand by the id from the Brand's table
 */
-func (r *repository) GetBrandByID(ID uuid.UUID) (Brand, error) {
+func (r *repository) GetBrandByID(ID int) (Brand, error) {
 	var brand Brand
 
 	err := r.db.Model(&brand).

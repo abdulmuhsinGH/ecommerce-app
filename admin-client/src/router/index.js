@@ -41,6 +41,11 @@ const routes = [
         name: 'Brand',
         component: ViewBrands,
       },
+      {
+        path: '/dashboard/product-categories',
+        name: 'ProductCategory',
+        component: ViewProductCategory,
+      },
     ],
   },
 ];
