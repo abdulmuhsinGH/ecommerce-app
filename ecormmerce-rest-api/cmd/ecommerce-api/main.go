@@ -5,6 +5,7 @@ import (
 	server "ecormmerce-app/ecormmerce-rest-api/pkg/server"
 	postgres "ecormmerce-app/ecormmerce-rest-api/pkg/storage/postgres"
 	users "ecormmerce-app/ecormmerce-rest-api/pkg/users"
+	"fmt"
 	"os"
 
 	"github.com/go-pg/pg/v9"
@@ -28,6 +29,14 @@ func main() {
 		DbPort     = os.Getenv("DB_PORT")
 		DbName     = os.Getenv("DB_NAME")
 	)
+	if len(DbHost) == 0 {
+		socketDir, isSet := os.LookupEnv("DB_SOCKET_DIR")
+		if !isSet {
+			socketDir = "/cloudsql"
+		}
+		instanceConnectionName := os.Getenv("INSTANCE_CONNECTION_NAME")
+		DbHost = fmt.Sprintf("%s/%s", socketDir, instanceConnectionName)
+	}
 
 	dbInfo := pg.Options{
 		Addr:     DbHost + ":" + DbPort,

@@ -44,14 +44,18 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager = manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
-	// token store
-	fmt.Println(os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"))
-	fmt.Println(os.Getenv("REDIS_SERVER_PASS"))
-	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
-		Password: os.Getenv("REDIS_SERVER_PASS"),
-		DB: 15,
-	}))
+	if len(os.Getenv("REDIS_SERVER_PASS")) > 0 {
+		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+			Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			Password: os.Getenv("REDIS_SERVER_PASS"),
+			DB: 15,
+		}))
+	}else{
+		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+			Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			DB: 15,
+		}))
+	}
 
 	// create client store for admin dashboard. NB set env variables for ADMIN CLIENT before building
 	_ = clientStore.Create(clientstore.OauthClient{

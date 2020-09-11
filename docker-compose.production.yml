@@ -3,7 +3,7 @@ version: '3'
 services:
   ecommerceapi:
     container_name: ecormmerce-api
-    image: abdulmuhsin/ecormmerce_app:v1
+    image: abdulmuhsin/ecormmerce-api
     hostname: ecormmerce-api
     env_file: .env
     build:
@@ -14,21 +14,18 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
-      DB_HOST: ${DB_HOST_DOCKER}
+      DB_HOST: ${DB_HOST_PROD}
       ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
       ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
       ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
       JWT_SECRET: ${JWT_SECRET}
-      REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_DOCKER}
-      REDIS_SERVER_PASS: ${REDIS_SERVER_PASS}
-      REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_DOCKER}
+      REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_PROD}
+      REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_PROD}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       RESOURCE_ALLOWED_ORIGIN: ${RESOURCE_ALLOWED_ORIGIN}
     networks:
     - ecormmercenet
-    volumes:
-    - .:/go/src/ecormmerce-app/ecormmerce-rest-api
     ports:
     - 8081:8081
     labels:
@@ -36,7 +33,7 @@ services:
 
   authserver:
     container_name: auth-server
-    image: abdulmuhsin/auth-server:v1
+    image: abdulmuhsin/auth-server
     hostname: auth-server
     env_file: .env
     build: 
@@ -47,21 +44,18 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
-      DB_HOST: ${DB_HOST_DOCKER}
+      DB_HOST: ${DB_HOST_PROD}
       ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
       ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
       ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
       JWT_SECRET: ${JWT_SECRET}
-      REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_DOCKER}
-      REDIS_SERVER_PASS: ${REDIS_SERVER_PASS}
-      REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_DOCKER}
+      REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_PROD}
+      REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_PROD}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       AUTH_ALLOWED_ORIGIN: ${AUTH_ALLOWED_ORIGIN}
     networks:
     - ecormmercenet
-    volumes:
-    - .:/go/src/ecormmerce-app/ecormmerce-rest-api/auth-server
     ports:
     - 9096:9096
     labels:
@@ -69,7 +63,7 @@ services:
 
   adminclient:
     container_name: admin-client
-    image: abdulmuhsin/admin-client:v1
+    image: abdulmuhsin/admin-client
     hostname: admin-client
     env_file: admin-client/.env
     build: 
@@ -79,8 +73,6 @@ services:
       GET_HOSTS_FROM: dns
     networks:
     - ecormmercenet
-    volumes:
-    - .:/go/src/ecormmerce-app/ecormmerce-rest-api/admin-client
     ports:
     - 8080:80
 
