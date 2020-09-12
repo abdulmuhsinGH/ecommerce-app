@@ -5,27 +5,26 @@ services:
     container_name: ecormmerce-api
     image: abdulmuhsin/ecormmerce-api
     hostname: ecormmerce-api
-    env_file: .env
     build:
       context: ./ecormmerce-rest-api
       dockerfile: Dockerfile
     environment:
       GET_HOSTS_FROM: dns
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-      DB_HOST: ${DB_HOST_PROD}
-      ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
-      ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
-      ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
-      JWT_SECRET: ${JWT_SECRET}
-      REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_PROD}
-      REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_PROD}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      RESOURCE_ALLOWED_ORIGIN: ${RESOURCE_ALLOWED_ORIGIN}
-    networks:
-    - ecormmercenet
+      #DB_NAME: ${DB_NAME}
+      #DB_USER: ${DB_USER}
+      #DB_PASS: ${DB_PASS}
+      #DB_HOST: ${DB_HOST}
+      #ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
+      #ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
+      #ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
+      #JWT_SECRET: ${JWT_SECRET}
+      #REDIS_SERVER_HOST: ${REDIS_SERVER_HOST}
+      #REDIS_SERVER_PORT: ${REDIS_SERVER_PORT}
+      #GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      #GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      #RESOURCE_ALLOWED_ORIGIN: ${RESOURCE_ALLOWED_ORIGIN}
+  #  networks:
+  #  - ecormmercenet
     ports:
     - 8081:8081
     labels:
@@ -35,27 +34,26 @@ services:
     container_name: auth-server
     image: abdulmuhsin/auth-server
     hostname: auth-server
-    env_file: .env
     build: 
       context: ./auth-server
       dockerfile: Dockerfile
     environment:
       GET_HOSTS_FROM: dns 
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-      DB_HOST: ${DB_HOST_PROD}
-      ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
-      ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
-      ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
-      JWT_SECRET: ${JWT_SECRET}
-      REDIS_SERVER_HOST: ${REDIS_SERVER_HOST_PROD}
-      REDIS_SERVER_PORT: ${REDIS_SERVER_PORT_PROD}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      AUTH_ALLOWED_ORIGIN: ${AUTH_ALLOWED_ORIGIN}
-    networks:
-    - ecormmercenet
+      #DB_NAME: ${DB_NAME}
+      #DB_USER: ${DB_USER}
+      #DB_PASS: ${DB_PASS}
+      #DB_HOST: ${DB_HOST}
+      #ADMIN_CLIENT_ID: ${ADMIN_CLIENT_ID}
+      #ADMIN_CLIENT_SECRET: ${ADMIN_CLIENT_SECRET}
+      #ADMIN_CLIENT_DOMAIN: ${ADMIN_CLIENT_DOMAIN}
+      #JWT_SECRET: ${JWT_SECRET}
+      #REDIS_SERVER_HOST: ${REDIS_SERVER_HOST}
+      #REDIS_SERVER_PORT: ${REDIS_SERVER_PORT}
+      #GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      #GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      #AUTH_ALLOWED_ORIGIN: ${AUTH_ALLOWED_ORIGIN}
+  #  networks:
+  #  - ecormmercenet
     ports:
     - 9096:9096
     labels:
@@ -65,17 +63,26 @@ services:
     container_name: admin-client
     image: abdulmuhsin/admin-client
     hostname: admin-client
-    env_file: admin-client/.env
     build: 
       context: ./admin-client
       dockerfile: Dockerfile
     environment:
       GET_HOSTS_FROM: dns
-    networks:
-    - ecormmercenet
+      #VUE_APP_ClientID: ${VUE_APP_ClientID}
+      #VUE_APP_ClientSecret: ${VUE_APP_ClientSecret}
+      #VUE_APP_Scopes: ${VUE_APP_Scopes}
+      #VUE_APP_RedirectURL: ${VUE_APP_RedirectURL}
+      #VUE_APP_AUTH_URL: ${VUE_APP_AUTH_URL}
+      #VUE_APP_AuthURL: ${VUE_APP_AuthURL}
+      #VUE_APP_TokenURL: ${VUE_APP_TokenURL}
+      #VUE_APP_ECOMMERCE_API_URL: ${VUE_APP_ECOMMERCE_API_URL}
+  #  networks:
+  #  - ecormmercenet
     ports:
     - 8080:80
+    labels:
+      kompose.service.type: LoadBalancer
 
-networks:
-  ecormmercenet:
-    driver: bridge
+#networks:
+#  ecormmercenet:
+#    driver: bridge
