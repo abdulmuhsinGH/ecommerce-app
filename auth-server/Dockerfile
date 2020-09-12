@@ -26,6 +26,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifi
 COPY ./view/ /view/
 # RUN apk add --no-cache ca-certificates openssl
 
-EXPOSE 9096
+EXPOSE 8080
 
 ENTRYPOINT ["/auth-server"]

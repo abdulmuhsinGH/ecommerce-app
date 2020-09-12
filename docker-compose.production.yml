@@ -10,6 +10,7 @@ services:
       dockerfile: Dockerfile
     environment:
       GET_HOSTS_FROM: dns
+      PORT: 8080
       #DB_NAME: ${DB_NAME}
       #DB_USER: ${DB_USER}
       #DB_PASS: ${DB_PASS}
@@ -26,7 +27,7 @@ services:
   #  networks:
   #  - ecormmercenet
     ports:
-    - 8081:8081
+    - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
 
@@ -38,7 +39,8 @@ services:
       context: ./auth-server
       dockerfile: Dockerfile
     environment:
-      GET_HOSTS_FROM: dns 
+      GET_HOSTS_FROM: dns
+      PORT: 8080 
       #DB_NAME: ${DB_NAME}
       #DB_USER: ${DB_USER}
       #DB_PASS: ${DB_PASS}
@@ -55,7 +57,7 @@ services:
   #  networks:
   #  - ecormmercenet
     ports:
-    - 9096:9096
+    - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
 
@@ -79,7 +81,7 @@ services:
   #  networks:
   #  - ecormmercenet
     ports:
-    - 8080:80
+    - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
 

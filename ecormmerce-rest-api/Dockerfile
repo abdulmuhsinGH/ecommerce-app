@@ -21,5 +21,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build /ecormmerce-rest-api/cmd/ecom
 FROM scratch
 COPY --from=builder /ecormmerce-rest-api/main /ecormmerce-rest-api
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-EXPOSE 8081
+EXPOSE 8080
 ENTRYPOINT ["/ecormmerce-rest-api"]
