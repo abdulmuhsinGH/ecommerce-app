@@ -87,7 +87,7 @@ export default {
         window.location.href = 'dashboard';
       }).catch((err) => {
         // TODO: Log errors properly
-        console.log({ err });
+        // console.log({ err });
       });
     },
   },

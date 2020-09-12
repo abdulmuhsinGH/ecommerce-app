@@ -1,4 +1,5 @@
 package cors
+
 // SOURCE: https://github.com/heppu/simple-cors/blob/master/cors.go
 import (
 	"net/http"

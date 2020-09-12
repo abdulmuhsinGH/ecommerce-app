@@ -79,7 +79,7 @@ services:
   #  networks:
   #  - ecormmercenet
     ports:
-    - 8080:80
+    - 80:80
     labels:
       kompose.service.type: LoadBalancer
 

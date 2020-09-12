@@ -193,7 +193,7 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 	//authLogging.Printlog("request_body: ", string(body))
 	newUser := users.User{
 		Firstname: request.FormValue("firstname"),
-		Username: request.FormValue("username"),
+		Username:  request.FormValue("username"),
 		EmailWork: request.FormValue("username"),
 		Lastname:  request.FormValue("lastname"),
 		Gender:    request.FormValue("gender"),

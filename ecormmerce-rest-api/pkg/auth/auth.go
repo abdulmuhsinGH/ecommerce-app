@@ -22,17 +22,16 @@ func New() *server.Server {
 	fmt.Println(os.Getenv("REDIS_SERVER_PASS")) */
 	if len(os.Getenv("REDIS_SERVER_PASS")) > 0 {
 		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-			Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			Addr:     os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
 			Password: os.Getenv("REDIS_SERVER_PASS"),
-			DB: 15,
+			DB:       15,
 		}))
-	}else{
+	} else {
 		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
 			Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
-			DB: 15,
+			DB:   15,
 		}))
 	}
-	
 
 	return server.NewServer(server.NewConfig(), manager)
 

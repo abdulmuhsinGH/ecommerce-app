@@ -192,7 +192,6 @@ export default {
         });
         this.users = response.data.data;
       } catch (error) {
-        console.error({ error });
         eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
       }
     },
@@ -206,7 +205,6 @@ export default {
         });
         this.userRoles = response.data.data;
       } catch (error) {
-        console.error({ error });
       }
     },
     editItem(item) {
@@ -226,7 +224,7 @@ export default {
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
-        console.log({ error });
+        // console.log({ error });
         eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
       }
     },
@@ -250,7 +248,7 @@ export default {
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
-        console.log({ error });
+        // console.log({ error });
         eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
         this.close();
       }
