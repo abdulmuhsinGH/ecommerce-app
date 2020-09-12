@@ -5,22 +5,22 @@ steps:
   args: ['build', '-f', 'docker-compose.production.yml']
   # Tag admin-client container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/admin-client:latest', 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA']
+  args: ['tag', 'abdulmuhsin/admin-client:latest', 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT/$COMMIT_SHA']
   # Tag ecormmerce-api container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/ecormmerce-api:latest', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA']
+  args: ['tag', 'abdulmuhsin/ecormmerce-api:latest', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API/$COMMIT_SHA']
   # Tag auth-server container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/auth-server:latest', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA']
+  args: ['tag', 'abdulmuhsin/auth-server:latest', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER/$COMMIT_SHA']
   # Push the admin-client container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA']
+  args: ['push', 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT/$COMMIT_SHA']
   # Push the ecormmerce-api container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA']
+  args: ['push', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API/$COMMIT_SHA']
 # Push the auth-server container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA']
+  args: ['push', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER/$COMMIT_SHA']
   # Deploy admin-client container image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
@@ -29,7 +29,7 @@ steps:
   - 'deploy'
   - 'ADMIN-CLIENT'
   - '--image'
-  - 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA'
+  - 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT/$COMMIT_SHA'
   - '--region'
   - 'us-central1'
   - '--platform'
@@ -42,7 +42,7 @@ steps:
   - 'deploy'
   - 'ECOMMERCE-API'
   - '--image'
-  - 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA'
+  - 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API/$COMMIT_SHA'
   - '--region'
   - 'us-central1'
   - '--platform'
@@ -54,9 +54,9 @@ steps:
   - 'deploy'
   - 'AUTH-SERVER'
   - '--image'
-  - 'us.gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA'
+  - 'us.gcr.io/$PROJECT_ID/AUTH-SERVER/$COMMIT_SHA'
   - '--region'
   - 'us-central1'
   - '--platform'
   - 'managed'
-images: ['us.gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA']
+images: ['us.gcr.io/$PROJECT_ID/ADMIN-CLIENT/$COMMIT_SHA', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API/$COMMIT_SHA', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER/$COMMIT_SHA']
