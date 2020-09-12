@@ -2,7 +2,7 @@
 steps:
   # Build the container image
 - name: 'docker/compose:1.26.0'
-  args: ['build', '-f', 'docker-compose.production.yml']
+  args: ['-f', 'docker-compose.production.yml', 'build']
   # Tag admin-client container image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['tag', 'abdulmuhsin/admin-client:latest', 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
