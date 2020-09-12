@@ -27,7 +27,7 @@ steps:
   args:
   - 'run'
   - 'deploy'
-  - 'ADMIN-CLIENT'
+  - 'adminclient'
   - '--image'
   - 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA'
   - '--region'
@@ -40,7 +40,7 @@ steps:
   args:
   - 'run'
   - 'deploy'
-  - 'ECOMMERCE-API'
+  - 'ecormmerceapi'
   - '--image'
   - 'gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA'
   - '--region'
@@ -52,7 +52,7 @@ steps:
   args:
   - 'run'
   - 'deploy'
-  - 'AUTH-SERVER'
+  - 'authserver'
   - '--image'
   - 'gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA'
   - '--region'
