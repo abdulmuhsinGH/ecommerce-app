@@ -19,6 +19,7 @@ module.exports = {
     'no-unused-expressions': 'off',
     'no-restricted-globals': 'off',
     'no-param-reassign': 'off',
-    'no-empty': 'off'
+    'no-empty': 'off',
+    'no-multiple-empty-lines': 'off',
   },
 };
