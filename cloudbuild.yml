@@ -1,0 +1,68 @@
+# cloudbuild.yaml
+steps:
+  # Build the container image
+  - name: 'docker/compose:1.26.0'
+    args: ['build', '-f', 'docker-compose.production.yml']
+  # Tag admin-client container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['tag', 'abdulmuhsin/admin-client:latest', 'us.gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA']
+  # Push the admin-client container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA']
+  # Deploy admin-client container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+    - 'run'
+    - 'deploy'
+    - 'ADMIN-CLIENT'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+  images:
+    - 'gcr.io/$PROJECT_ID/ADMIN-CLIENT:$COMMIT_SHA'
+  # Tag ecormmerce-api container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['tag', 'abdulmuhsin/ecormmerce-api:latest', 'us.gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA']
+  # Push the ecormmerce-api container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA']
+  # Deploy ecormmerce-api container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+    - 'run'
+    - 'deploy'
+    - 'ECOMMERCE-API'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+  images:
+    - 'gcr.io/$PROJECT_ID/ECOMMERCE-API:$COMMIT_SHA'
+  # Tag auth-server container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['tag', 'abdulmuhsin/auth-server:latest', 'us.gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA']
+  # Push the auth-server container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA']
+  # Deploy auth-server container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+    - 'run'
+    - 'deploy'
+    - 'AUTH-SERVER'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+  images:
+    - 'gcr.io/$PROJECT_ID/AUTH-SERVER:$COMMIT_SHA'
