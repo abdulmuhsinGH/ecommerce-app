@@ -76,7 +76,7 @@ export default {
       // Set up metadata server request
       // See https://cloud.google.com/compute/docs/instances/verifying-instance-identity#request_signature
       const metadataServerTokenURL = 'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=';
-      return axios.get(metadataServerTokenURL + serviceURL, {
+      return fetch(metadataServerTokenURL + serviceURL, {
         headers: {
           'Metadata-Flavor': 'Google',
         },
