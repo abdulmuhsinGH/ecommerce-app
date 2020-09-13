@@ -3,6 +3,33 @@ steps:
   # Build the container image
 - name: 'docker/compose:1.26.0'
   args: ['-f', 'docker-compose.production.yml', 'build']
+  env:
+    - 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID'
+    - 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET'
+    - 'VUE_APP_Scopes=$_VUE_APP_SCOPES'
+    - 'VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL'
+    - 'VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL'
+    - 'VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL'
+    - 'VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL'
+    - 'VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL'
+    - 'DB_NAME=$_DB_NAME'
+    - 'DB_HOST=$_DB_HOST'
+    - 'DB_PASS=$_DB_PASS'
+    - 'DB_USER=$_DB_USER'
+    - 'DB_PORT=$_DB_PORT'
+    - 'JWT_SECRET=$_JWT_SECRET'
+    - 'SESSION_KEY=$_SESSION_KEY'
+    - 'STATE_HASH_KEY=$_STATE_HASH_KEY'
+    - 'GOOGLE_CLIENT_ID=$_GOOGLE_CLIENT_ID'
+    - 'GOOGLE_CLIENT_SECRET=$_GOOGLE_CLIENT_SECRET'
+    - 'GOOGLE_CLIENT_REDIRECT_URL=$_GOOGLE_CLIENT_REDIRECT_URL'
+    - 'ADMIN_CLIENT_ID=$_VUE_APP_CLIENT_ID'
+    - 'ADMIN_CLIENT_SECRET=$_VUE_APP_CLIENT_SECRET'
+    - 'ADMIN_CLIENT_DOMAIN=$_VUE_APP_REDIRECT_URL'
+    - 'AUTH_ALLOWED_ORIGIN=$_VUE_APP_REDIRECT_URL'
+    - 'REDIS_SERVER_HOST=$_REDIS_SERVER_HOST'
+    - 'REDIS_SERVER_PORT=$_REDIS_SERVER_PORT'
+    - 'RESOURCE_ALLOWED_ORIGIN=$_VUE_APP_REDIRECT_URL'
   # Tag admin-client container image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['tag', 'abdulmuhsin/admin-client:latest', 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
