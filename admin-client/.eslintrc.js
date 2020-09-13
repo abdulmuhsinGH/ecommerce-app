@@ -21,5 +21,6 @@ module.exports = {
     'no-param-reassign': 'off',
     'no-empty': 'off',
     'no-multiple-empty-lines': 'off',
+    'max-len': 'off',
   },
 };
