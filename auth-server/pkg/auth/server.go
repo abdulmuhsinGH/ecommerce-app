@@ -105,7 +105,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 
 	logging.Printlog("AuthServer", "Server is running at 9096 port.")
 
-	log.Fatal(http.ListenAndServe(":9096", cors.CORS(router)))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), cors.CORS(router)))
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
