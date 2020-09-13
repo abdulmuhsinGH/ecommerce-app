@@ -4,15 +4,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-ENV VUE_APP_ClientID 4
-ENV VUE_APP_ClientSecret c
-ENV VUE_APP_Scopes all
-ENV VUE_APP_RedirectURL http://127.0.0.1:8080
-ENV VUE_APP_AUTH_URL http://127.0.0.1:9096/
-ENV VUE_APP_AuthURL http://127.0.0.1:9096/auth/authorize
-ENV VUE_APP_TokenURL http://127.0.0.1:9096/auth/token
-ENV VUE_APP_ECOMMERCE_API_URL http://localhost:8081
-ENV TEST_ENV qwertyuy
+ENV VUE_APP_ClientID $VUE_APP_ClientID
+ENV VUE_APP_ClientSecret $VUE_APP_ClientSecret
+ENV VUE_APP_Scopes $VUE_APP_Scopes
+ENV VUE_APP_RedirectURL $VUE_APP_RedirectURL
+ENV VUE_APP_AUTH_URL $VUE_APP_AUTH_URL
+ENV VUE_APP_AuthURL $VUE_APP_AuthURL
+ENV VUE_APP_TokenURL $VUE_APP_TokenURL
+ENV VUE_APP_ECOMMERCE_API_URL $VUE_APP_ECOMMERCE_API_URL
+
 RUN npm run build
 
 # production stage
