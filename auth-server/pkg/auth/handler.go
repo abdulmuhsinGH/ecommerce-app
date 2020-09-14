@@ -177,9 +177,9 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	store.Set("LoggedInUserID", user.ID)
 	store.Save()
 
-	redirectURI := r.FormValue("redirect_uri")
-	clientID := r.FormValue("client_id")
-	authLogging.Printlog(redirectURI, clientID)
+	//redirectURI := r.FormValue("redirect_uri")
+	//clientID := r.FormValue("client_id")
+	//authLogging.Printlog(redirectURI, clientID)
 
 	w.Header().Set("Location", "/auth")
 	w.WriteHeader(http.StatusFound)

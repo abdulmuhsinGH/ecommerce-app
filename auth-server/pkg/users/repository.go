@@ -84,10 +84,8 @@ GetAllUsers returns all users from the user's table
 func (r *repository) FindUserByUsername(username string) *User {
 	user := new(User)
 
-	userRepositoryLogging.Printlog("pg_host", os.Getenv("DB_HOST"))
 	err := r.db.Model(user).Where("username = ?", username).Select()
 	if err != nil {
-		userRepositoryLogging.Printlog("pg_host", os.Getenv("DB_HOST"))
 		userRepositoryLogging.Printlog("FindUserByUsername_Error", err.Error())
 	}
 	return user
