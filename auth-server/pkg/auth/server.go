@@ -44,22 +44,29 @@ func Server(db *pg.DB, logging logging.Logging) {
 	manager = manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
-	// token store
-	fmt.Println(os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"))
-	fmt.Println(os.Getenv("REDIS_SERVER_PASS"))
-	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
-		Password: os.Getenv("REDIS_SERVER_PASS"),
-		DB: 15,
-	}))
+	if len(os.Getenv("REDIS_SERVER_PASS")) > 0 {
+		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+			Addr:     os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			Password: os.Getenv("REDIS_SERVER_PASS"),
+			DB:       15,
+		}))
+	} else {
+		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+			Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			DB:   15,
+		}))
+	}
 
 	// create client store for admin dashboard. NB set env variables for ADMIN CLIENT before building
-	_ = clientStore.Create(clientstore.OauthClient{
+	err := clientStore.Create(clientstore.OauthClient{
 		ID:     os.Getenv("ADMIN_CLIENT_ID"),
 		Secret: os.Getenv("ADMIN_CLIENT_SECRET"),
 		Domain: os.Getenv("ADMIN_CLIENT_DOMAIN"),
 		Data:   nil,
 	})
+	if err != nil {
+		logging.Printlog("Error Creating admin client", err.Error())
+	}
 
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("JWT_SECRET")), jwt.SigningMethodHS512))
 
@@ -101,7 +108,7 @@ func Server(db *pg.DB, logging logging.Logging) {
 
 	logging.Printlog("AuthServer", "Server is running at 9096 port.")
 
-	log.Fatal(http.ListenAndServe(":9096", cors.CORS(router)))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), cors.CORS(router)))
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {

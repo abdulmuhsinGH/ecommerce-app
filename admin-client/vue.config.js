@@ -2,12 +2,12 @@ module.exports = {
   transpileDependencies: [
     'vuetify',
   ],
-  chainWebpack: config => {
+  chainWebpack: (config) => {
     config
-        .plugin('html')
-        .tap(args => {
-            args[0].title = 'Ankara Admin';
-            return args;
-        })
-}
+      .plugin('html')
+      .tap((args) => {
+        args[0].title = 'Ankara Admin';
+        return args;
+      });
+  },
 };

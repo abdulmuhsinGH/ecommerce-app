@@ -220,15 +220,15 @@ func TestUpdateUser(t *testing.T) {
 
 	teardownTestCase := setupTestCase(t, dbTest)
 	defer teardownTestCase(t)
-	
+
 	userRepositoryTest = NewRepository(dbTest)
 	u := User{}
 	err = dbTest.Model(&u).
 		Where("gender = ?", "male").
-    Limit(1).
-    Select()
+		Limit(1).
+		Select()
 	if err != nil {
-		t.Errorf("Test Failed; Error getting user to update: "+ err.Error())
+		t.Errorf("Test Failed; Error getting user to update: " + err.Error())
 	}
 
 	u.Firstname = "New Name"

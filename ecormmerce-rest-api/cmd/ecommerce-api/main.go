@@ -30,7 +30,7 @@ func main() {
 		DbPort     = os.Getenv("DB_PORT")
 		DbName     = os.Getenv("DB_NAME")
 	)
-
+	logging.Printlog("DBUSER", os.Getenv("DB_USER"))
 	dbInfo := pg.Options{
 		Addr:     DbHost + ":" + DbPort,
 		User:     DbUser,

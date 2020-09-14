@@ -193,7 +193,7 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 	//authLogging.Printlog("request_body: ", string(body))
 	newUser := users.User{
 		Firstname: request.FormValue("firstname"),
-		Username: request.FormValue("username"),
+		Username:  request.FormValue("username"),
 		EmailWork: request.FormValue("username"),
 		Lastname:  request.FormValue("lastname"),
 		Gender:    request.FormValue("gender"),
@@ -286,7 +286,7 @@ func NewHandlers(logging logging.Logging, db *pg.DB, authServer *server.Server, 
 	authService = service
 	authLogging = logging
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://127.0.0.1:9096/auth/google/callback",
+		RedirectURL:  os.Getenv("GOOGLE_CLIENT_REDIRECT_URL"),
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "profile"},

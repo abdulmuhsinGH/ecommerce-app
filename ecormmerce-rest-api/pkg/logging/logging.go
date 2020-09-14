@@ -37,7 +37,7 @@ Httplog handles how long it takes for a request to process
 func (l logging) Httplog(next http.HandlerFunc) http.HandlerFunc {
 	return func(response http.ResponseWriter, request *http.Request) {
 		startTime := time.Now()
-		defer l.logger.Printf("%s request processed in %s\n", request.URL.Path,time.Now().Sub(startTime))
+		defer l.logger.Printf("%s request processed in %s\n", request.URL.Path, time.Now().Sub(startTime))
 		next(response, request)
 	}
 }
@@ -49,9 +49,9 @@ func (l logging) Printlog(logType string, logMessage string) {
 	l.logger.Printf("%s : %s\n", logType, logMessage)
 }
 
-/* 
+/*
 PrintFatal prints a message and exits
 */
 func (l logging) PrintFatal(logMessage string, err error) {
-	l.logger.Fatalf("%v: %v", logMessage,err)
+	l.logger.Fatalf("%v: %v", logMessage, err)
 }

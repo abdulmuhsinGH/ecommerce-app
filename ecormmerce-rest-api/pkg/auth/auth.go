@@ -20,12 +20,18 @@ func New() *server.Server {
 	manager = manage.NewDefaultManager()
 	/* fmt.Println(os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"))
 	fmt.Println(os.Getenv("REDIS_SERVER_PASS")) */
-
-	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
-		Password: os.Getenv("REDIS_SERVER_PASS"),
-		DB: 15,
-	}))
+	if len(os.Getenv("REDIS_SERVER_PASS")) > 0 {
+		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+			Addr:     os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			Password: os.Getenv("REDIS_SERVER_PASS"),
+			DB:       15,
+		}))
+	} else {
+		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+			Addr: os.Getenv("REDIS_SERVER_HOST") + ":" + os.Getenv("REDIS_SERVER_PORT"),
+			DB:   15,
+		}))
+	}
 
 	return server.NewServer(server.NewConfig(), manager)
 
