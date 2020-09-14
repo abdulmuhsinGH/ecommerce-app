@@ -49,7 +49,6 @@ export default {
     ],
   }),
   async mounted() {
-    console.log({ env: process.env });
     if (process.env.NODE_ENV === 'production') {
       const authserviceToken = await this.authorizeServiceURL(process.env.VUE_APP_AUTH_URL);
       this.headers = {

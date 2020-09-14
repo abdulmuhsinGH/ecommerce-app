@@ -58,12 +58,15 @@ func Server(db *pg.DB, logging logging.Logging) {
 	}
 
 	// create client store for admin dashboard. NB set env variables for ADMIN CLIENT before building
-	_ = clientStore.Create(clientstore.OauthClient{
+	err := clientStore.Create(clientstore.OauthClient{
 		ID:     os.Getenv("ADMIN_CLIENT_ID"),
 		Secret: os.Getenv("ADMIN_CLIENT_SECRET"),
 		Domain: os.Getenv("ADMIN_CLIENT_DOMAIN"),
 		Data:   nil,
 	})
+	if err != nil {
+		logging.Printlog("Error Creating admin client", err.Error())
+	}
 
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate([]byte(os.Getenv("JWT_SECRET")), jwt.SigningMethodHS512))
 
