@@ -37,6 +37,7 @@ AddUser saves user to the user's table
 */
 func (r *repository) AddUser(user *User) bool {
 	setDefaultUserRole(r, user)
+	userRepositoryLogging.Printlog("user new role", user.Role.String())
 	err := r.db.Insert(user)
 	if err != nil {
 		userRepositoryLogging.Printlog("AddUser_Error", err.Error())
@@ -47,9 +48,12 @@ func (r *repository) AddUser(user *User) bool {
 }
 
 func setDefaultUserRole(r *repository, user *User) {
+	userRepositoryLogging.Printlog("User viewer role id", user.Role.String())
 	if len(user.Role.String()) == 0 {
 		role := (*repository).FindUserRoleByName(r, "viewer")
+		userRepositoryLogging.Printlog("User viewer role", role.RoleName)
 		user.Role = role.ID
+		userRepositoryLogging.Printlog("user new role", user.Role.String())
 	}
 
 }
@@ -59,6 +63,7 @@ FindOrAddUser finds user or saves user if not found to the user's table
 */
 func (r *repository) FindOrAddUser(user *User) (*User, error) {
 	setDefaultUserRole(r, user)
+	userRepositoryLogging.Printlog("user new role", user.Role.String())
 	_, err := r.db.Model(user).
 		Column("id").
 		Where("email_work = ?email_work").

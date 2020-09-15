@@ -54,7 +54,6 @@ func NewAuthService(r users.Repository, c *clientstore.ClientStore) Service {
 GenerateState genearate a state for verifying request to prevent CSRF
 */
 func (s *service) GenerateState(w http.ResponseWriter) string {
-	fmt.Println("sa:", os.Getenv("SESSION_KEY"), os.Getenv("STATE_HASH_KEY"))
 	var expiration = time.Now().Add(365 * 24 * time.Hour)
 	SecuredCookie = securecookie.New([]byte(os.Getenv("SESSION_KEY")), []byte(os.Getenv("STATE_HASH_KEY")))
 
