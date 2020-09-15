@@ -124,7 +124,7 @@ func googleUserInfoToUserStruct(userInfo googleUserInfo) users.User {
 	user.Username = strings.Split(userInfo.Email, "@")[0]
 	user.Password = userInfo.ID
 	user.Gender = "_"
-	user.Role = 1 //TODO find a way to assing a role. for users and customers. This is temporal
+	//user.Role = 1 //TODO find a way to assing a role. for users and customers. This is temporal
 	user.Status = userInfo.VerifiedEmail
 
 	return user

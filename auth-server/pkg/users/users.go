@@ -21,7 +21,7 @@ type User struct {
 	EmailPersonal string    `json:"email_personal"`
 	PhonePersonal string    `json:"phone_personal"`
 	Gender        string    `json:"gender"`
-	Role          int       `json:"role"`
+	Role          uuid.UUID `json:"role"`
 	Status        bool      `json:"status"`
 	LastLogin     time.Time `json:"last_login"`
 	UpdatedBy     string    `json:"updated_by"`
@@ -31,9 +31,9 @@ type User struct {
 UserRole defines the properties of roles a user can have
 */
 type UserRole struct {
-	ID          int    `pg:"type:integer;primary_key;" json:"id"`
-	RoleName    string `json:"role_name"`
-	Description string `json:"description"`
-	Comment     string `json:"comment"`
-	UpdatedBy   string `json:"updated_by"`
+	ID          uuid.UUID `pg:"type:integer;primary_key;" json:"id"`
+	RoleName    string    `json:"role_name"`
+	Description string    `json:"description"`
+	Comment     string    `json:"comment"`
+	UpdatedBy   string    `json:"updated_by"`
 }

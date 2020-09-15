@@ -2,7 +2,6 @@ package users
 
 import (
 	"ecormmerce-app/auth-server/pkg/logging"
-	"os"
 
 	"github.com/go-pg/pg/v9"
 )
@@ -15,6 +14,7 @@ type Repository interface {
 	GetAllUsers() ([]User, error)
 	FindUserByUsername(string) *User
 	FindOrAddUser(*User) (*User, error)
+	FindUserRoleByName(string) *UserRole
 }
 
 type repository struct {
@@ -36,6 +36,7 @@ func NewRepository(db *pg.DB) Repository {
 AddUser saves user to the user's table
 */
 func (r *repository) AddUser(user *User) bool {
+	setDefaultUserRole(r, user)
 	err := r.db.Insert(user)
 	if err != nil {
 		userRepositoryLogging.Printlog("AddUser_Error", err.Error())
@@ -45,11 +46,19 @@ func (r *repository) AddUser(user *User) bool {
 
 }
 
+func setDefaultUserRole(r *repository, user *User) {
+	if len(user.Role.String()) == 0 {
+		role := (*repository).FindUserRoleByName(r, "viewer")
+		user.Role = role.ID
+	}
+
+}
+
 /*
 FindOrAddUser finds user or saves user if not found to the user's table
 */
 func (r *repository) FindOrAddUser(user *User) (*User, error) {
-
+	setDefaultUserRole(r, user)
 	_, err := r.db.Model(user).
 		Column("id").
 		Where("email_work = ?email_work").
@@ -79,7 +88,7 @@ func (r *repository) GetAllUsers() ([]User, error) {
 }
 
 /*
-GetAllUsers returns all users from the user's table
+FindUserByUsername returns all users from the user's table
 */
 func (r *repository) FindUserByUsername(username string) *User {
 	user := new(User)
@@ -89,4 +98,17 @@ func (r *repository) FindUserByUsername(username string) *User {
 		userRepositoryLogging.Printlog("FindUserByUsername_Error", err.Error())
 	}
 	return user
+}
+
+/*
+FindUserRoleByName returns all users from the user's table
+*/
+func (r *repository) FindUserRoleByName(role string) *UserRole {
+	userRole := new(UserRole)
+
+	err := r.db.Model(userRole).Where("role_name = ?", role).Select()
+	if err != nil {
+		userRepositoryLogging.Printlog("FindUserRoleByRoleName_Error", err.Error())
+	}
+	return userRole
 }

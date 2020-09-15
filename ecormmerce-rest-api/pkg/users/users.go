@@ -21,7 +21,7 @@ type User struct {
 	EmailPersonal string    `json:"email_personal"`
 	PhonePersonal string    `json:"phone_personal"`
 	Gender        string    `json:"gender"`
-	Role          int       `json:"role"`
+	Role          uuid.UUID `json:"role"`
 	Status        bool      `json:"status"`
 	LastLogin     time.Time `json:"last_login"`
 	UpdatedBy     string    `json:"updated_by"`

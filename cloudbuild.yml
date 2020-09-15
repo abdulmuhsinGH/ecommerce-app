@@ -3,14 +3,14 @@ steps:
   # Build the container image
 - name: 'docker/compose:1.26.0'
   args: ['-f', 'docker-compose.production.yml', 'build', 
-      '--build-arg', 'VUE_APP_ClientID_ARG=$_VUE_APP_CLIENT_ID', 
-      '--build-arg', 'VUE_APP_ClientSecret_ARG=$_VUE_APP_CLIENT_SECRET', 
-      '--build-arg', 'VUE_APP_Scopes_ARG=$_VUE_APP_SCOPES', 
-      '--build-arg', 'VUE_APP_RedirectURL_ARG=$_VUE_APP_REDIRECT_URL', 
-      '--build-arg', 'VUE_APP_AUTH_URL_ARG=$_VUE_APP_AUTH_URL', 
-      '--build-arg', 'VUE_APP_AuthURL_ARG=$_VUE_APP_AUTHORIZE_URL', 
-      '--build-arg', 'VUE_APP_TokenURL_ARG=$_VUE_APP_TOKEN_URL', 
-      '--build-arg', 'VUE_APP_ECOMMERCE_API_URL_ARG=$_VUE_APP_ECOMMERCE_API_URL']
+      '--build-arg', 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID', 
+      '--build-arg', 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET', 
+      '--build-arg', 'VUE_APP_Scopes=$_VUE_APP_SCOPES', 
+      '--build-arg', 'VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL', 
+      '--build-arg', 'VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL', 
+      '--build-arg', 'VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL', 
+      '--build-arg', 'VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL', 
+      '--build-arg', 'VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL']
   env:
     - 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID'
     - 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET'
