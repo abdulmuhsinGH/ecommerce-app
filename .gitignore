@@ -31,3 +31,4 @@ redis.conf
 
 postgres-data/
 redis-data/
+migration/migrate_cli
