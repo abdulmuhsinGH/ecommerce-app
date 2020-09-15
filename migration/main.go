@@ -54,7 +54,8 @@ func main() {
 			fmt.Print(usageText)
 			exitf(err.Error())
 		} else {
-			fmt.Printf("Files Created")
+			//fmt.Printf("Files Created")
+			exitf("Files Created")
 		}
 	} else {
 		//migrations.
