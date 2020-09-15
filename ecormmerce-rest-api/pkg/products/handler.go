@@ -61,7 +61,7 @@ func (h *Handlers) handleAddProduct(response http.ResponseWriter, request *http.
 HandleUpdateProduct gets data from http request and sends to
 */
 func (h *Handlers) handleUpdateProduct(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("add new products")
+	fmt.Println("Update products")
 	product := Product{}
 
 	err := json.NewDecoder(request.Body).Decode(&product)

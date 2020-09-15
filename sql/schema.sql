@@ -176,7 +176,7 @@ create TABLE IF NOT EXISTS products(
 	name text not null,
 	category int not null,
 	brand int not null REFERENCES product_brands(id),
-	cost numeric not null,
+	-- cost numeric not null,
 	description text not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_by VARCHAR(100),
@@ -236,3 +236,61 @@ CREATE TABLE IF NOT EXISTS oauth_clients (
   data   JSONB NULL,
   CONSTRAINT oauth_clients_pkey PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS variants (
+  id     TEXT  NOT NULL PRIMARY KEY,	
+  variant_name   text 	not null  ,
+  vaiant_desc desc not null,
+  
+);
+
+create table if not exists variant_value(
+	id text not null PRIMARY KEY,
+	variant_id text  not null REFERENCES variants(id),
+	variant_name text not null,
+)
+
+create table if not exists product_variant(
+	id text not null PRIMARY KEY,
+	product_id text not null REFERENCES products(id),
+	sku text not null,
+	product_variant_name text not null,
+)
+
+create table if not exists  product_details(
+	id text not null PRIMARY KEY,
+	product_id text not null REFERENCES products(id),
+	product_variant_id text not null REFERENCES product_variant(id),
+	quantity_remaining int not null,
+	product_status text not null,
+	brand_id text not null REFERENCES product_brands(id),
+	created_at CURRENT_TIMESTAMP not null,
+)
+
+create table if not exists inventory_levels(
+	id int not null PRIMARY KEY,
+	product_detail_id text not null REFERENCES product_details(id),
+	reorder_level int not null,
+	maximum_level int not null,
+	danger_level int not null,
+	quantity int not null,
+)
+
+
+create table if not exists inventory_log(
+	id text not null PRIMARY KEY,
+	product_detail_id text not null REFERENCES product_details(id),
+	inventory_status text not null,
+	quantity int not null,
+)
+
+create table if not exists batch(
+	id text not null PRIMARY KEY,
+	product_id text not null REFERENCES products(id),
+	product_variant_id not null REFERENCES product_variant(id),
+	brand_id int not null REFERENCES product_brands(id),
+	quantity int not null,
+	cost_price numeric not null,
+	created_at CURRENT_TIMESTAMP not null,
+	batch_status text not null,
+)

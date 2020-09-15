@@ -2,6 +2,7 @@ package main
 
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/brands"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/products"
 	server "ecormmerce-app/ecormmerce-rest-api/pkg/server"
@@ -52,6 +53,9 @@ func main() {
 
 	p := products.NewHandlers(logging, db, authServer)
 	p.SetupRoutes(router)
+
+	b := brands.NewHandlers(logging, db, authServer)
+	b.SetupRoutes(router)
 
 	srv := server.New(router, ":"+os.Getenv("PORT"))
 
