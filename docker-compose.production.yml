@@ -68,7 +68,6 @@ services:
     container_name: admin-client
     image: abdulmuhsin/admin-client
     hostname: admin-client
-    env_file: ./admin-client/.env
     build: 
       context: ./admin-client
       dockerfile: Dockerfile
