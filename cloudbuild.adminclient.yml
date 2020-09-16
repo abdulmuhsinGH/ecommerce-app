@@ -1,0 +1,44 @@
+#cloudbuild.yaml
+steps:
+  # Build the container image
+- name: 'docker/compose:1.26.0'
+  args: ['-f', 'docker-compose.production.yml', 'build', 
+      '--build-arg', 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID', 
+      '--build-arg', 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET', 
+      '--build-arg', 'VUE_APP_Scopes=$_VUE_APP_SCOPES', 
+      '--build-arg', 'VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL', 
+      '--build-arg', 'VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL', 
+      '--build-arg', 'VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL', 
+      '--build-arg', 'VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL', 
+      '--build-arg', 'VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL', 'adminclient']
+  env:
+    - 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID'
+    - 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET'
+    - 'VUE_APP_Scopes=$_VUE_APP_SCOPES'
+    - 'VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL'
+    - 'VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL'
+    - 'VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL'
+    - 'VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL'
+    - 'VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL'
+  # Tag admin-client container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['tag', 'abdulmuhsin/admin-client:latest', 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
+  # Push the admin-client container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
+  # Push the ecormmerce-api container image to Container Registry
+  # Deploy admin-client container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+  - 'run'
+  - 'deploy'
+  - 'adminclient'
+  - '--image'
+  - 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA'
+  - '--region'
+  - 'us-central1'
+  - '--platform'
+  - 'managed'
+  # Deploy ecormmerce-api container image to Cloud Run
+images: ['gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
