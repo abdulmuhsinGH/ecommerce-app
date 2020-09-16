@@ -8,6 +8,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/go-pg/pg/v9"
+	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
 	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
@@ -136,8 +137,12 @@ func validateToken(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := authServer.ValidationBearerToken(r)
 		if err != nil {
+			userHandlerLogging.Printlog("token error", err.Error())
+			if err == errors.ErrInvalidAccessToken {
+				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+			}
 			format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			//http.Error(w, err.Error(), http.StatusBadRequest)
+			
 			return
 		}
 		next(w, r)

@@ -46,7 +46,8 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 	oauthState, err := r.Cookie("oauth-state")
 	if err != nil {
 		authLogging.Printlog("getting_cookie_err", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		
+		http.Error(w, "<a href='/auth/login'>Go To Login Page</a> "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -55,13 +56,13 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 	err = SecuredCookie.Decode("oauth-state", oauthState.Value, &decodedState)
 	if err != nil {
 		authLogging.Printlog("cookie err", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "<a href='/auth/login'>Go To Login Page</a> "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	store, err := session.Start(nil, w, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "<a href='/auth/login'>Go To Login Page</a> "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -105,6 +106,7 @@ func (h *Handlers) handleToken(response http.ResponseWriter, request *http.Reque
 	err := srv.HandleTokenRequest(response, request)
 	if err != nil {
 		authLogging.Printlog("handle_token_Error: %s\n", err.Error())
+
 		http.Error(response, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -154,7 +156,8 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 	err = srv.HandleAuthorizeRequest(response, request)
 	if err != nil {
 		authLogging.Printlog("HandleAuthorizeRequestError:", err.Error())
-		format.Send(response, 500, format.Message(false, "Error handling authorization", nil))
+		//format.Send(response, 500, format.Message(false, "Error handling authorization", nil))
+		http.Redirect(response, request, os.Getenv("ADMIN_CLIENT_DOMAIN"), http.StatusInternalServerError)
 	}
 }
 
@@ -171,7 +174,8 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	user, err := authService.Login(r.FormValue("username"), r.FormValue("password"))
 	if err != nil {
 		authLogging.Printlog("Error: %v", err.Error())
-		format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+		//format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+		http.Redirect(w, r, os.Getenv("ADMIN_CLIENT_DOMAIN"), http.StatusInternalServerError)
 		return
 	}
 	store.Set("LoggedInUserID", user.ID)
@@ -203,12 +207,14 @@ func (h *Handlers) handlePostSignUp(response http.ResponseWriter, request *http.
 	err := authService.SignUp(newUser)
 	if err != nil {
 		authLogging.Printlog("Error: %v", err.Error())
-		format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+		//format.Send(response, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+		http.Redirect(response, request, "/auth/signup", http.StatusInternalServerError)
 		return
 	}
 
 	response.Header().Set("Location", "/auth/login")
-	format.Send(response, http.StatusCreated, format.Message(true, "User Created", nil))
+	//format.Send(response, http.StatusCreated, format.Message(true, "User Created", nil))
+	http.Redirect(response, request, "/auth/login", http.StatusOK)
 }
 
 func (h *Handlers) handleAddClient(response http.ResponseWriter, request *http.Request) {
@@ -219,6 +225,7 @@ func (h *Handlers) handleAddClient(response http.ResponseWriter, request *http.R
 	if err != nil {
 		authLogging.Printlog("Error while decoding request body: %v", err.Error())
 		format.Send(response, 500, format.Message(false, "Error while decoding request body", nil))
+		//http.Redirect(response, request, "/auth/signup", http.StatusInternalServerError)
 		return
 	}
 	err = authService.AddOuathClient(oauthClient)
