@@ -7,6 +7,7 @@
 <script>
 import axios from 'axios';
 
+axios.defaults.headers.common['Content-Type'] = 'application/json; charset=UTF-8';
 export default {
   name: 'App',
   components: {
@@ -14,7 +15,6 @@ export default {
   data: () => ({
     dialog: false,
     drawer: null,
-    headers: {},
     items: [
       { icon: 'mdi-contacts', text: 'Contacts' },
       { icon: 'mdi-history', text: 'Frequently contacted' },
@@ -48,11 +48,6 @@ export default {
       { icon: 'mdi-keyboard', text: 'Go to the old version' },
     ],
   }),
-  async mounted() {
-    this.headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
-    };
-  },
   watch: {
     '$route.query.code': {
       async handler(code) {
@@ -74,7 +69,6 @@ export default {
         grant_type: 'authorization_code',
       },
       {
-        headers: vm.headers,
         params: {
           client_id: `${process.env.VUE_APP_ClientID}`,
           client_secret: `${process.env.VUE_APP_ClientSecret}`,
