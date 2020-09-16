@@ -140,9 +140,10 @@ func validateToken(next http.HandlerFunc) http.HandlerFunc {
 			userHandlerLogging.Printlog("token error", err.Error())
 			if err == errors.ErrInvalidAccessToken {
 				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+			} else {
+				format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
 			}
-			format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			
+
 			return
 		}
 		next(w, r)
