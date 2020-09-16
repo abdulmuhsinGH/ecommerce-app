@@ -33,9 +33,9 @@ type User struct {
 UserRole defines the properties of roles a user can have
 */
 type UserRole struct {
-	ID          int    `pg:"type:integer;primary_key;" json:"id"`
-	RoleName    string `json:"role_name"`
-	Description string `json:"description"`
-	Comment     string `json:"comment"`
-	UpdatedBy   string `json:"updated_by"`
+	ID          uuid.UUID `json:"id"`
+	RoleName    string    `json:"role_name"`
+	Description string    `json:"description"`
+	Comment     string    `json:"comment"`
+	UpdatedBy   string    `json:"updated_by"`
 }
