@@ -7,6 +7,7 @@
 <script>
 import axios from 'axios';
 
+axios.defaults.headers.common['Content-Type'] = 'application/json; charset=UTF-8';
 export default {
   name: 'App',
   components: {
@@ -14,7 +15,6 @@ export default {
   data: () => ({
     dialog: false,
     drawer: null,
-    headers: {},
     items: [
       { icon: 'mdi-contacts', text: 'Contacts' },
       { icon: 'mdi-history', text: 'Frequently contacted' },
@@ -48,19 +48,6 @@ export default {
       { icon: 'mdi-keyboard', text: 'Go to the old version' },
     ],
   }),
-  async mounted() {
-    if (process.env.NODE_ENV === 'production') {
-      const authserviceToken = await this.authorizeServiceURL(process.env.VUE_APP_AUTH_URL);
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        Authorization: `Bearer ${authserviceToken}`,
-      };
-    } else {
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-      };
-    }
-  },
   watch: {
     '$route.query.code': {
       async handler(code) {
@@ -71,17 +58,6 @@ export default {
     },
   },
   methods: {
-    async authorizeServiceURL(serviceURL) {
-      const vm = this;
-      // Set up metadata server request
-      // See https://cloud.google.com/compute/docs/instances/verifying-instance-identity#request_signature
-      const metadataServerTokenURL = 'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=';
-      return fetch(metadataServerTokenURL + serviceURL, {
-        headers: {
-          'Metadata-Flavor': 'Google',
-        },
-      });
-    },
     async requestToken(code) {
       const vm = this;
       axios.post(process.env.VUE_APP_TokenURL, {
@@ -93,7 +69,6 @@ export default {
         grant_type: 'authorization_code',
       },
       {
-        headers: vm.headers,
         params: {
           client_id: `${process.env.VUE_APP_ClientID}`,
           client_secret: `${process.env.VUE_APP_ClientSecret}`,

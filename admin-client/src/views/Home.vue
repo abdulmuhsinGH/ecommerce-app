@@ -1,9 +1,9 @@
 <template>
   <div class="home">
     <admin-drawer></admin-drawer>
-    <v-content>
+    <v-main>
       <router-view></router-view>
-    </v-content>
+    </v-main>
   </div>
 </template>
 

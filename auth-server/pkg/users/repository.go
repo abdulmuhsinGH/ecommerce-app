@@ -49,7 +49,7 @@ func (r *repository) AddUser(user *User) bool {
 
 func setDefaultUserRole(r *repository, user *User) {
 	userRepositoryLogging.Printlog("User viewer role id", user.Role.String())
-	if len(user.Role.String()) == 0 {
+	if user.Role.String() == "00000000-0000-0000-0000-000000000000" {
 		role := (*repository).FindUserRoleByName(r, "viewer")
 		userRepositoryLogging.Printlog("User viewer role", role.RoleName)
 		user.Role = role.ID

@@ -162,7 +162,6 @@ export default {
       gender: '',
       status: true,
     },
-    header: {},
   }),
 
   computed: {
@@ -179,17 +178,6 @@ export default {
     },
   },
   async mounted() {
-    if (process.env.NODE_ENV === 'production') {
-      const authserviceToken = await this.authorizeServiceURL(process.env.VUE_APP_ECOMMERCE_API_URL);
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        Authorization: `Bearer ${authserviceToken}`,
-      };
-    } else {
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-      };
-    }
     this.getAllUsers();
     this.getAllUserRoles();
   },
@@ -210,7 +198,6 @@ export default {
         const token = JSON.parse(window.atob(this.$store.getters.getToken));
         const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/users`,
           {
-            headers: this.headers,
             params: {
               access_token: token.access_token,
             },
@@ -224,7 +211,6 @@ export default {
       try {
         const token = JSON.parse(window.atob(this.$store.getters.getToken));
         const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/users/roles`, {
-          headers: this.headers,
           params: {
             access_token: token.access_token,
           },
@@ -245,7 +231,7 @@ export default {
         // eslint-disable-next-line
         const status = window.confirm('Are you sure you want to delete this item?');
         if (status) {
-          responseData = await this.deleteItem('api/users/', this.users[index].id, this.headers);
+          responseData = await this.deleteItem('api/users/', this.users[index].id);
           this.users.splice(index, 1);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
@@ -265,10 +251,10 @@ export default {
       try {
         let responseData;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/users', this.editedItem, this.headers);
+          responseData = await this.updateItem('api/users', this.editedItem);
           Object.assign(this.users[this.editedIndex], this.editedItem);
         } else {
-          responseData = await this.createItem('api/users/new', this.editedItem, this.headers);
+          responseData = await this.createItem('api/users/new', this.editedItem);
           this.users.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
