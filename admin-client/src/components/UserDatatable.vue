@@ -179,17 +179,9 @@ export default {
     },
   },
   async mounted() {
-    if (process.env.NODE_ENV === 'production') {
-      const authserviceToken = await this.authorizeServiceURL(process.env.VUE_APP_ECOMMERCE_API_URL);
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        Authorization: `Bearer ${authserviceToken}`,
-      };
-    } else {
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-      };
-    }
+    this.headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
     this.getAllUsers();
     this.getAllUserRoles();
   },

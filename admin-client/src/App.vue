@@ -49,17 +49,9 @@ export default {
     ],
   }),
   async mounted() {
-    if (process.env.NODE_ENV === 'production') {
-      const authserviceToken = await this.authorizeServiceURL(process.env.VUE_APP_AUTH_URL);
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        Authorization: `Bearer ${authserviceToken}`,
-      };
-    } else {
-      this.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-      };
-    }
+    this.headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
   },
   watch: {
     '$route.query.code': {
@@ -71,17 +63,6 @@ export default {
     },
   },
   methods: {
-    async authorizeServiceURL(serviceURL) {
-      const vm = this;
-      // Set up metadata server request
-      // See https://cloud.google.com/compute/docs/instances/verifying-instance-identity#request_signature
-      const metadataServerTokenURL = 'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=';
-      return fetch(metadataServerTokenURL + serviceURL, {
-        headers: {
-          'Metadata-Flavor': 'Google',
-        },
-      });
-    },
     async requestToken(code) {
       const vm = this;
       axios.post(process.env.VUE_APP_TokenURL, {
