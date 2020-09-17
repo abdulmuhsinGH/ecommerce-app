@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"time"
 	"ecormmerce-app/auth-server/pkg/clientstore"
 	"ecormmerce-app/auth-server/pkg/cors"
 	"ecormmerce-app/auth-server/pkg/logging"
@@ -42,7 +43,13 @@ func Server(db *pg.DB, logging logging.Logging) {
 	authService = NewAuthService(userRepository, clientStore)
 
 	manager = manage.NewDefaultManager()
-	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
+	
+	tokenConfig:=&manage.Config{
+		AccessTokenExp: time.Hour * 24,
+		RefreshTokenExp: time.Hour * 24 * 3,
+		IsGenerateRefresh: true,
+	}
+	manager.SetAuthorizeCodeTokenCfg(tokenConfig)
 
 	if len(os.Getenv("REDIS_SERVER_PASS")) > 0 {
 		manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{

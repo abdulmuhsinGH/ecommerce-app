@@ -17,7 +17,8 @@ const getters = {
   },
   isProfileLoaded: (state) => !!state.profile && !!state.profile.name,
   isAuthenticated: (state) => (!!state.token && !!state.token.length > 0),
-  isAdmin: (state) => (state.profile.user_type === 'admin'),
+  isAdmin: (state) => (state.profile.user_role === 'administrator'),
+  canEdit: (state) => (state.profile.user_role === 'administrator' || state.profile.user_role === 'editor'),
   authStatus: (state) => state.status,
   getHeaders: (state) => state.headers,
   getToken(state) {

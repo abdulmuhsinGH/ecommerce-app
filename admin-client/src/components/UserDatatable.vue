@@ -87,7 +87,7 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+        <v-icon small class="mr-2" @click="editItem(item)" :disabled="canEdit">mdi-pencil</v-icon>
         <v-icon small @click="deleteUser(item)">mdi-delete</v-icon>
       </template>
       <template v-slot:no-data>
@@ -162,6 +162,7 @@ export default {
       gender: '',
       status: true,
     },
+    canEdit: this.$store.getters.canEdit,
   }),
 
   computed: {

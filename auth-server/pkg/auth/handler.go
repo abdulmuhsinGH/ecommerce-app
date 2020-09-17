@@ -149,9 +149,9 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 	store.Delete("ReturnUri")
 	store.Save()
 
-	redirectURI := request.FormValue("redirect_uri")
-	clientID := request.FormValue("client_id")
-	authLogging.Printlog("rr: "+redirectURI, "cci: "+clientID)
+	//redirectURI := request.FormValue("redirect_uri")
+	//clientID := request.FormValue("client_id")
+	//authLogging.Printlog("rr: "+redirectURI, "cci: "+clientID)
 
 	err = srv.HandleAuthorizeRequest(response, request)
 	if err != nil {
