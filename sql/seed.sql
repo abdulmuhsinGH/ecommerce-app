@@ -185,7 +185,7 @@ INSERT INTO oauth_clients (id, secret, domain, data) VALUES ('4x45RYbu21vYFHABaP
 -- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO user_roles (id, role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES (1, 'admin', 'Administrator', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
+INSERT INTO user_roles (id, role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('0a2b3104-3f85-4d7e-b286-51fe9dfe0ed5', 'admin', 'Administrator', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
 
 
 --
@@ -194,7 +194,7 @@ INSERT INTO user_roles (id, role_name, description, comment, updated_by, created
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO users (id, username, password, firstname, middlename, lastname, gender, email_work, phone_work, email_personal, phone_personal, role, status, last_login, created_at, updated_at, deleted_at, updated_by) VALUES ('63f284c3-1891-4905-a183-57f621aca134', 'admin', '$2a$14$TH23lPu7kA9QiRqW8SCNJOg182LKQ7okjhCThCN.ICSw9dgmBk2a2', 'admin', NULL, 'admin', 'm', 'admin@admin.com', NULL, NULL, NULL, 1, true, NULL, '2020-03-03 13:09:20.037895+00', NULL, NULL, NULL);
+INSERT INTO users (id, username, password, firstname, middlename, lastname, gender, email_work, phone_work, email_personal, phone_personal, role, status, last_login, created_at, updated_at, deleted_at, updated_by) VALUES ('63f284c3-1891-4905-a183-57f621aca134', 'admin', '$2a$14$TH23lPu7kA9QiRqW8SCNJOg182LKQ7okjhCThCN.ICSw9dgmBk2a2', 'admin', NULL, 'admin', 'm', 'admin@admin.com', NULL, NULL, NULL, '0a2b3104-3f85-4d7e-b286-51fe9dfe0ed5', true, NULL, '2020-03-03 13:09:20.037895+00', NULL, NULL, NULL);
 
 
 --

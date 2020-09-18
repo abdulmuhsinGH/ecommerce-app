@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   ecommerceapi:
@@ -24,10 +24,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       RESOURCE_ALLOWED_ORIGIN: ${RESOURCE_ALLOWED_ORIGIN}
-  #  networks:
-  #  - ecormmercenet
     ports:
-    - 8080:8080
+      - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
 
@@ -35,14 +33,15 @@ services:
     container_name: auth-server
     image: abdulmuhsin/auth-server
     hostname: auth-server
-    build: 
+    build:
       context: ./auth-server
       dockerfile: Dockerfile
     environment:
       GET_HOSTS_FROM: dns
-      PORT: 8080 
+      PORT: 8080
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
+      DB_PORT: ${DB_PORT}
       DB_PASS: ${DB_PASS}
       DB_HOST: ${DB_HOST}
       SESSION_KEY: ${SESSION_KEY}
@@ -57,10 +56,8 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_CLIENT_REDIRECT_URL: ${GOOGLE_CLIENT_REDIRECT_URL}
       AUTH_ALLOWED_ORIGIN: ${AUTH_ALLOWED_ORIGIN}
-  #  networks:
-  #  - ecormmercenet
     ports:
-    - 8080:8080
+      - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
 
@@ -81,13 +78,27 @@ services:
       VUE_APP_AuthURL: ${VUE_APP_AuthURL}
       VUE_APP_TokenURL: ${VUE_APP_TokenURL}
       VUE_APP_ECOMMERCE_API_URL: ${VUE_APP_ECOMMERCE_API_URL}
-  #  networks:
-  #  - ecormmercenet
     ports:
-    - 8080:8080
+      - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
 
-#networks:
-#  ecormmercenet:
-#    driver: bridge
+  migration:
+    container_name: migration
+    image: abdulmuhsin/migration
+    hostname: migration
+    build:
+      context: ./migration
+      dockerfile: Dockerfile
+    environment:
+      GET_HOSTS_FROM: dns
+      PORT: 8080
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PORT: ${DB_PORT}
+      DB_PASS: ${DB_PASS}
+      DB_HOST: ${DB_HOST}
+    ports:
+      - 8080:8080
+    labels:
+      kompose.service.type: LoadBalancer

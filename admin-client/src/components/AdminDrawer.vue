@@ -84,8 +84,9 @@ export default {
     drawer: null,
     items: [
       { icon: 'mdi-contacts', text: 'Users', to: '/dashboard/users' },
-      { icon: 'mdi-history', text: 'Products', to: '/dashboard' },
-      { icon: 'mdi-content-copy', text: 'Orders', to: '/dashboard' },
+      { icon: 'mdi-history', text: 'Products', to: '/dashboard/products' },
+      { icon: 'mdi-content-copy', text: 'Brands', to: '/dashboard/brands' },
+      { icon: 'mdi-content-category', text: 'Categories', to: '/dashboard/product-categories' },
       {
         icon: 'mdi-chevron-up',
         'icon-alt': 'mdi-chevron-down',

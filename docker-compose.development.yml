@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   ecormmercedbdev:
@@ -47,14 +47,14 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       RESOURCE_ALLOWED_ORIGIN: ${RESOURCE_ALLOWED_ORIGIN}
     networks:
-    - ecormmercenetdev
+      - ecormmercenetdev
     volumes:
-    - .:/go/src/ecormmerce-app/ecormmerce-rest-api
+      - .:/go/src/ecormmerce-app/ecormmerce-rest-api
     ports:
-    - 8081:8081
+      - 8081:8081
     depends_on:
-    - ecormmercedbdev
-    - redisdbdev
+      - ecormmercedbdev
+      - redisdbdev
     labels:
       kompose.service.type: LoadBalancer
 
@@ -63,11 +63,11 @@ services:
     image: abdulmuhsin/auth-server-dev:v1
     hostname: auth-server-dev
     # env_file: .env
-    build: 
+    build:
       context: ./auth-server
       dockerfile: Dockerfile-dev
     environment:
-      GET_HOSTS_FROM: dns 
+      GET_HOSTS_FROM: dns
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
@@ -87,14 +87,14 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       AUTH_ALLOWED_ORIGIN: ${AUTH_ALLOWED_ORIGIN}
     networks:
-    - ecormmercenetdev
+      - ecormmercenetdev
     volumes:
-    - .:/go/src/ecormmerce-app/auth-server
+      - ./admin-client:/admin-client
     ports:
-    - 9096:9096
+      - 9096:9096
     depends_on:
-    - ecormmercedbdev
-    - redisdbdev
+      - ecormmercedbdev
+      - redisdbdev
     labels:
       kompose.service.type: LoadBalancer
 
@@ -103,18 +103,19 @@ services:
     image: abdulmuhsin/admin-client-dev:v1
     hostname: admin-client-dev
     env_file: ./admin-client/.env
-    build: 
+    build:
       context: ./admin-client
       dockerfile: Dockerfile-dev
     environment:
       GET_HOSTS_FROM: dns
+      CHOKIDAR_USEPOLLING: "true"
     networks:
-    - ecormmercenetdev
+      - ecormmercenetdev
     volumes:
-    - .:/go/src/ecormmerce-app/admin-client
+      - .:/go/src/ecormmerce-app/admin-client
     ports:
-    - 8080:8080
-  
+      - 8080:8080
+
   redisdbdev:
     image: "redis:alpine"
     container_name: redisdbdev
@@ -131,6 +132,28 @@ services:
       - REDIS_APPENDFSYNC=always
     networks:
       - ecormmercenetdev
+
+  migration:
+    container_name: migration
+    image: abdulmuhsin/migration
+    hostname: migration
+    build:
+      context: ./migration
+      dockerfile: Dockerfile
+    environment:
+      GET_HOSTS_FROM: dns
+      PORT: 9090
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_PORT: ${DB_PORT_DOCKER}
+      DB_HOST: ${DB_HOST_DOCKER_DEV}
+    ports:
+      - 9090:9090
+    networks:
+      - ecormmercenetdev
+    labels:
+      kompose.service.type: LoadBalancer
 
 networks:
   ecormmercenetdev:

@@ -100,7 +100,7 @@ func (r *repository) DeleteUser(user *User) error {
 GetAllUsers returns all users from the user's table
 */
 func (r *repository) GetAllUsers() ([]User, error) {
-	var users []User
+	users := []User{}
 	err := r.db.Model(&users).
 		Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
 			"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by", "updated_at").
@@ -117,7 +117,7 @@ func (r *repository) GetAllUsers() ([]User, error) {
 GetAllUserRoles returns all user roles from the user_roles table
 */
 func (r *repository) GetAllUserRoles() ([]UserRole, error) {
-	var userRoles []UserRole
+	userRoles := []UserRole{}
 	err := r.db.Model(&userRoles).
 		Column("id", "role_name", "description").
 		Select()
@@ -132,7 +132,7 @@ func (r *repository) GetAllUserRoles() ([]UserRole, error) {
 GetAllUsers returns all users from the user's table
 */
 func (r *repository) FindUserByUsername(username string) *User {
-	user := new(User)
+	user := &User{}
 	err := r.db.Model(user).Where("username = ?", username).Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("FindUserByUsername_Error", err.Error())

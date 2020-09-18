@@ -87,11 +87,11 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)" :disabled="canEdit">mdi-pencil</v-icon>
+        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
         <v-icon small @click="deleteUser(item)">mdi-delete</v-icon>
       </template>
       <template v-slot:no-data>
-        <v-btn color="primary" @click="getAllUsers">Reset</v-btn>
+        <v-btn color="primary" @click="getAllUsers">Refresh</v-btn>
       </template>
     </v-data-table>
     <div class="text-center pt-2">
@@ -104,6 +104,7 @@
 <script>
 import axios from 'axios';
 import crudMixin from '@/mixins/crudMixin';
+import auth from '@/mixins/authentication';
 import eventBus from '@/plugins/eventbus';
 import SnackbarComponent from './SnackbarComponent.vue';
 
@@ -114,6 +115,7 @@ export default {
   },
   mixins: [
     crudMixin,
+    auth,
   ],
   data: () => ({
     dialog: false,
@@ -162,7 +164,7 @@ export default {
       gender: '',
       status: true,
     },
-    canEdit: this.$store.getters.canEdit,
+    canEdit: true,
   }),
 
   computed: {
@@ -179,6 +181,7 @@ export default {
     },
   },
   async mounted() {
+    // ths.canEdit = $store.getters.canEdit
     this.getAllUsers();
     this.getAllUserRoles();
   },
@@ -206,6 +209,9 @@ export default {
         this.users = response.data.data;
       } catch (error) {
         eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+        if (error.response.status === 401) {
+          this.logout();
+        }
       }
     },
     async getAllUserRoles() {
@@ -218,6 +224,9 @@ export default {
         });
         this.userRoles = response.data.data;
       } catch (error) {
+        if (error.response.status === 401) {
+          this.logout();
+        }
       }
     },
     editItem(item) {
@@ -239,6 +248,9 @@ export default {
       } catch (error) {
         // console.log({ error });
         eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+        if (error.response.status === 401) {
+          this.logout();
+        }
       }
     },
     close() {
@@ -263,6 +275,9 @@ export default {
       } catch (error) {
         // console.log({ error });
         eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+        if (error.response.status === 401) {
+          this.logout();
+        }
         this.close();
       }
     },

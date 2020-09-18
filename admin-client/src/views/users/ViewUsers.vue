@@ -13,12 +13,10 @@
           </v-col>
         </v-row>
       </v-container>
-    <add-user-dialog/>
   </div>
 </template>
 
 <script>
-import AddUserDialog from '../../components/AddUserDialog.vue';
 import UserDatatable from '../../components/UserDatatable.vue';
 
 export default {
@@ -27,7 +25,6 @@ export default {
     source: String,
   },
   components: {
-    AddUserDialog,
     UserDatatable,
   },
   mounted() {

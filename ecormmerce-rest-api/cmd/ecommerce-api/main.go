@@ -1,7 +1,11 @@
 package main
 
 import (
+	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/brands"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
+	productcategories "ecormmerce-app/ecormmerce-rest-api/pkg/product_categories"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/products"
 	server "ecormmerce-app/ecormmerce-rest-api/pkg/server"
 	postgres "ecormmerce-app/ecormmerce-rest-api/pkg/storage/postgres"
 	users "ecormmerce-app/ecormmerce-rest-api/pkg/users"
@@ -41,11 +45,21 @@ func main() {
 	}
 	defer db.Close()
 
-	u := users.NewHandlers(logging, db)
-
+	authServer := auth.New()
 	router := mux.NewRouter()
 
+	u := users.NewHandlers(logging, db)
 	u.SetupRoutes(router)
+
+	p := products.NewHandlers(logging, db, authServer)
+	p.SetupRoutes(router)
+
+	b := brands.NewHandlers(logging, db, authServer)
+	b.SetupRoutes(router)
+
+	productCat := productcategories.NewHandlers(logging, db, authServer)
+	productCat.SetupRoutes(router)
+
 	srv := server.New(router, ":"+os.Getenv("PORT"))
 
 	logging.Printlog("server_status", "starting")
