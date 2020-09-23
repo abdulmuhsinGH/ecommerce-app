@@ -16,7 +16,7 @@ var userRepositoryTest Repository
 func setupTestCase(t *testing.T, db *pg.DB) func(t *testing.T) {
 	t.Log("setup test case")
 	err := db.Insert(&UserRole{
-		ID:          1,
+		//ID:          1,
 		RoleName:    "admin",
 		Description: "admin",
 	})
@@ -32,8 +32,8 @@ func setupTestCase(t *testing.T, db *pg.DB) func(t *testing.T) {
 		Username:  "test.username",
 		EmailWork: "test@email.com",
 		PhoneWork: "02933482",
-		Role:      1,
-		Status:    true,
+		//Role:      1,
+		Status: true,
 	})
 
 	if err != nil {
@@ -105,8 +105,8 @@ func TestAddUser(t *testing.T) {
 		Username:  "w",
 		EmailWork: "e",
 		PhoneWork: "1",
-		Role:      1,
-		Status:    true,
+		//Role:      1,
+		Status: true,
 	}
 	status := userRepositoryTest.AddUser(user)
 	if !status {
@@ -138,8 +138,8 @@ func TestAddUserWithoutEmail(t *testing.T) {
 		Gender:    "d",
 		Username:  "qwerty",
 		PhoneWork: "1",
-		Role:      1,
-		Status:    true,
+		//Role:      1,
+		Status: true,
 	}
 
 	status := userRepositoryTest.AddUser(user)

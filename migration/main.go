@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-pg/migrations/v8"
 	"github.com/go-pg/pg/v10"
-	"github.com/joho/godotenv"
 )
 
 const usageText = `This program runs command on the db. Supported commands are:
@@ -33,7 +32,7 @@ func main() {
 
 	flag.Usage = usage
 	flag.Parse()
-	_ = godotenv.Load(".env")
+	//_ = godotenv.Load(".env")
 	var (
 		// local db credential
 		DbHost     = os.Getenv("DB_HOST")
@@ -48,6 +47,10 @@ func main() {
 		Password: DbPassword,
 		Database: DbName,
 	})
+	err := initDB(db)
+	if err != nil {
+		exitf(err.Error())
+	}
 
 	if flag.Arg(0) == "create_sql" {
 		fileName = strings.ReplaceAll(fileName, " ", "_")
@@ -59,6 +62,7 @@ func main() {
 			fmt.Printf("Files Created")
 		}
 	} else {
+
 		//migrations.
 		oldVersion, newVersion, err := migrations.Run(db, flag.Args()...)
 		if err != nil {
@@ -77,6 +81,17 @@ func usage() {
 	fmt.Print(usageText)
 	flag.PrintDefaults()
 	os.Exit(2)
+}
+
+func initDB(db *pg.DB) error {
+	_, err := migrations.Version(db)
+	if err != nil {
+		_, _, err = migrations.Run(db, "init")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func errorf(s string, args ...interface{}) {

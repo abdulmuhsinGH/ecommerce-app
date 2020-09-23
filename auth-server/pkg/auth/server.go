@@ -1,15 +1,16 @@
 package auth
 
 import (
-	"time"
 	"ecormmerce-app/auth-server/pkg/clientstore"
 	"ecormmerce-app/auth-server/pkg/cors"
 	"ecormmerce-app/auth-server/pkg/logging"
 	"ecormmerce-app/auth-server/pkg/users"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/go-redis/redis"
 	oredis "gopkg.in/go-oauth2/redis.v3"
@@ -18,7 +19,6 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
@@ -43,10 +43,10 @@ func Server(db *pg.DB, logging logging.Logging) {
 	authService = NewAuthService(userRepository, clientStore)
 
 	manager = manage.NewDefaultManager()
-	
-	tokenConfig:=&manage.Config{
-		AccessTokenExp: time.Hour * 24,
-		RefreshTokenExp: time.Hour * 24 * 3,
+
+	tokenConfig := &manage.Config{
+		AccessTokenExp:    time.Hour * 24,
+		RefreshTokenExp:   time.Hour * 24 * 3,
 		IsGenerateRefresh: true,
 	}
 	manager.SetAuthorizeCodeTokenCfg(tokenConfig)
@@ -130,8 +130,8 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 			r.ParseForm()
 		}
 		store.Set("ReturnUri", r.Form)
-		d, _ := store.Get("ReturnUri")
-		fmt.Println(d)
+		/* d, _ := store.Get("ReturnUri")
+		fmt.Println(d) */
 		store.Save()
 
 		w.Header().Set("Location", "/auth/login")

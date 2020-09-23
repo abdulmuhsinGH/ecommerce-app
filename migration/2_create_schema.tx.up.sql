@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user_roles(
 	role_name VARCHAR(100) UNIQUE not null,
 	description text  NOT NULL,
 	comment text,
-	updated_by TEXT,
+	updated_by uuid,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
-	updated_by TEXT,
+	updated_by uuid,
 	PRIMARY KEY (id, username)
 	
 );
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS customers(
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
-	updated_by TEXT
+	updated_by uuid
 );
 
 CREATE TABLE IF NOT EXISTS address_type(
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS addresses(
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
-	updated_by TEXT
+	updated_by uuid
 );
 
 create table IF NOT EXISTS customer_address(
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS orders(
 	order_status int not null REFERENCES order_status(id),
 	delivery_status int not null REFERENCES delivery_status(id),
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by varchar(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
@@ -179,7 +179,7 @@ create TABLE IF NOT EXISTS products(
 	-- cost numeric not null,
 	description text not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS order_items(
 	cost numeric not null,
 	delivery_status int not null REFERENCES delivery_status(id),
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS product_categories(
 	name varchar(100) not null,
 	description text,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );

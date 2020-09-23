@@ -18,8 +18,11 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12" sm="12" md="12">
                       <v-text-field v-model="editedItem.name" label="name"></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="12" md="12">
+                      <v-textarea outlined v-model="editedItem.Description" label="Description"></v-textarea>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -85,15 +88,17 @@ export default {
     editedIndex: -1,
     editedItem: {
       name: '',
+      description: '',
     },
     defaultItem: {
       name: '',
+      description: '',
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
+      return this.editedIndex === -1 ? 'New Category' : 'Edit Category';
     },
   },
 

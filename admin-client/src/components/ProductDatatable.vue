@@ -47,7 +47,7 @@
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.Description" label="Description"></v-text-field>
+                      <v-textarea outlined v-model="editedItem.Description" label="Description"></v-textarea>
                     </v-col>
 
                   </v-row>
@@ -131,7 +131,7 @@ export default {
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
+      return this.editedIndex === -1 ? 'New Product' : 'Edit Product';
     },
   },
 
@@ -139,6 +139,10 @@ export default {
     dialog(val) {
       if (!val) {
         this.close();
+      }
+      if (val) {
+        this.getAllBrands();
+        this.getAllCategories();
       }
     },
   },

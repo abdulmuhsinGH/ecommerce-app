@@ -1,13 +1,12 @@
 package products
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-
-	uuid "github.com/satori/go.uuid"
+	"strconv"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/google/uuid"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
@@ -42,7 +41,7 @@ func (h *Handlers) handleAddProduct(response http.ResponseWriter, request *http.
 	fmt.Println("add new products")
 	newProduct := Product{}
 
-	err := json.NewDecoder(request.Body).Decode(&newProduct)
+	err := parseBody(&newProduct, request)
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleAddProduct; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -65,7 +64,7 @@ func (h *Handlers) handleUpdateProduct(response http.ResponseWriter, request *ht
 	fmt.Println("Update products")
 	product := Product{}
 
-	err := json.NewDecoder(request.Body).Decode(&product)
+	err := parseBody(&product, request)
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -87,7 +86,7 @@ HandleDeleteProduct gets data from http request and sends to
 func (h *Handlers) handleDeleteProduct(response http.ResponseWriter, request *http.Request) {
 	product := Product{}
 
-	uuid, err := uuid.FromString(mux.Vars(request)["id"])
+	uuid, err := uuid.Parse(mux.Vars(request)["id"])
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while converting string to uuid:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
@@ -118,12 +117,34 @@ func (h *Handlers) handleGetProducts(response http.ResponseWriter, request *http
 
 }
 
+func parseBody(product *Product, request *http.Request) error {
+	request.ParseForm()
+	product.Name = request.Form.Get("name")
+	product.Description = request.Form.Get("description")
+	productCategory, err := strconv.ParseInt(request.Form.Get("category"), 10, 64)
+	if err != nil {
+		return err
+	}
+	product.Category = productCategory
+	productBrand, err := strconv.ParseInt(request.Form.Get("brand"), 10, 64)
+	if err != nil {
+		return err
+	}
+	product.Brand = productBrand
+	productUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
+	if err != nil {
+		return err
+	}
+	product.UpdatedBy = productUpdatedBy
+
+	return nil
+}
+
 func validateToken(next http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := authServer.ValidationBearerToken(r)
+		tokenInfo, err := authServer.ValidationBearerToken(r)
 		if err != nil {
-			productHandlerLogging.Printlog("token error", err.Error())
 			if err == errors.ErrInvalidAccessToken {
 				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 			} else {
@@ -131,6 +152,9 @@ func validateToken(next http.HandlerFunc) http.HandlerFunc {
 			}
 
 			return
+		}
+		if r.Method == "PUT" {
+			r.Form.Set("updated_by", tokenInfo.GetUserID())
 		}
 		next(w, r)
 	})

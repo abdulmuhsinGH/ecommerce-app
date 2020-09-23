@@ -7,7 +7,7 @@
 <script>
 import axios from 'axios';
 
-axios.defaults.headers.common['Content-Type'] = 'application/json; charset=UTF-8';
+axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 export default {
   name: 'App',
   components: {

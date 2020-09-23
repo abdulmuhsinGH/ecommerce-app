@@ -1,12 +1,13 @@
 package brands
 
 import (
-	"encoding/json"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-pg/pg/v9"
+	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
 	"ecormmerce-app/ecormmerce-rest-api/pkg/format"
@@ -40,13 +41,11 @@ func (h *Handlers) handleAddBrand(response http.ResponseWriter, request *http.Re
 	fmt.Println("add new Brands")
 	newBrand := ProductBrand{}
 
-	err := json.NewDecoder(request.Body).Decode(&newBrand)
+	err := parseBody(&newBrand, request)
 	if err != nil {
-		brandHandlerLogging.Printlog("ProductBrand HandleAddBrand; Error while decoding request body:", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while decoding body brand", nil))
 		return
 	}
-
 	err = brandService.AddBrand(&newBrand)
 	if err != nil {
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving brand", nil))
@@ -63,14 +62,9 @@ func (h *Handlers) handleUpdateBrand(response http.ResponseWriter, request *http
 	fmt.Println("update ProductBrand")
 	brand := ProductBrand{}
 
-	err := json.NewDecoder(request.Body).Decode(&brand)
-	if err != nil {
-		brandHandlerLogging.Printlog("ProductBrand HandleUpdateBrand; Error while decoding request body:", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
-		return
-	}
+	parseBody(&brand, request)
 
-	err = brandService.UpdateBrand(&brand)
+	err := brandService.UpdateBrand(&brand)
 	if err != nil {
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating brand", nil))
 		return
@@ -124,26 +118,43 @@ func (h *Handlers) handleGetBrands(response http.ResponseWriter, request *http.R
 }
 
 func validateToken(next http.HandlerFunc) http.HandlerFunc {
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := authServer.ValidationBearerToken(r)
+		tokenInfo, err := authServer.ValidationBearerToken(r)
 		if err != nil {
-			format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			//http.Error(w, err.Error(), http.StatusBadRequest)
+			if err == errors.ErrInvalidAccessToken {
+				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
+			} else {
+				format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
+			}
+
 			return
+		}
+		if r.Method == "PUT" {
+			r.Form.Set("updated_by", tokenInfo.GetUserID())
 		}
 		next(w, r)
 	})
+}
+
+func parseBody(brand *ProductBrand, request *http.Request) error {
+	err := request.ParseForm()
+	if err != nil {
+		return err
+	}
+	brand.Name = request.Form.Get("name")
+	return nil
+	//brand.Description = request.Form.Get("description")
+	// brand.UpdatedBy, _ = strconv.ParseInt(request.Form.Get("updated_by"), 10, 64)
 }
 
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/brands/new", brandHandlerLogging.Httplog((validateToken(h.handleAddBrand)))).Methods("POST")
-	mux.HandleFunc("/api/brands", brandHandlerLogging.Httplog((validateToken(h.handleGetBrands)))).Methods("GET")
-	mux.HandleFunc("/api/brands", brandHandlerLogging.Httplog((validateToken(h.handleUpdateBrand)))).Methods("PUT")
-	mux.HandleFunc("/api/brands/{id}", brandHandlerLogging.Httplog((validateToken(h.handleDeleteBrand)))).Methods("DELETE")
+	mux.HandleFunc("/api/brands/new", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleAddBrand, authServer)))).Methods("POST")
+	mux.HandleFunc("/api/brands", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleGetBrands, authServer)))).Methods("GET")
+	mux.HandleFunc("/api/brands", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateBrand, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/brands/{id}", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteBrand, authServer)))).Methods("DELETE")
 }
 
 /*

@@ -3,7 +3,7 @@ package users
 import (
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 /*
@@ -24,7 +24,7 @@ type User struct {
 	Role          uuid.UUID `json:"role"`
 	Status        bool      `json:"status"`
 	LastLogin     time.Time `json:"last_login"`
-	UpdatedBy     string    `json:"updated_by"`
+	UpdatedBy     uuid.UUID `json:"updated_by"`
 }
 
 /*
@@ -35,5 +35,5 @@ type UserRole struct {
 	RoleName    string    `json:"role_name"`
 	Description string    `json:"description"`
 	Comment     string    `json:"comment"`
-	UpdatedBy   string    `json:"updated_by"`
+	UpdatedBy   uuid.UUID `json:"updated_by"`
 }

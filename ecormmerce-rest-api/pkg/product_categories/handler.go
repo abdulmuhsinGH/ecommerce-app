@@ -1,10 +1,11 @@
 package productcategories
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
 
 	"github.com/go-pg/pg/v9"
 	"gopkg.in/oauth2.v3/errors"
@@ -39,16 +40,15 @@ HandleAddProductCategory gets data from http request and sends to
 */
 func (h *Handlers) handleAddProductCategory(response http.ResponseWriter, request *http.Request) {
 	fmt.Println("add new productCategory")
-	newproductCategory := ProductCategory{}
+	newProductCategory := ProductCategory{}
 
-	err := json.NewDecoder(request.Body).Decode(&newproductCategory)
+	err := parseBody(&newProductCategory, request)
 	if err != nil {
-		productCategoryHandlerLogging.Printlog("productCategory HandleAddProductCategory; Error while decoding request body:", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while decoding productCategory", nil))
 		return
 	}
 
-	err = productCategoryService.AddProductCategory(&newproductCategory)
+	err = productCategoryService.AddProductCategory(&newProductCategory)
 	if err != nil {
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving productCategory", nil))
 		return
@@ -64,13 +64,11 @@ func (h *Handlers) handleUpdateProductCategory(response http.ResponseWriter, req
 	fmt.Println("update productCategory")
 	productCategory := ProductCategory{}
 
-	err := json.NewDecoder(request.Body).Decode(&productCategory)
+	err := parseBody(&productCategory, request)
 	if err != nil {
-		productCategoryHandlerLogging.Printlog("productCategory HandleUpdateProductCategory; Error while decoding request body:", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while decoding body", nil))
 		return
 	}
-
 	err = productCategoryService.UpdateProductCategory(&productCategory)
 	if err != nil {
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating productCategory", nil))
@@ -124,12 +122,24 @@ func (h *Handlers) handleGetProductCategory(response http.ResponseWriter, reques
 
 }
 
+func parseBody(productCategory *ProductCategory, request *http.Request) error {
+	request.ParseForm()
+	productCategory.Name = request.Form.Get("name")
+	productCategory.Description = request.Form.Get("description")
+	productCatUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
+	if err != nil {
+		return err
+	}
+	productCategory.UpdatedBy = productCatUpdatedBy
+
+	return nil
+}
+
 func validateToken(next http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := authServer.ValidationBearerToken(r)
+		tokenInfo, err := authServer.ValidationBearerToken(r)
 		if err != nil {
-			productCategoryHandlerLogging.Printlog("token error", err.Error())
 			if err == errors.ErrInvalidAccessToken {
 				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 			} else {
@@ -137,6 +147,9 @@ func validateToken(next http.HandlerFunc) http.HandlerFunc {
 			}
 
 			return
+		}
+		if r.Method == "PUT" {
+			r.Form.Set("updated_by", tokenInfo.GetUserID())
 		}
 		next(w, r)
 	})

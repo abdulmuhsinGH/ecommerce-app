@@ -46,7 +46,7 @@ func (h *Handlers) handleGoogleAuthCallback(w http.ResponseWriter, r *http.Reque
 	oauthState, err := r.Cookie("oauth-state")
 	if err != nil {
 		authLogging.Printlog("getting_cookie_err", err.Error())
-		
+
 		http.Error(w, "<a href='/auth/login'>Go To Login Page</a> "+err.Error(), http.StatusInternalServerError)
 		return
 	}

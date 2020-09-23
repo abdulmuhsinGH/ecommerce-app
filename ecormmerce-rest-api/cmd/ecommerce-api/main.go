@@ -48,21 +48,21 @@ func main() {
 	authServer := auth.New()
 	router := mux.NewRouter()
 
-	u := users.NewHandlers(logging, db)
-	u.SetupRoutes(router)
+	usersHandler := users.NewHandlers(logging, db)
+	usersHandler.SetupRoutes(router)
 
-	p := products.NewHandlers(logging, db, authServer)
-	p.SetupRoutes(router)
+	productsHandler := products.NewHandlers(logging, db, authServer)
+	productsHandler.SetupRoutes(router)
 
-	b := brands.NewHandlers(logging, db, authServer)
-	b.SetupRoutes(router)
+	brandshandler := brands.NewHandlers(logging, db, authServer)
+	brandshandler.SetupRoutes(router)
 
-	productCat := productcategories.NewHandlers(logging, db, authServer)
-	productCat.SetupRoutes(router)
+	productCatHandler := productcategories.NewHandlers(logging, db, authServer)
+	productCatHandler.SetupRoutes(router)
 
 	srv := server.New(router, ":"+os.Getenv("PORT"))
 
-	logging.Printlog("server_status", "starting")
+	logging.Printlog("server_status", "starting on"+os.Getenv("PORT"))
 	err = srv.ListenAndServe()
 	if err != nil {
 		logging.PrintFatal("server failed to start:", err)

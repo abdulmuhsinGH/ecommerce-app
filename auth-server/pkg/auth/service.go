@@ -14,8 +14,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/gorilla/securecookie"
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/oauth2.v3/server"
 )
@@ -116,7 +117,7 @@ type googleUserInfo struct {
 
 func googleUserInfoToUserStruct(userInfo googleUserInfo) users.User {
 	var user users.User
-	user.ID = uuid.NewV4()
+	user.ID = uuid.New()
 	user.EmailWork = userInfo.Email
 	user.Firstname = userInfo.GivenName
 	user.Lastname = userInfo.FamilyName

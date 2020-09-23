@@ -3,7 +3,7 @@ const state = {
   profile: {},
   token: window.$cookies.get('ank_tkn_val') || null,
   headers: {
-    accept: 'application/json',
+    accept: 'application/x-www-form-urlencoded',
     authorization: '',
   },
 };

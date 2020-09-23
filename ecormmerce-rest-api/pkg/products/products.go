@@ -3,18 +3,18 @@ package products
 import (
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 //Product defines the properties of a produt type
 type Product struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
-	Category    int       `json:"category"`
-	Brand       int       `json:"brand"`
+	Category    int64     `json:"category"`
+	Brand       int64     `json:"brand"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
-	UpdatedBy   int       `json:"updated_by"`
+	UpdatedBy   uuid.UUID `json:"updated_by"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`
 }

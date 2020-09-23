@@ -42,7 +42,7 @@ ID          uuid.UUID `json:"id"`
 	Brand       int       `json:"brand"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
-	UpdatedBy   int       `json:"updated_by"`
+	UpdatedBy   uuid.UUID `json:"updated_by"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`
 */
@@ -90,7 +90,7 @@ func (r *repository) DeleteProduct(product *Product) error {
 GetAllProducts returns all products from the product's table
 */
 func (r *repository) GetAllProducts() ([]Product, error) {
-	products :=[]Product{}
+	products := []Product{}
 	err := r.db.Model(&products).
 		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
 		Select()
@@ -106,7 +106,7 @@ func (r *repository) GetAllProducts() ([]Product, error) {
 GetProductByID returns a product by the id from the product's table
 */
 func (r *repository) GetProductByID(ID uuid.UUID) (Product, error) {
-	product :=Product{}
+	product := Product{}
 
 	err := r.db.Model(&product).
 		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").

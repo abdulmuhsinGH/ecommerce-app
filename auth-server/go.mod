@@ -7,6 +7,7 @@ require (
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-session/session v3.1.2+incompatible
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.3.0

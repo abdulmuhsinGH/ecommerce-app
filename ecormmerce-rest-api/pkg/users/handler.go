@@ -1,13 +1,12 @@
 package users
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-
-	uuid "github.com/satori/go.uuid"
+	"strconv"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/google/uuid"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
@@ -43,7 +42,7 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 	fmt.Println("add new users")
 	newUser := User{}
 
-	err := json.NewDecoder(request.Body).Decode(&newUser)
+	err := parseBody(&newUser, request)
 	if err != nil {
 		userHandlerLogging.Printlog("User HandleAddUser; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -66,7 +65,7 @@ func (h *Handlers) handleUpdateUser(response http.ResponseWriter, request *http.
 	fmt.Println("add new users")
 	user := User{}
 
-	err := json.NewDecoder(request.Body).Decode(&user)
+	err := parseBody(&user, request)
 	if err != nil {
 		userHandlerLogging.Printlog("User HandleUpdateUser; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -88,7 +87,7 @@ HandleDeleteUser gets data from http request and sends to
 func (h *Handlers) handleDeleteUser(response http.ResponseWriter, request *http.Request) {
 	user := User{}
 
-	uuid, err := uuid.FromString(mux.Vars(request)["id"])
+	uuid, err := uuid.Parse(mux.Vars(request)["id"])
 	if err != nil {
 		userHandlerLogging.Printlog("User HandleUpdateUser; Error while converting string to uuid:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
@@ -132,12 +131,41 @@ func (h *Handlers) handleGetUserRoles(response http.ResponseWriter, request *htt
 
 }
 
+func parseBody(user *User, request *http.Request) error {
+	request.ParseForm()
+	user.Firstname = request.Form.Get("firstname")
+	user.Lastname = request.Form.Get("lastname")
+	user.Username = request.Form.Get("username")
+	user.Middlename = request.Form.Get("middlename")
+	user.EmailWork = request.Form.Get("email_work")
+	user.EmailPersonal = request.Form.Get("email_personal")
+	user.PhonePersonal = request.Form.Get("phone_personal")
+	user.PhoneWork = request.Form.Get("phone_work")
+	user.Gender = request.Form.Get("gender")
+	userRole, err := uuid.Parse(request.Form.Get("user_role"))
+	if err != nil {
+		return err
+	}
+	user.Role = userRole
+	userStatus, err := strconv.ParseBool(request.Form.Get("status"))
+	if err != nil {
+		return err
+	}
+	user.Status = userStatus
+	userUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
+	if err != nil {
+		return err
+	}
+	user.UpdatedBy = userUpdatedBy
+
+	return nil
+}
+
 func validateToken(next http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := authServer.ValidationBearerToken(r)
+		tokenInfo, err := authServer.ValidationBearerToken(r)
 		if err != nil {
-			userHandlerLogging.Printlog("token error", err.Error())
 			if err == errors.ErrInvalidAccessToken {
 				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 			} else {
@@ -146,6 +174,10 @@ func validateToken(next http.HandlerFunc) http.HandlerFunc {
 
 			return
 		}
+		if r.Method == "PUT" {
+			r.Form.Set("updated_by", tokenInfo.GetUserID())
+		}
+
 		next(w, r)
 	})
 }
