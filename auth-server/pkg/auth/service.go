@@ -32,6 +32,7 @@ type Service interface {
 	AddOuathClient(clientstore.OauthClient) error
 	GetUserDataFromGoogle(string) (users.User, error)
 	ValidateToken(http.HandlerFunc, *server.Server) http.HandlerFunc
+	GetUserByID(uuid.UUID) (*users.User, error)
 }
 
 type service struct {
@@ -155,6 +156,18 @@ func (s *service) Login(username string, password string) (*users.User, error) {
 	passwordMatched := s.CheckPasswordHash(password, user.Password)
 	if !passwordMatched {
 		return &users.User{}, errors.New("password does not match")
+	}
+
+	return user, nil
+}
+
+/*
+GetUserByID gets user using their id
+*/
+func (s *service) GetUserByID(ID uuid.UUID) (*users.User, error) {
+	user, err := s.userRepository.FindUserByID(ID)
+	if err != nil {
+		return &users.User{}, err
 	}
 
 	return user, nil

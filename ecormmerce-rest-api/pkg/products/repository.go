@@ -47,7 +47,7 @@ ID          uuid.UUID `json:"id"`
 	DeletedAt   time.Time `json:"deleted_at"`
 */
 func (r *repository) UpdateProduct(product *Product) (*Product, error) {
-	_, err := r.db.Model(product).Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").WherePK().Update()
+	_, err := r.db.Model(product).Column("id", "name", "category", "brand", "description", "updated_by", "updated_at").WherePK().Update()
 	if err != nil {
 		productRepositoryLogging.Printlog("UpdateProduct_Error", err.Error())
 		return &Product{}, err

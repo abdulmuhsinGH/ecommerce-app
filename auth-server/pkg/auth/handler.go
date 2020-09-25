@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/go-pg/pg/v9"
 	"github.com/go-session/session"
 	"github.com/gorilla/mux"
@@ -129,6 +131,27 @@ func (h *Handlers) handleUserAuthTest(response http.ResponseWriter, request *htt
 	e.Encode(data)
 }
 
+func (h *Handlers) handleGetUserDetails(response http.ResponseWriter, request *http.Request) {
+	token, err := srv.ValidationBearerToken(request)
+	if err != nil {
+		authLogging.Printlog("Error: %s\n", err.Error())
+		http.Error(response, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	ID, err := uuid.Parse(token.GetUserID())
+	if err != nil {
+		authLogging.Printlog("Error: %s\n", err.Error())
+		http.Error(response, err.Error(), http.StatusBadRequest)
+		return
+	}
+	user, err := authService.GetUserByID(ID)
+
+	e := json.NewEncoder(response)
+	e.SetIndent("", "  ")
+	e.Encode(user)
+}
+
 /*
 HandleAddUser gets data from http request and sends to
 */
@@ -148,10 +171,6 @@ func (h *Handlers) handleAuthorize(response http.ResponseWriter, request *http.R
 
 	store.Delete("ReturnUri")
 	store.Save()
-
-	//redirectURI := request.FormValue("redirect_uri")
-	//clientID := request.FormValue("client_id")
-	//authLogging.Printlog("rr: "+redirectURI, "cci: "+clientID)
 
 	err = srv.HandleAuthorizeRequest(response, request)
 	if err != nil {
@@ -173,17 +192,13 @@ func (h *Handlers) handlePostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := authService.Login(r.FormValue("username"), r.FormValue("password"))
 	if err != nil {
-		authLogging.Printlog("Error: %v", err.Error())
+		authLogging.Printlog("Error:", err.Error())
 		//format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
 		http.Redirect(w, r, os.Getenv("ADMIN_CLIENT_DOMAIN"), http.StatusInternalServerError)
 		return
 	}
 	store.Set("LoggedInUserID", user.ID)
 	store.Save()
-
-	//redirectURI := r.FormValue("redirect_uri")
-	//clientID := r.FormValue("client_id")
-	//authLogging.Printlog(redirectURI, clientID)
 
 	w.Header().Set("Location", "/auth")
 	w.WriteHeader(http.StatusFound)
@@ -280,6 +295,7 @@ func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/auth/authorize", authLogging.Httplog(h.handleAuthorize)).Methods("GET", "POST")
 	mux.HandleFunc("/auth/token", authLogging.Httplog(h.handleToken)).Methods("POST")
 	mux.HandleFunc("/auth/test", authLogging.Httplog(authService.ValidateToken(h.handleUserAuthTest, srv))).Methods("GET")
+	mux.HandleFunc("/auth/user-details", authLogging.Httplog(authService.ValidateToken(h.handleGetUserDetails, srv))).Methods("GET")
 	mux.HandleFunc("/auth/google/login", authLogging.Httplog(h.handlePostLoginWithGoogle))
 	mux.HandleFunc("/auth/google/callback", authLogging.Httplog(h.handleGoogleAuthCallback))
 	mux.HandleFunc("/auth/client", authLogging.Httplog(authService.ValidateToken(h.handleAddClient, srv))).Methods("POST")

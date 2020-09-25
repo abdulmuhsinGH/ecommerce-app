@@ -34,7 +34,7 @@ func NewRepository(db *pg.DB) Repository {
 }
 
 func (r *repository) UpdateBrand(brand *ProductBrand) (*ProductBrand, error) {
-	_, err := r.db.Model(brand).Column("id", "name", "created_at", "updated_at", "deleted_at").WherePK().Update()
+	_, err := r.db.Model(brand).Column("id", "name", "updated_at").WherePK().Update()
 	if err != nil {
 		brandRepositoryLogging.Printlog("UpdateBrand_Error", err.Error())
 		return &ProductBrand{}, err

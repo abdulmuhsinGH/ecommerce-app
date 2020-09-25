@@ -2,12 +2,10 @@ package brands
 
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-pg/pg/v9"
-	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
 	"ecormmerce-app/ecormmerce-rest-api/pkg/format"
@@ -38,7 +36,6 @@ type Resp map[string]interface{}
 HandleAddbrand gets data from http request and sends to
 */
 func (h *Handlers) handleAddBrand(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("add new Brands")
 	newBrand := ProductBrand{}
 
 	err := parseBody(&newBrand, request)
@@ -59,7 +56,6 @@ func (h *Handlers) handleAddBrand(response http.ResponseWriter, request *http.Re
 HandleUpdateBrand gets data from http request and sends to
 */
 func (h *Handlers) handleUpdateBrand(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("update ProductBrand")
 	brand := ProductBrand{}
 
 	parseBody(&brand, request)
@@ -117,30 +113,16 @@ func (h *Handlers) handleGetBrands(response http.ResponseWriter, request *http.R
 
 }
 
-func validateToken(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenInfo, err := authServer.ValidationBearerToken(r)
-		if err != nil {
-			if err == errors.ErrInvalidAccessToken {
-				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
-			} else {
-				format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			}
-
-			return
-		}
-		if r.Method == "PUT" {
-			r.Form.Set("updated_by", tokenInfo.GetUserID())
-		}
-		next(w, r)
-	})
-}
-
 func parseBody(brand *ProductBrand, request *http.Request) error {
 	err := request.ParseForm()
 	if err != nil {
 		return err
 	}
+	ID, err := strconv.ParseInt(request.Form.Get("id"), 10, 64)
+	if err != nil {
+		return err
+	}
+	brand.ID = ID
 	brand.Name = request.Form.Get("name")
 	return nil
 	//brand.Description = request.Form.Get("description")

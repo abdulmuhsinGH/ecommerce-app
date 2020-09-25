@@ -7,8 +7,8 @@
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-2" v-on="on">New User</v-btn>
+            <template v-slot:activator="{ on }" >
+              <v-btn color="primary" dark class="mb-2" v-on="on" :disabled="!canEdit">New User</v-btn>
             </template>
             <v-card>
               <v-card-title>
@@ -63,7 +63,7 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
-                        v-model="editedItem.role"
+                        v-model="editedItem.user_role"
                         :items="userRoles"
                         item-value="id"
                         item-text="role_name"
@@ -87,15 +87,15 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-        <v-icon small @click="deleteUser(item)">mdi-delete</v-icon>
+        <v-icon small class="mr-2" @click="editItem(item)" :disabled="!canEdit">mdi-pencil</v-icon>
+        <v-icon small @click="deleteUser(item)" :disabled="!canEdit">mdi-delete</v-icon>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="getAllUsers">Refresh</v-btn>
       </template>
     </v-data-table>
     <div class="text-center pt-2">
-      <v-btn color="primary" class="mr-2">Import Users</v-btn>
+      <v-btn color="primary" class="mr-2" :disabled="!canEdit">Import Users</v-btn>
       <snackbar-component></snackbar-component>
     </div>
   </div>
@@ -135,6 +135,8 @@ export default {
       { text: 'Personal Phone', value: 'phone_personal' },
       { text: 'Gender', value: 'gender' },
       { text: 'Status', value: 'status' },
+      { text: 'Created At', value: 'created_at' },
+      { text: 'Updated At', value: 'updated_at' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
     users: [],
@@ -151,6 +153,7 @@ export default {
       phone_personal: '',
       gender: '',
       status: true,
+      user_role: '',
     },
     defaultItem: {
       username: '',
@@ -184,19 +187,9 @@ export default {
     // ths.canEdit = $store.getters.canEdit
     this.getAllUsers();
     this.getAllUserRoles();
+    this.canEdit = this.$store.getters.canEdit;
   },
   methods: {
-    async authorizeServiceURL(serviceURL) {
-      const vm = this;
-      // Set up metadata server request
-      // See https://cloud.google.com/compute/docs/instances/verifying-instance-identity#request_signature
-      const metadataServerTokenURL = 'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=';
-      return axios.get(metadataServerTokenURL + serviceURL, {
-        headers: {
-          'Metadata-Flavor': 'Google',
-        },
-      });
-    },
     async getAllUsers() {
       try {
         const token = JSON.parse(window.atob(this.$store.getters.getToken));

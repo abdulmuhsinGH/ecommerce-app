@@ -130,8 +130,7 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 			r.ParseForm()
 		}
 		store.Set("ReturnUri", r.Form)
-		/* d, _ := store.Get("ReturnUri")
-		fmt.Println(d) */
+		
 		store.Save()
 
 		w.Header().Set("Location", "/auth/login")

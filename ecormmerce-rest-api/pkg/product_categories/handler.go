@@ -1,16 +1,15 @@
 package productcategories
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/google/uuid"
 
 	"github.com/go-pg/pg/v9"
-	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
+	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/format"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 
@@ -39,7 +38,6 @@ type Resp map[string]interface{}
 HandleAddProductCategory gets data from http request and sends to
 */
 func (h *Handlers) handleAddProductCategory(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("add new productCategory")
 	newProductCategory := ProductCategory{}
 
 	err := parseBody(&newProductCategory, request)
@@ -61,7 +59,6 @@ func (h *Handlers) handleAddProductCategory(response http.ResponseWriter, reques
 HandleUpdateproductCategory gets data from http request and sends to
 */
 func (h *Handlers) handleUpdateProductCategory(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("update productCategory")
 	productCategory := ProductCategory{}
 
 	err := parseBody(&productCategory, request)
@@ -123,46 +120,35 @@ func (h *Handlers) handleGetProductCategory(response http.ResponseWriter, reques
 }
 
 func parseBody(productCategory *ProductCategory, request *http.Request) error {
-	request.ParseForm()
-	productCategory.Name = request.Form.Get("name")
-	productCategory.Description = request.Form.Get("description")
-	productCatUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
+	err := request.ParseForm()
 	if err != nil {
 		return err
 	}
-	productCategory.UpdatedBy = productCatUpdatedBy
-
-	return nil
-}
-
-func validateToken(next http.HandlerFunc) http.HandlerFunc {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenInfo, err := authServer.ValidationBearerToken(r)
+	ID, err := strconv.ParseInt(request.Form.Get("id"), 10, 64)
+	if err != nil {
+		return err
+	}
+	productCategory.ID = ID
+	productCategory.Name = request.Form.Get("name")
+	productCategory.Description = request.Form.Get("description")
+	if request.Method == "PUT" {
+		productCatUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
 		if err != nil {
-			if err == errors.ErrInvalidAccessToken {
-				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
-			} else {
-				format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			}
-
-			return
+			return err
 		}
-		if r.Method == "PUT" {
-			r.Form.Set("updated_by", tokenInfo.GetUserID())
-		}
-		next(w, r)
-	})
+		productCategory.UpdatedBy = productCatUpdatedBy
+	}
+	return nil
 }
 
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/product-categories/new", productCategoryHandlerLogging.Httplog((validateToken(h.handleAddProductCategory)))).Methods("POST")
-	mux.HandleFunc("/api/product-categories", productCategoryHandlerLogging.Httplog((validateToken(h.handleGetProductCategory)))).Methods("GET")
-	mux.HandleFunc("/api/product-categories", productCategoryHandlerLogging.Httplog((validateToken(h.handleUpdateProductCategory)))).Methods("PUT")
-	mux.HandleFunc("/api/product-categories/{id}", productCategoryHandlerLogging.Httplog((validateToken(h.handleDeleteProductCategory)))).Methods("DELETE")
+	mux.HandleFunc("/api/product-categories/new", productCategoryHandlerLogging.Httplog((auth.ValidateToken(h.handleAddProductCategory, authServer)))).Methods("POST")
+	mux.HandleFunc("/api/product-categories", productCategoryHandlerLogging.Httplog((auth.ValidateToken(h.handleGetProductCategory, authServer)))).Methods("GET")
+	mux.HandleFunc("/api/product-categories", productCategoryHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateProductCategory, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/product-categories/{id}", productCategoryHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteProductCategory, authServer)))).Methods("DELETE")
 }
 
 /*

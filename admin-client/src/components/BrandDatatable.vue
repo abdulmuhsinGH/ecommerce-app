@@ -21,9 +21,6 @@
                     <v-col cols="12" sm="12" md="12">
                       <v-text-field v-model="editedItem.name" label="name"></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="12" md="12">
-                      <v-textarea v-model="editedItem.description" label="description"></v-textarea>
-                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -77,7 +74,6 @@ export default {
         sortable: false,
         value: 'name',
       },
-      { text: 'Description', value: 'description' },
       { text: 'Created At', value: 'created_at' },
       { text: 'Updated At', value: 'updated_at' },
       { text: 'Actions', value: 'actions', sortable: false },
@@ -86,11 +82,9 @@ export default {
     editedIndex: -1,
     editedItem: {
       name: '',
-      description: '',
     },
     defaultItem: {
       name: '',
-      description: '',
     },
   }),
 

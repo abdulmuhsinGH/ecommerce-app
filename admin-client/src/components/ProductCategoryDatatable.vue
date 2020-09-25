@@ -22,7 +22,7 @@
                       <v-text-field v-model="editedItem.name" label="name"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
-                      <v-textarea outlined v-model="editedItem.Description" label="Description"></v-textarea>
+                      <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -78,10 +78,7 @@ export default {
         value: 'name',
       },
       { text: 'Description', value: 'description' },
-      { text: 'Created At', value: 'created_at' },
-      { text: 'Updated By', value: 'updated_by' },
       { text: 'Updated At', value: 'updated_at' },
-      { text: 'Deleted At', value: 'deleted_at' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
     productCategories: [],

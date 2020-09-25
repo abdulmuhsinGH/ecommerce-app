@@ -60,10 +60,9 @@ func (s *service) AddUser(user *User) error {
 UpdateUser creates a new user
 */
 func (s *service) UpdateUser(user *User) error {
-	var err error
 
-	user.UpdatedAt = time.Now()
-	user, err = s.userRepository.UpdateUser(user)
+	user.UpdatedAt = time.Now().UTC()
+	_, err := s.userRepository.UpdateUser(user)
 	if err != nil {
 		return errors.New("not updated")
 	}

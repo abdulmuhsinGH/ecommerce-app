@@ -34,7 +34,7 @@ func NewRepository(db *pg.DB) Repository {
 }
 
 func (r *repository) UpdateProductCategory(productCategory *ProductCategory) (*ProductCategory, error) {
-	_, err := r.db.Model(productCategory).Column("id", "name", "description", "created_at", "updated_by", "updated_at", "deleted_at").WherePK().Update()
+	_, err := r.db.Model(productCategory).Column("id", "name", "description", "updated_by", "updated_at").WherePK().Update()
 	if err != nil {
 		productCategoryRepositoryLogging.Printlog("UpdateproductCategory_Error", err.Error())
 		return &ProductCategory{}, err

@@ -185,7 +185,7 @@ INSERT INTO oauth_clients (id, secret, domain, data) VALUES ('4x45RYbu21vYFHABaP
 -- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO user_roles (id, role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('0a2b3104-3f85-4d7e-b286-51fe9dfe0ed5', 'admin', 'Administrator', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
+INSERT INTO user_roles (id, role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('0a2b3104-3f85-4d7e-b286-51fe9dfe0ed5', 'administrator', 'Administrator', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
 
 
 --

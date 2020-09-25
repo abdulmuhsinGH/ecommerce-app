@@ -49,10 +49,8 @@ func (s *service) AddProduct(product *Product) error {
 UpdateProduct creates a new product
 */
 func (s *service) UpdateProduct(product *Product) error {
-	var err error
-
-	product.UpdatedAt = time.Now()
-	product, err = s.productRepository.UpdateProduct(product)
+	product.UpdatedAt = time.Now().UTC()
+	_, err := s.productRepository.UpdateProduct(product)
 	if err != nil {
 		return err
 	}

@@ -47,7 +47,7 @@
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-textarea outlined v-model="editedItem.Description" label="Description"></v-textarea>
+                      <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
                     </v-col>
 
                   </v-row>
@@ -108,7 +108,6 @@ export default {
       { text: 'Description', value: 'description' },
       { text: 'Created At', value: 'created_at' },
       { text: 'Updated At', value: 'updated_at' },
-      { text: 'Updated By', value: 'updated_by' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
     products: [],
@@ -224,7 +223,7 @@ export default {
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
-        console.log({ error });
+        // console.log({ error });
         eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
         if (error.response.status === 401) {
           this.logout();
@@ -251,7 +250,7 @@ export default {
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
-        console.log({ error });
+        // console.log({ error });
         eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
         if (error.response.status === 401) {
           this.logout();

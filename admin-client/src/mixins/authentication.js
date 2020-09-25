@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const auth = {
   methods: {
     login() {
@@ -21,6 +23,16 @@ const auth = {
       if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
       for (let i = length; i > 0; i -= 1) result += mask[Math.floor(Math.random() * mask.length)];
       return result;
+    },
+    async getUserDetails() {
+      // /auth/user-details
+      const token = JSON.parse(window.atob(this.$store.getters.getToken));
+      const response = await axios.get(`${process.env.VUE_APP_AUTH_URL}/auth/user-details`, {
+        params: {
+          access_token: token.access_token,
+        },
+      });
+      this.$cookies.set('ank_usr_val', window.btoa(JSON.stringify(response.data)), '1d');
     },
   },
 };

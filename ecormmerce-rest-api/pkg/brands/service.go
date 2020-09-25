@@ -47,10 +47,9 @@ func (s *service) AddBrand(brand *ProductBrand) error {
 UpdateBrand creates a new ProductBrand
 */
 func (s *service) UpdateBrand(brand *ProductBrand) error {
-	var err error
 
-	brand.UpdatedAt = time.Now()
-	brand, err = s.brandRepository.UpdateBrand(brand)
+	brand.UpdatedAt = time.Now().UTC()
+	_, err := s.brandRepository.UpdateBrand(brand)
 	if err != nil {
 		return err
 	}

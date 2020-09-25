@@ -105,7 +105,7 @@ CREATE table IF NOT EXISTS payment_vendor(
 );
 
 CREATE TABLE IF NOT EXISTS customer_payment_types(
-	id uuid PRIMARY KEY NOT NULL,
+	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid NOT NULL REFERENCES customers(id),
 	payment_vendor_id int not null REFERENCES payment_vendor(id),
 	details json not null,
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS cart_type(
 );
 
 create table IF NOT EXISTS carts(
-	id uuid PRIMARY KEY NOT NULL,
+	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid not null REFERENCES customers(id),
 	cart_items json not null,
 	cart_type int not null REFERENCES cart_type(id),
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS delivery_status(
 );
 
 CREATE TABLE IF NOT EXISTS orders(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	customer_id uuid REFERENCES customers(id),
 	cart_id uuid REFERENCES carts(id),
 	total_cost numeric not null,
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS product_brands(
 );
 
 create TABLE IF NOT EXISTS products(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	name text not null,
 	category int not null,
 	brand int not null REFERENCES product_brands(id),
@@ -183,7 +183,7 @@ create TABLE IF NOT EXISTS products(
 );
 
 CREATE TABLE IF NOT EXISTS order_items(
-	id uuid primary key not null,
+	id uuid primary key DEFAULT uuid_generate_v4(),
 	order_id uuid REFERENCES orders(id),
 	product_id uuid REFERENCES products(id),
 	quantity INTEGER not null,
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS order_items(
 );
 
 create TABLE IF NOT EXISTS payments(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	order_id uuid REFERENCES orders(id),
 	payment_type integer not null REFERENCES  payment_types(id),
 	amount_paid numeric not null,
@@ -208,7 +208,7 @@ create TABLE IF NOT EXISTS payments(
 );
 
 create table IF NOT EXISTS inventory(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	product_id uuid REFERENCES products(id),
 	quantity integer not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,

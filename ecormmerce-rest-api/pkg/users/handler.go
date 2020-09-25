@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/google/uuid"
-	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 
 	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
@@ -39,7 +38,6 @@ type Resp map[string]interface{}
 HandleAddUser gets data from http request and sends to
 */
 func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("add new users")
 	newUser := User{}
 
 	err := parseBody(&newUser, request)
@@ -62,7 +60,6 @@ func (h *Handlers) handleAddUser(response http.ResponseWriter, request *http.Req
 HandleUpdateUser gets data from http request and sends to
 */
 func (h *Handlers) handleUpdateUser(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("add new users")
 	user := User{}
 
 	err := parseBody(&user, request)
@@ -71,7 +68,7 @@ func (h *Handlers) handleUpdateUser(response http.ResponseWriter, request *http.
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
-
+	fmt.Println("id", user.ID)
 	err = userService.UpdateUser(&user)
 	if err != nil {
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating user", nil))
@@ -132,7 +129,15 @@ func (h *Handlers) handleGetUserRoles(response http.ResponseWriter, request *htt
 }
 
 func parseBody(user *User, request *http.Request) error {
-	request.ParseForm()
+	err := request.ParseForm()
+	if err != nil {
+		return err
+	}
+	ID, err := uuid.Parse(request.Form.Get("id"))
+	if err != nil {
+		return err
+	}
+	user.ID = ID
 	user.Firstname = request.Form.Get("firstname")
 	user.Lastname = request.Form.Get("lastname")
 	user.Username = request.Form.Get("username")
@@ -152,45 +157,26 @@ func parseBody(user *User, request *http.Request) error {
 		return err
 	}
 	user.Status = userStatus
-	userUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
-	if err != nil {
-		return err
-	}
-	user.UpdatedBy = userUpdatedBy
+	if request.Method == http.MethodPut {
 
-	return nil
-}
-
-func validateToken(next http.HandlerFunc) http.HandlerFunc {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenInfo, err := authServer.ValidationBearerToken(r)
+		userUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
 		if err != nil {
-			if err == errors.ErrInvalidAccessToken {
-				format.Send(w, http.StatusUnauthorized, format.Message(false, err.Error(), nil))
-			} else {
-				format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			}
-
-			return
+			return err
 		}
-		if r.Method == "PUT" {
-			r.Form.Set("updated_by", tokenInfo.GetUserID())
-		}
-
-		next(w, r)
-	})
+		user.UpdatedBy = userUpdatedBy
+	}
+	return nil
 }
 
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((validateToken(h.handleAddUser)))).Methods("POST")
-	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((validateToken(h.handleGetUsers)))).Methods("GET")
-	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((validateToken(h.handleUpdateUser)))).Methods("PUT")
-	mux.HandleFunc("/api/users/{id}", userHandlerLogging.Httplog((validateToken(h.handleDeleteUser)))).Methods("DELETE")
-	mux.HandleFunc("/api/users/roles", userHandlerLogging.Httplog((validateToken(h.handleGetUserRoles)))).Methods("GET")
+	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((auth.ValidateToken(h.handleAddUser, authServer)))).Methods("POST")
+	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((auth.ValidateToken(h.handleGetUsers, authServer)))).Methods("GET")
+	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateUser, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/users/{id}", userHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteUser, authServer)))).Methods("DELETE")
+	mux.HandleFunc("/api/users/roles", userHandlerLogging.Httplog((auth.ValidateToken(h.handleGetUserRoles, authServer)))).Methods("GET")
 }
 
 /*

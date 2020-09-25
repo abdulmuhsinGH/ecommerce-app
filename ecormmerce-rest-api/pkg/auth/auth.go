@@ -53,7 +53,7 @@ func ValidateToken(next http.HandlerFunc, authServer *server.Server) http.Handle
 
 			return
 		}
-		if r.Method == "PUT" {
+		if r.Method == http.MethodPut {
 			r.Form.Set("updated_by", tokenInfo.GetUserID())
 		}
 		next(w, r)

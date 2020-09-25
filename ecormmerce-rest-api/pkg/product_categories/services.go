@@ -47,10 +47,8 @@ func (s *service) AddProductCategory(productCategory *ProductCategory) error {
 UpdateproductCategory creates a new productCategory
 */
 func (s *service) UpdateProductCategory(productCategory *ProductCategory) error {
-	var err error
-
-	productCategory.UpdatedAt = time.Now()
-	productCategory, err = s.productCategoryRepository.UpdateProductCategory(productCategory)
+	productCategory.UpdatedAt = time.Now().UTC()
+	_, err := s.productCategoryRepository.UpdateProductCategory(productCategory)
 	if err != nil {
 		return err
 	}
