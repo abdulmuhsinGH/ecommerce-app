@@ -163,7 +163,6 @@ export default {
           this.products = response.data.data;
         }
       } catch (error) {
-        console.error({ error });
         eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
         if (error.response.status === 401) {
           this.logout();
@@ -187,7 +186,6 @@ export default {
           this.brands = response.data.data;
         }
       } catch (error) {
-        console.error({ error });
         if (error.response.status === 401) {
           this.logout();
         }
@@ -205,7 +203,6 @@ export default {
           this.categories = response.data.data;
         }
       } catch (error) {
-        console.error({ error });
         if (error.response.status === 401) {
           this.logout();
         }
