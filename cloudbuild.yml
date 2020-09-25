@@ -1,118 +1,150 @@
 #cloudbuild.yaml
 steps:
   # Build the container image
-- name: 'docker/compose:1.26.0'
-  args: ['-f', 'docker-compose.production.yml', 'build', 
-      '--build-arg', 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID', 
-      '--build-arg', 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET', 
-      '--build-arg', 'VUE_APP_Scopes=$_VUE_APP_SCOPES', 
-      '--build-arg', 'VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL', 
-      '--build-arg', 'VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL', 
-      '--build-arg', 'VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL', 
-      '--build-arg', 'VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL', 
-      '--build-arg', 'VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL']
-  env:
-    - 'VUE_APP_ClientID=$_VUE_APP_CLIENT_ID'
-    - 'VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET'
-    - 'VUE_APP_Scopes=$_VUE_APP_SCOPES'
-    - 'VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL'
-    - 'VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL'
-    - 'VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL'
-    - 'VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL'
-    - 'VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL'
-    - 'DB_NAME=$_DB_NAME'
-    - 'DB_HOST=$_DB_HOST'
-    - 'DB_PASS=$_DB_PASS'
-    - 'DB_USER=$_DB_USER'
-    - 'DB_PORT=$_DB_PORT'
-    - 'JWT_SECRET=$_JWT_SECRET'
-    - 'SESSION_KEY=$_SESSION_KEY'
-    - 'STATE_HASH_KEY=$_STATE_HASH_KEY'
-    - 'GOOGLE_CLIENT_ID=$_GOOGLE_CLIENT_ID'
-    - 'GOOGLE_CLIENT_SECRET=$_GOOGLE_CLIENT_SECRET'
-    - 'GOOGLE_CLIENT_REDIRECT_URL=$_GOOGLE_CLIENT_REDIRECT_URL'
-    - 'ADMIN_CLIENT_ID=$_VUE_APP_CLIENT_ID'
-    - 'ADMIN_CLIENT_SECRET=$_VUE_APP_CLIENT_SECRET'
-    - 'ADMIN_CLIENT_DOMAIN=$_VUE_APP_REDIRECT_URL'
-    - 'AUTH_ALLOWED_ORIGIN=$_VUE_APP_REDIRECT_URL'
-    - 'REDIS_SERVER_HOST=$_REDIS_SERVER_HOST'
-    - 'REDIS_SERVER_PORT=$_REDIS_SERVER_PORT'
-    - 'RESOURCE_ALLOWED_ORIGIN=$_VUE_APP_REDIRECT_URL'
-  # Tag admin-client container image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/admin-client:latest', 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
-  # Tag ecormmerce-api container image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/ecormmerce-api:latest', 'gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA']
-  # Tag auth-server container image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/auth-server:latest', 'gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA']
-  # Tag migration container image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['tag', 'abdulmuhsin/migration:latest', 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA']
+  - name: "docker/compose:1.26.0"
+    args:
+      [
+        "-f",
+        "docker-compose.production.yml",
+        "build",
+        "--build-arg",
+        "VUE_APP_ClientID=$_VUE_APP_CLIENT_ID",
+        "--build-arg",
+        "VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET",
+        "--build-arg",
+        "VUE_APP_Scopes=$_VUE_APP_SCOPES",
+        "--build-arg",
+        "VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL",
+        "--build-arg",
+        "VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL",
+        "--build-arg",
+        "VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL",
+        "--build-arg",
+        "VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL",
+        "--build-arg",
+        "VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL",
+      ]
+    env:
+      - "VUE_APP_ClientID=$_VUE_APP_CLIENT_ID"
+      - "VUE_APP_ClientSecret=$_VUE_APP_CLIENT_SECRET"
+      - "VUE_APP_Scopes=$_VUE_APP_SCOPES"
+      - "VUE_APP_RedirectURL=$_VUE_APP_REDIRECT_URL"
+      - "VUE_APP_AUTH_URL=$_VUE_APP_AUTH_URL"
+      - "VUE_APP_AuthURL=$_VUE_APP_AUTHORIZE_URL"
+      - "VUE_APP_TokenURL=$_VUE_APP_TOKEN_URL"
+      - "VUE_APP_ECOMMERCE_API_URL=$_VUE_APP_ECOMMERCE_API_URL"
+      - "DB_NAME=$_DB_NAME"
+      - "DB_HOST=$_DB_HOST"
+      - "DB_PASS=$_DB_PASS"
+      - "DB_USER=$_DB_USER"
+      - "DB_PORT=$_DB_PORT"
+      - "JWT_SECRET=$_JWT_SECRET"
+      - "SESSION_KEY=$_SESSION_KEY"
+      - "STATE_HASH_KEY=$_STATE_HASH_KEY"
+      - "GOOGLE_CLIENT_ID=$_GOOGLE_CLIENT_ID"
+      - "GOOGLE_CLIENT_SECRET=$_GOOGLE_CLIENT_SECRET"
+      - "GOOGLE_CLIENT_REDIRECT_URL=$_GOOGLE_CLIENT_REDIRECT_URL"
+      - "ADMIN_CLIENT_ID=$_VUE_APP_CLIENT_ID"
+      - "ADMIN_CLIENT_SECRET=$_VUE_APP_CLIENT_SECRET"
+      - "ADMIN_CLIENT_DOMAIN=$_VUE_APP_REDIRECT_URL"
+      - "AUTH_ALLOWED_ORIGIN=$_VUE_APP_REDIRECT_URL"
+      - "REDIS_SERVER_HOST=$_REDIS_SERVER_HOST"
+      - "REDIS_SERVER_PORT=$_REDIS_SERVER_PORT"
+      - "RESOURCE_ALLOWED_ORIGIN=$_VUE_APP_REDIRECT_URL"
+    # Tag admin-client container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "tag",
+        "abdulmuhsin/admin-client:latest",
+        "gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA",
+      ]
+    # Tag ecormmerce-api container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "tag",
+        "abdulmuhsin/ecormmerce-api:latest",
+        "gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA",
+      ]
+    # Tag auth-server container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "tag",
+        "abdulmuhsin/auth-server:latest",
+        "gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA",
+      ]
+    # Tag migration container image
+  #- name: 'gcr.io/cloud-builders/docker'
+  #  args: ['tag', 'abdulmuhsin/migration:latest', 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA']
   # Push the admin-client container image to Container Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA']
-  # Push the ecormmerce-api container image to Container Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA']
-# Push the auth-server container image to Container Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA']
-# Push the migration container image to Container Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA']
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA"]
+    # Push the ecormmerce-api container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA"]
+  # Push the auth-server container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA"]
+  # Push the migration container image to Container Registry
+  #- name: 'gcr.io/cloud-builders/docker'
+  #  args: ['push', 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA']
   # Deploy admin-client container image to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-  - 'run'
-  - 'deploy'
-  - 'adminclient'
-  - '--image'
-  - 'gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA'
-  - '--region'
-  - 'us-central1'
-  - '--platform'
-  - 'managed'
-  # Deploy ecormmerce-api container image to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-  - 'run'
-  - 'deploy'
-  - 'ecormmerceapi'
-  - '--image'
-  - 'gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA'
-  - '--region'
-  - 'us-central1'
-  - '--platform'
-  - 'managed'
-  # Deploy authserver container image to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-  - 'run'
-  - 'deploy'
-  - 'authserver'
-  - '--image'
-  - 'gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA'
-  - '--region'
-  - 'us-central1'
-  - '--platform'
-  - 'managed'
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "adminclient"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+    # Deploy ecormmerce-api container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "ecormmerceapi"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+    # Deploy authserver container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "authserver"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
 # Deploy migration container image to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-  - 'run'
-  - 'deploy'
-  - 'migration'
-  - '--image'
-  - 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA'
-  - '--region'
-  - 'us-central1'
-  - '--platform'
-  - 'managed'
-images: ['gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA', 'gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA', 
-  'gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA', 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA']
+#- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#  entrypoint: gcloud
+#  args:
+#  - 'run'
+#  - 'deploy'
+#  - 'migration'
+#  - '--image'
+#  - 'gcr.io/$PROJECT_ID/migration:$COMMIT_SHA'
+#  - '--region'
+#  - 'us-central1'
+#  - '--platform'
+#  - 'managed'
+images:
+  [
+    "gcr.io/$PROJECT_ID/admin-client:$COMMIT_SHA",
+    "gcr.io/$PROJECT_ID/ecommerce-api:$COMMIT_SHA",
+    "gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA",
+  ]

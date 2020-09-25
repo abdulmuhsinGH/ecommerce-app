@@ -106,12 +106,12 @@ services:
       dockerfile: Dockerfile-dev
     environment:
       GET_HOSTS_FROM: dns
-      CHOKIDAR_USEPOLLING: 'true'
+      CHOKIDAR_USEPOLLING: "true"
     networks:
       - ecormmercenetdev
     volumes:
-      - './admin-client:/admin-client'
-      - '/admin-client/node_modules'
+      - "./admin-client:/admin-client"
+      - "/admin-client/node_modules"
     ports:
       - 8080:8080
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-pg/migrations/v8"
 	"github.com/go-pg/pg/v10"
+	"github.com/joho/godotenv"
 )
 
 const usageText = `This program runs command on the db. Supported commands are:
@@ -32,7 +33,7 @@ func main() {
 
 	flag.Usage = usage
 	flag.Parse()
-	//_ = godotenv.Load(".env")
+	_ = godotenv.Load(".env")
 	var (
 		// local db credential
 		DbHost     = os.Getenv("DB_HOST")

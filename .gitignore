@@ -33,3 +33,4 @@ redis.conf
 /redis-data
 openapi2-run.yaml
 migration/migrate_cli
+migration/migration_cli

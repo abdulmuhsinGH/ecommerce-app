@@ -65,7 +65,7 @@ services:
     container_name: admin-client
     image: abdulmuhsin/admin-client
     hostname: admin-client
-    build: 
+    build:
       context: ./admin-client
       dockerfile: Dockerfile
     environment:
@@ -82,23 +82,22 @@ services:
       - 8080:8080
     labels:
       kompose.service.type: LoadBalancer
-
-  migration:
-    container_name: migration
-    image: abdulmuhsin/migration
-    hostname: migration
-    build:
-      context: ./migration
-      dockerfile: Dockerfile
-    environment:
-      GET_HOSTS_FROM: dns
-      PORT: 8080
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PORT: ${DB_PORT}
-      DB_PASS: ${DB_PASS}
-      DB_HOST: ${DB_HOST}
-    ports:
-      - 8080:8080
-    labels:
-      kompose.service.type: LoadBalancer
+  #migration:
+  #  container_name: migration
+  #  image: abdulmuhsin/migration
+  #  hostname: migration
+  #  build:
+  #    context: ./migration
+  #    dockerfile: Dockerfile
+  #  environment:
+  #    GET_HOSTS_FROM: dns
+  #    PORT: 8080
+  #    DB_NAME: ${DB_NAME}
+  #    DB_USER: ${DB_USER}
+  #    DB_PORT: ${DB_PORT}
+  #    DB_PASS: ${DB_PASS}
+  #    DB_HOST: ${DB_HOST}
+  #  ports:
+  #    - 8080:8080
+  #  labels:
+  #    kompose.service.type: LoadBalancer
