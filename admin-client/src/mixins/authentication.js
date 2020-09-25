@@ -26,13 +26,19 @@ const auth = {
     },
     async getUserDetails() {
       // /auth/user-details
-      const token = JSON.parse(window.atob(this.$store.getters.getToken));
-      const response = await axios.get(`${process.env.VUE_APP_AUTH_URL}/auth/user-details`, {
-        params: {
-          access_token: token.access_token,
-        },
-      });
-      this.$cookies.set('ank_usr_val', window.btoa(JSON.stringify(response.data)), '1d');
+      try {
+        const token = JSON.parse(window.atob(this.$store.getters.getToken));
+        const response = await axios.get(`${process.env.VUE_APP_AUTH_URL}/auth/user-details`, {
+          params: {
+            access_token: token.access_token,
+          },
+        });
+        this.$cookies.set('ank_usr_val', window.btoa(JSON.stringify(response.data)), '1d');
+      } catch (error) {
+        if (error && error.response && error.response.status === 401) {
+          this.logout();
+        }
+      }
     },
   },
 };

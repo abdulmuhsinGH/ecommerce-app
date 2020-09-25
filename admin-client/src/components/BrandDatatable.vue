@@ -1,6 +1,12 @@
 <template>
   <div>
     <v-data-table :headers="headers" :items="brands" sort-by="name" class="elevation-2">
+      <template v-slot:[`item.created_at`]="{ item }">
+           <span>{{new Date(item.created_at).toString()}}</span>
+      </template>
+      <template v-slot:[`item.updated_at`]="{ item }">
+           <span>{{new Date(item.updated_at).toString()}}</span>
+      </template>
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Brands</v-toolbar-title>
@@ -19,7 +25,7 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.name" label="name"></v-text-field>
+                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -80,6 +86,7 @@ export default {
     ],
     brands: [],
     editedIndex: -1,
+    editedItemID: '',
     editedItem: {
       name: '',
     },
@@ -115,14 +122,17 @@ export default {
         });
         this.brands = response.data.data;
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
     editItem(item) {
       this.editedIndex = this.brands.indexOf(item);
+      this.editedItemID = this.brands[this.editedIndex].id;
       this.editedItem = { ...item };
       this.dialog = true;
     },
@@ -138,9 +148,11 @@ export default {
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -154,19 +166,24 @@ export default {
     async save() {
       try {
         let responseData;
+        const currentDate = new Date(Date.now()).toString();
+        this.editedItem.updated_at = currentDate;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/brands', this.editedItem);
+          responseData = await this.updateItem('api/brands', this.editedItem, this.editedItemID);
           Object.assign(this.brands[this.editedIndex], this.editedItem);
         } else {
           responseData = await this.createItem('api/brands/new', this.editedItem);
+          this.editedItem.created_at = currentDate;
           this.brands.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
         this.close();
       }

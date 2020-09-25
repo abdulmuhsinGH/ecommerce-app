@@ -61,7 +61,15 @@ HandleUpdateProduct gets data from http request and sends to
 func (h *Handlers) handleUpdateProduct(response http.ResponseWriter, request *http.Request) {
 	product := Product{}
 
-	err := parseBody(&product, request)
+	uuid, err := uuid.Parse(mux.Vars(request)["id"])
+	if err != nil {
+		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while converting string to uuid:", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
+		return
+	}
+	product.ID = uuid
+
+	err = parseBody(&product, request)
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -119,11 +127,6 @@ func parseBody(product *Product, request *http.Request) error {
 	if err != nil {
 		return err
 	}
-	ID, err := uuid.Parse(request.Form.Get("id"))
-	if err != nil {
-		return err
-	}
-	product.ID = ID
 	product.Name = request.Form.Get("name")
 	product.Description = request.Form.Get("description")
 	productCategory, err := strconv.ParseInt(request.Form.Get("category"), 10, 64)
@@ -152,7 +155,7 @@ SetupRoutes sets up routes to respective handlers
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/products/new", productHandlerLogging.Httplog((auth.ValidateToken(h.handleAddProduct, authServer)))).Methods("POST")
 	mux.HandleFunc("/api/products", productHandlerLogging.Httplog((auth.ValidateToken(h.handleGetProducts, authServer)))).Methods("GET")
-	mux.HandleFunc("/api/products", productHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateProduct, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/products/{id}", productHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateProduct, authServer)))).Methods("PUT")
 	mux.HandleFunc("/api/products/{id}", productHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteProduct, authServer)))).Methods("DELETE")
 }
 

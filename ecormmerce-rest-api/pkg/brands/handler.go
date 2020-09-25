@@ -58,9 +58,24 @@ HandleUpdateBrand gets data from http request and sends to
 func (h *Handlers) handleUpdateBrand(response http.ResponseWriter, request *http.Request) {
 	brand := ProductBrand{}
 
+	idStr, status := mux.Vars(request)["id"]
+	if !status {
+		brandHandlerLogging.Printlog("ProductBrand HandleUpdateBrand; Error getting brand id:", "Could not get id")
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to int", nil))
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		brandHandlerLogging.Printlog("ProductBrand HandleUpdateBrand; Error while converting string to int:", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to int", nil))
+		return
+	}
+	brand.ID = id
+
 	parseBody(&brand, request)
 
-	err := brandService.UpdateBrand(&brand)
+	err = brandService.UpdateBrand(&brand)
 	if err != nil {
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating brand", nil))
 		return
@@ -118,11 +133,7 @@ func parseBody(brand *ProductBrand, request *http.Request) error {
 	if err != nil {
 		return err
 	}
-	ID, err := strconv.ParseInt(request.Form.Get("id"), 10, 64)
-	if err != nil {
-		return err
-	}
-	brand.ID = ID
+
 	brand.Name = request.Form.Get("name")
 	return nil
 	//brand.Description = request.Form.Get("description")
@@ -135,7 +146,7 @@ SetupRoutes sets up routes to respective handlers
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/brands/new", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleAddBrand, authServer)))).Methods("POST")
 	mux.HandleFunc("/api/brands", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleGetBrands, authServer)))).Methods("GET")
-	mux.HandleFunc("/api/brands", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateBrand, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/brands/{id}", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateBrand, authServer)))).Methods("PUT")
 	mux.HandleFunc("/api/brands/{id}", brandHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteBrand, authServer)))).Methods("DELETE")
 }
 

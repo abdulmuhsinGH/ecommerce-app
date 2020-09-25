@@ -27,9 +27,9 @@ const crudMixin = {
 
       return response.data;
     },
-    async updateItem(endpoint, item) {
+    async updateItem(endpoint, item, id) {
       const token = JSON.parse(window.atob(this.$store.getters.getToken));
-      const response = await axios.put(`${process.env.VUE_APP_ECOMMERCE_API_URL}/${endpoint}`, stringify(item), {
+      const response = await axios.put(`${process.env.VUE_APP_ECOMMERCE_API_URL}/${endpoint}/${id}`, stringify(item), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

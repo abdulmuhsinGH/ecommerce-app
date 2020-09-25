@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Service provides productCategory adding operations.
+// Service provides product category adding operations.
 type Service interface {
 	AddProductCategory(*ProductCategory) error
 	GetAllProductCategories() ([]ProductCategory, error)
@@ -23,7 +23,7 @@ type service struct {
 var productCategoryServiceLogging logging.Logging
 
 /*
-NewService creates a productCategorys service with the necessary dependencies
+NewService creates a product category service with the necessary dependencies
 */
 func NewService(r Repository) Service {
 	productCategoryServiceLogging = logging.New("productCategory_service:")
@@ -31,7 +31,7 @@ func NewService(r Repository) Service {
 }
 
 /*
-AddproductCategory creates a new productCategory
+AddProductCategory creates a new product category
 */
 func (s *service) AddProductCategory(productCategory *ProductCategory) error {
 
@@ -44,7 +44,7 @@ func (s *service) AddProductCategory(productCategory *ProductCategory) error {
 }
 
 /*
-UpdateproductCategory creates a new productCategory
+UpdateProductCategory creates a new product category
 */
 func (s *service) UpdateProductCategory(productCategory *ProductCategory) error {
 	productCategory.UpdatedAt = time.Now().UTC()
@@ -57,7 +57,7 @@ func (s *service) UpdateProductCategory(productCategory *ProductCategory) error 
 }
 
 /*
-DeleteproductCategory creates a new productCategory
+DeleteProductCategory creates a new product category
 */
 func (s *service) DeleteProductCategory(productCategory *ProductCategory) error {
 	err := s.productCategoryRepository.DeleteProductCategory(productCategory)
@@ -69,7 +69,7 @@ func (s *service) DeleteProductCategory(productCategory *ProductCategory) error 
 }
 
 /*
-GetAllProductCategories gets all productCategorys
+GetAllProductCategories gets all product categorys
 */
 func (s *service) GetAllProductCategories() ([]ProductCategory, error) {
 	productCategorys, err := s.productCategoryRepository.GetAllProductCategories()
@@ -80,7 +80,7 @@ func (s *service) GetAllProductCategories() ([]ProductCategory, error) {
 }
 
 /*
-GetproductCategoryByID gets all productCategorys
+GetProductCategoryByID gets a product category using the ID
 */
 func (s *service) GetProductCategoryByID(ID int64) (productCategory ProductCategory, err error) {
 	productCategory, err = s.productCategoryRepository.GetProductCategoryByID(ID)
@@ -91,7 +91,7 @@ func (s *service) GetProductCategoryByID(ID int64) (productCategory ProductCateg
 }
 
 /*
-GetProductCategoriesByName gets all productCategories
+GetProductCategoriesByName gets a product category using the name
 */
 func (s *service) GetProductCategoriesByName(name string) ([]ProductCategory, error) {
 	productCategories, err := s.productCategoryRepository.GetProductCategoriesByName(name)

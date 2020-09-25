@@ -7,7 +7,7 @@ import (
 )
 
 /*
-Repository provides productCategory repository operations
+Repository provides product category repository operations
 */
 type Repository interface {
 	//AddproductCategory(*productCategory) bool
@@ -44,7 +44,7 @@ func (r *repository) UpdateProductCategory(productCategory *ProductCategory) (*P
 }
 
 /*
-AddProductCategory finds productCategory or saves productCategory if not found to the productCategory's table
+AddProductCategory finds product category or saves product category if not found to the product category's table
 */
 func (r *repository) AddProductCategory(productCategory *ProductCategory) (*ProductCategory, error) {
 
@@ -61,7 +61,7 @@ func (r *repository) AddProductCategory(productCategory *ProductCategory) (*Prod
 }
 
 /*
-DeleteProductCategory saves productCategory to the productCategory's table
+DeleteProductCategory saves product category to the product category's table
 */
 func (r *repository) DeleteProductCategory(productCategory *ProductCategory) error {
 	_, err := r.db.Model(productCategory).WherePK().Delete()
@@ -74,7 +74,7 @@ func (r *repository) DeleteProductCategory(productCategory *ProductCategory) err
 }
 
 /*
-GetAllProductCategories returns all productCategorys from the productCategory's table
+GetAllProductCategories returns all productCategorys from the product category's table
 */
 func (r *repository) GetAllProductCategories() ([]ProductCategory, error) {
 	productCategories := []ProductCategory{}
@@ -109,7 +109,7 @@ func (r *repository) GetProductCategoryByID(ID int64) (ProductCategory, error) {
 }
 
 /*
-GetProductCategoriesByName returns a productCategory by the id from the productCategory's table
+GetProductCategoriesByName returns a product category by the id from the product category's table
 */
 func (r *repository) GetProductCategoriesByName(name string) ([]ProductCategory, error) {
 	productCategories := []ProductCategory{}

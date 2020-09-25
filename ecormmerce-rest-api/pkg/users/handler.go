@@ -62,7 +62,15 @@ HandleUpdateUser gets data from http request and sends to
 func (h *Handlers) handleUpdateUser(response http.ResponseWriter, request *http.Request) {
 	user := User{}
 
-	err := parseBody(&user, request)
+	uuid, err := uuid.Parse(mux.Vars(request)["id"])
+	if err != nil {
+		userHandlerLogging.Printlog("User HandleUpdateUser; Error while converting string to uuid:", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
+		return
+	}
+	user.ID = uuid
+
+	err = parseBody(&user, request)
 	if err != nil {
 		userHandlerLogging.Printlog("User HandleUpdateUser; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -133,11 +141,7 @@ func parseBody(user *User, request *http.Request) error {
 	if err != nil {
 		return err
 	}
-	ID, err := uuid.Parse(request.Form.Get("id"))
-	if err != nil {
-		return err
-	}
-	user.ID = ID
+
 	user.Firstname = request.Form.Get("firstname")
 	user.Lastname = request.Form.Get("lastname")
 	user.Username = request.Form.Get("username")
@@ -174,7 +178,7 @@ SetupRoutes sets up routes to respective handlers
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/users/new", userHandlerLogging.Httplog((auth.ValidateToken(h.handleAddUser, authServer)))).Methods("POST")
 	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((auth.ValidateToken(h.handleGetUsers, authServer)))).Methods("GET")
-	mux.HandleFunc("/api/users", userHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateUser, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/users/{id}", userHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateUser, authServer)))).Methods("PUT")
 	mux.HandleFunc("/api/users/{id}", userHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteUser, authServer)))).Methods("DELETE")
 	mux.HandleFunc("/api/users/roles", userHandlerLogging.Httplog((auth.ValidateToken(h.handleGetUserRoles, authServer)))).Methods("GET")
 }

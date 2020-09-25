@@ -2,6 +2,12 @@
   <div>
 
     <v-data-table :headers="headers" :items="products" sort-by="name" class="elevation-2">
+      <template v-slot:[`item.created_at`]="{ item }">
+           <span>{{new Date(item.created_at).toString()}}</span>
+      </template>
+      <template v-slot:[`item.updated_at`]="{ item }">
+           <span>{{new Date(item.updated_at).toString()}}</span>
+      </template>
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Products</v-toolbar-title>
@@ -20,7 +26,7 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.name" label="name"></v-text-field>
+                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
@@ -32,7 +38,7 @@
                         label="Select Brand"
                         hide-details
                         single-line
-                      ></v-select>
+                       outlined></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
@@ -44,7 +50,7 @@
                         label="Select Category"
                         hide-details
                         single-line
-                      ></v-select>
+                       outlined></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
@@ -114,6 +120,7 @@ export default {
     brands: [],
     categories: [],
     editedIndex: -1,
+    editedItemID: '',
     editedItem: {
       name: '',
       category: '',
@@ -147,8 +154,6 @@ export default {
   },
   mounted() {
     this.getAllProducts();
-    this.getAllBrands();
-    this.getAllCategories();
   },
   methods: {
     async getAllProducts() {
@@ -171,6 +176,7 @@ export default {
     },
     editItem(item) {
       this.editedIndex = this.products.indexOf(item);
+      this.editedItemID = this.products[this.editedIndex].id;
       this.editedItem = { ...item };
       this.dialog = true;
     },
@@ -186,8 +192,10 @@ export default {
           this.brands = response.data.data;
         }
       } catch (error) {
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.status) {
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -203,8 +211,10 @@ export default {
           this.categories = response.data.data;
         }
       } catch (error) {
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.status) {
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -221,9 +231,11 @@ export default {
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
         // console.log({ error });
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -237,20 +249,25 @@ export default {
     async save() {
       try {
         let responseData;
+        const currentDate = new Date(Date.now()).toString();
+        this.editedItem.updated_at = currentDate;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/products', this.editedItem);
+          responseData = await this.updateItem('api/products', this.editedItem, this.editedItemID);
           Object.assign(this.products[this.editedIndex], this.editedItem);
         } else {
           responseData = await this.createItem('api/products/new', this.editedItem);
+          this.editedItem.created_at = currentDate;
           this.products.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
         // console.log({ error });
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
         this.close();
       }

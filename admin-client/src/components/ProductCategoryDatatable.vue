@@ -1,6 +1,12 @@
 <template>
   <div>
     <v-data-table :headers="headers" :items="productCategories" sort-by="name" class="elevation-2">
+      <template v-slot:[`item.created_at`]="{ item }">
+           <span>{{new Date(item.created_at).toString()}}</span>
+      </template>
+      <template v-slot:[`item.updated_at`]="{ item }">
+           <span>{{new Date(item.updated_at).toString()}}</span>
+      </template>
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Product Categories</v-toolbar-title>
@@ -19,7 +25,7 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.name" label="name"></v-text-field>
+                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
                       <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
@@ -78,11 +84,13 @@ export default {
         value: 'name',
       },
       { text: 'Description', value: 'description' },
+      { text: 'Created At', value: 'created_at' },
       { text: 'Updated At', value: 'updated_at' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
     productCategories: [],
     editedIndex: -1,
+    editedItemID: '',
     editedItem: {
       name: '',
       description: '',
@@ -120,14 +128,17 @@ export default {
         });
         this.productCategories = response.data.data;
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
     editItem(item) {
       this.editedIndex = this.productCategories.indexOf(item);
+      this.editedItemID = this.productCategories[this.editedIndex].id;
       this.editedItem = { ...item };
       this.dialog = true;
     },
@@ -143,9 +154,11 @@ export default {
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -159,20 +172,24 @@ export default {
     async save() {
       try {
         let responseData;
+        const currentDate = new Date(Date.now()).toString();
+        this.editedItem.updated_at = currentDate;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/product-categories', this.editedItem);
+          responseData = await this.updateItem('api/product-categories', this.editedItem, this.editedItemID);
           Object.assign(this.productCategories[this.editedIndex], this.editedItem);
         } else {
           responseData = await this.createItem('api/product-categories/new', this.editedItem);
+          this.editedItem.created_at = currentDate;
           this.productCategories.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        this.close();
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },

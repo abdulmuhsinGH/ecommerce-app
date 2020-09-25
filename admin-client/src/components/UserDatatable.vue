@@ -1,6 +1,12 @@
 <template>
   <div>
     <v-data-table :headers="headers" :items="users" sort-by="username" class="elevation-2">
+      <template v-slot:[`item.created_at`]="{ item }">
+           <span>{{new Date(item.created_at).toString()}}</span>
+      </template>
+      <template v-slot:[`item.updated_at`]="{ item }">
+           <span>{{new Date(item.updated_at).toString()}}</span>
+      </template>
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Users</v-toolbar-title>
@@ -19,36 +25,36 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.username" label="Username"></v-text-field>
+                      <v-text-field v-model="editedItem.username" label="Username" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.firstname" label="Firstname"></v-text-field>
+                      <v-text-field v-model="editedItem.firstname" label="Firstname" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
                         v-model="editedItem.middlename"
-                        label="Middlename"></v-text-field>
+                        label="Middlename" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.lastname" label="Lastname"></v-text-field>
+                      <v-text-field v-model="editedItem.lastname" label="Lastname" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
                         v-model="editedItem.email_work"
-                        label="Work Email"></v-text-field>
+                        label="Work Email" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
                         v-model="editedItem.phone_work"
-                        label="Work phone"></v-text-field>
+                        label="Work phone" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
                         v-model="editedItem.phone_personal"
-                        label="Personal Phone"></v-text-field>
+                        label="Personal Phone" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.gender" label="Gender"></v-text-field>
+                      <v-text-field v-model="editedItem.gender" label="Gender" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
@@ -59,6 +65,7 @@
                         label="Select Status"
                         hide-details
                         single-line
+                        outlined
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
@@ -71,7 +78,8 @@
                         label="Select Role"
                         hide-details
                         single-line
-                      ></v-select>
+                        outlined
+                       ></v-select>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -142,6 +150,7 @@ export default {
     users: [],
     userRoles: [],
     editedIndex: -1,
+    editedItemID: '',
     editedItem: {
       username: '',
       firstname: '',
@@ -201,9 +210,11 @@ export default {
           });
         this.users = response.data.data;
       } catch (error) {
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -217,13 +228,16 @@ export default {
         });
         this.userRoles = response.data.data;
       } catch (error) {
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.status) {
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
     editItem(item) {
       this.editedIndex = this.users.indexOf(item);
+      this.editedItemID = this.users[this.editedIndex].id;
       this.editedItem = { ...item };
       this.dialog = true;
     },
@@ -240,9 +254,11 @@ export default {
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
         // console.log({ error });
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
       }
     },
@@ -256,20 +272,26 @@ export default {
     async save() {
       try {
         let responseData;
+        const currentDate = new Date(Date.now()).toString();
+        this.editedItem.updated_at = currentDate;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/users', this.editedItem);
+          responseData = await this.updateItem('api/users', this.editedItem, this.editedItemID);
+          this.editedItem.password = '';
           Object.assign(this.users[this.editedIndex], this.editedItem);
         } else {
           responseData = await this.createItem('api/users/new', this.editedItem);
+          this.editedItem.created_at = currentDate;
           this.users.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
         // console.log({ error });
-        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
-        if (error.response.status === 401) {
-          this.logout();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
         }
         this.close();
       }

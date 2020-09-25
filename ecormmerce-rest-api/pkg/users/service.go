@@ -3,6 +3,7 @@ package users
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -42,6 +43,9 @@ AddUser creates a new user
 */
 func (s *service) AddUser(user *User) error {
 	var err error
+	if len(user.Password) == 0 {
+		user.Password = fmt.Sprintf("%s@%s", user.Username, user.EmailWork)
+	}
 	user.Password, err = s.HashPassword(user.Password)
 	if err != nil {
 		userServiceLogging.Printlog("Password Hash Error;", err.Error())
