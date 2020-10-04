@@ -4,6 +4,7 @@
 ___
 1. create `.env` files in the root folder and the three folders using the `.env.template`
 2. set all environment variables 
+3. open terminal and change directory to project directory ie ecommerce-app
 3. run `go mod init`; to get all dependencies in the local project
 4. run `go mod verify`; to verify dependencies
 ### Before you move to the next steps please make sure you have docker and docker-compose installed
@@ -18,7 +19,7 @@ ___
 1. open terminal and change directory to the project folder
 2. Cchange directory to the migration folder
 3. Run this command to build the bin file - `go build -o migration_cli main.go`
-4. You should a bin file in the folder with the name `migration_cli`
+4. You should add binary file in the folder with the name `migration_cli`
 
 ### Creating an sql file for migration
 This is for when you want to create a sql file to alter a table, seed data or any change to the the database
