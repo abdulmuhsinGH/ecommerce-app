@@ -182,19 +182,6 @@ create TABLE IF NOT EXISTS products(
 	deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS order_items(
-	id uuid primary key DEFAULT uuid_generate_v4(),
-	order_id uuid REFERENCES orders(id),
-	product_details_id uuid REFERENCES product_details(id),
-	quantity INTEGER not null,
-	cost numeric not null,
-	delivery_status int not null REFERENCES delivery_status(id),
-	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by uuid,
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
-
 create TABLE IF NOT EXISTS payments(
 	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	order_id uuid REFERENCES orders(id),
@@ -299,6 +286,19 @@ create table if not exists batch(
 	cost_price numeric not null,
 	batch_status text not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMPTZ,
+	deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS order_items(
+	id uuid primary key DEFAULT uuid_generate_v4(),
+	order_id uuid REFERENCES orders(id),
+	product_details_id uuid REFERENCES product_details(id),
+	quantity INTEGER not null,
+	cost numeric not null,
+	delivery_status int not null REFERENCES delivery_status(id),
+	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
