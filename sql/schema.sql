@@ -185,7 +185,7 @@ create TABLE IF NOT EXISTS products(
 CREATE TABLE IF NOT EXISTS order_items(
 	id uuid primary key DEFAULT uuid_generate_v4(),
 	order_id uuid REFERENCES orders(id),
-	product_id uuid REFERENCES products(id),
+	product_details_id uuid REFERENCES product_details(id),
 	quantity INTEGER not null,
 	cost numeric not null,
 	delivery_status int not null REFERENCES delivery_status(id),
@@ -203,16 +203,6 @@ create TABLE IF NOT EXISTS payments(
 	details json not null,
 	status boolean not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
-
-create table IF NOT EXISTS inventory(
-	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
-	product_id uuid REFERENCES products(id),
-	quantity integer not null,
-	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
