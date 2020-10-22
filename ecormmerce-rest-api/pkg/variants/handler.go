@@ -126,8 +126,8 @@ func parseBody(variant *Variant, request *http.Request) error {
 	if err != nil {
 		return err
 	}
-	variant.Variant_name = request.Form.Get("name")
-	variant.Variant_desc = request.Form.Get("description")
+	variant.VariantName = request.Form.Get("name")
+	variant.VariantDesc = request.Form.Get("description")
 
 	if request.Method == "PUT" {
 		variantUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
