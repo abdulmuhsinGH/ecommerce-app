@@ -10,6 +10,7 @@ import (
 type ProductVariant struct {
 	ID                  uuid.UUID `json:"id"`
 	ProductID           uuid.UUID `json:"product_id"`
+	ProductName         string    `json:"product_name" pg:",discard_unknown_columns"`
 	SKU                 string    `json:"sku"`
 	ProductVariantValue string    `json:"product_variant_name"`
 	CreatedAt           time.Time `json:"created_at"`
