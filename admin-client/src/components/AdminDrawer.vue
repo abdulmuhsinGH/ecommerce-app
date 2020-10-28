@@ -94,8 +94,8 @@ export default {
       { icon: 'mdi-home', text: 'Home', to: '/dashboard' },
       { icon: 'mdi-contacts', text: 'Users', to: '/dashboard/users' },
       { icon: 'mdi-shopping', text: 'Products', to: '/dashboard/products' },
-      { icon: 'mdi-format-list-bulleted-type', text: 'Brands', to: '/dashboard/brands' },
-      { icon: 'mdi-format-list-bulleted', text: 'Categories', to: '/dashboard/product-categories' },
+      { icon: 'mdi-alpha-b-box', text: 'Brands', to: '/dashboard/brands' },
+      { icon: 'mdi-alpha-c-box', text: 'Categories', to: '/dashboard/product-categories' },
       /* {
         icon: 'mdi-chevron-up',
         'icon-alt': 'mdi-chevron-down',

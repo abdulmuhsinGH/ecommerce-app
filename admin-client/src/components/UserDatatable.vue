@@ -141,6 +141,7 @@ export default {
       { text: 'Work Phone', value: 'phone_work' },
       { text: 'Personal Email', value: 'email_personal' },
       { text: 'Personal Phone', value: 'phone_personal' },
+      { text: 'Role', value: 'role_name' },
       { text: 'Gender', value: 'gender' },
       { text: 'Status', value: 'status' },
       { text: 'Created At', value: 'created_at' },

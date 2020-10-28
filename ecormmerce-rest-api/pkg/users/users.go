@@ -10,6 +10,7 @@ import (
 User defines the properties of a user
 */
 type User struct {
+	users         struct{}  `pg:"users:table_alias"`
 	ID            uuid.UUID `json:"id"`
 	Username      string    `json:"username"`
 	Password      string    `json:"password"`
@@ -22,8 +23,10 @@ type User struct {
 	PhonePersonal string    `json:"phone_personal"`
 	Gender        string    `json:"gender"`
 	Role          uuid.UUID `json:"role"`
+	RoleName      string    `json:"role_name" pg:",discard_unknown_columns" sql:"-"`
 	Status        bool      `json:"status"`
 	LastLogin     time.Time `json:"last_login"`
+	CreatedAt     time.Time `json:"created_at"`
 	UpdatedBy     uuid.UUID `json:"updated_by"`
 	UpdatedAt     time.Time `json:"updated_at"`
 	DeletedAt     time.Time `pg:",soft_delete"`
