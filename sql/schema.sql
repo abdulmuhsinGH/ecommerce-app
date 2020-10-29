@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS variants (
 create table if not exists variant_value(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	variant_id uuid  not null REFERENCES variants(id),
-	variant_name text not null,
+	variant_value_name text not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ

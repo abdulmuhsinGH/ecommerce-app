@@ -38,7 +38,7 @@ HandleAddVariant gets data from http request and sends to
 func (h *Handlers) handleAddVariant(response http.ResponseWriter, request *http.Request) {
 	newVariant := Variant{}
 
-	err := parseBody(&newVariant, request)
+	err := parseVariant(&newVariant, request)
 	if err != nil {
 		variantHandlerLogging.Printlog("Variant HandleAddVariant; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -47,67 +47,34 @@ func (h *Handlers) handleAddVariant(response http.ResponseWriter, request *http.
 
 	err = variantService.AddVariant(&newVariant)
 	if err != nil {
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving product", nil))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving variant", nil))
 		return
 	}
-	format.Send(response, http.StatusOK, format.Message(true, "Product saved", nil))
+	format.Send(response, http.StatusOK, format.Message(true, "Variant saved", nil))
 
 }
 
-/*
-HandleUpdateVariant gets data from http request and sends to
-*/
-/* func (h *Handlers) handleUpdateVariant(response http.ResponseWriter, request *http.Request) {
-	variant := Variant{}
+func (h *Handlers) handleAddVariantValue(response http.ResponseWriter, request *http.Request) {
+	newVariantValue := VariantValue{}
 
-	uuid, err := uuid.Parse(mux.Vars(request)["id"])
+	err := parseVariantValue(&newVariantValue, request)
 	if err != nil {
-		variantHandlerLogging.Printlog("Product HandleUpdateProduct; Error while converting string to uuid:", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
-		return
-	}
-	variant.ID = uuid
-
-	err = parseBody(&variant, request)
-	if err != nil {
-		variantHandlerLogging.Printlog("Variant HandleUpdateProduct; Error while decoding request body:", err.Error())
+		variantHandlerLogging.Printlog("Variant HandleAddVariantValue; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
 		return
 	}
 
-	err = variantService.UpdateVariant(&variant)
+	err = variantService.AddVariantValue(&newVariantValue)
 	if err != nil {
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while updating variant", nil))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while saving varaint value", nil))
 		return
 	}
-	format.Send(response, http.StatusOK, format.Message(true, "Variant updated", nil))
+	format.Send(response, http.StatusOK, format.Message(true, "Variant Value saved", nil))
 
-} */
+}
 
 /*
-HandleDeleteProduct gets data from http request and sends to
-*/
-/* func (h *Handlers) handleDeleteVariant(response http.ResponseWriter, request *http.Request) {
-	variant := Variant{}
-
-	uuid, err := uuid.Parse(mux.Vars(request)["id"])
-	if err != nil {
-		variantHandlerLogging.Printlog("Variant HandleUpdateVariant; Error while converting string to uuid:", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
-		return
-	}
-	variant.ID = uuid
-	err = variantService.DeleteVariant(&variant)
-	if err != nil {
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while deleting variant", nil))
-		return
-	}
-	format.Send(response, http.StatusOK, format.Message(true, "Variant deleted", nil))
-
-} */
-
-/*
-HandleGetProducts gets data from http request and sends to
+HandleGetVariants gets data from http request and sends to
 */
 func (h *Handlers) handleGetVariants(response http.ResponseWriter, request *http.Request) {
 
@@ -121,7 +88,22 @@ func (h *Handlers) handleGetVariants(response http.ResponseWriter, request *http
 
 }
 
-func parseBody(variant *Variant, request *http.Request) error {
+/*
+HandleGetVariantValues gets data from http request and sends to
+*/
+func (h *Handlers) handleGetVariantValues(response http.ResponseWriter, request *http.Request) {
+
+	variantValues, err := variantService.GetAllVariantValues()
+	if err != nil {
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "error getting all variant values", nil))
+		return
+	}
+
+	format.Send(response, http.StatusOK, format.Message(true, "All variant values", variantValues)) // respond(response, message(true, "Variant saved"))
+
+}
+
+func parseVariant(variant *Variant, request *http.Request) error {
 	err := request.ParseForm()
 	if err != nil {
 		return err
@@ -139,12 +121,24 @@ func parseBody(variant *Variant, request *http.Request) error {
 	return nil
 }
 
+func parseVariantValue(variantValue *VariantValue, request *http.Request) error {
+	err := request.ParseForm()
+	if err != nil {
+		return err
+	}
+	variantValue.VariantValueName = request.Form.Get("name")
+
+	return nil
+}
+
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/variant/new", variantHandlerLogging.Httplog((auth.ValidateToken(h.handleAddVariant, authServer)))).Methods("POST")
 	mux.HandleFunc("/api/variants", variantHandlerLogging.Httplog((auth.ValidateToken(h.handleGetVariants, authServer)))).Methods("GET")
+	mux.HandleFunc("/api/variant-value/new", variantHandlerLogging.Httplog((auth.ValidateToken(h.handleAddVariantValue, authServer)))).Methods("POST")
+	mux.HandleFunc("/api/variant-values", variantHandlerLogging.Httplog((auth.ValidateToken(h.handleGetVariantValues, authServer)))).Methods("GET")
 	/* mux.HandleFunc("/api/variants/{id}", productHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateVariant, authServer)))).Methods("PUT")
 	mux.HandleFunc("/api/variants/{id}", productHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteVariant, authServer)))).Methods("DELETE") */
 }

@@ -9,11 +9,15 @@ import (
 // Service provides product adding operations.
 type Service interface {
 	AddVariant(*Variant) error
+	AddVariantValue(*VariantValue) error
 	GetAllVariants() ([]Variant, error)
+	GetAllVariantValues() ([]VariantValue, error)
 	// UpdateVariant(variant *Variant) error
 	// DeleteVariant(variant *Variant) error
 	GetVariantByID(ID uuid.UUID) (Variant, error)
+	GetVariantValueByID(ID uuid.UUID) (VariantValue, error)
 	GetVariantsByName(name string) ([]Variant, error)
+	GetVariantValuesByName(name string) ([]VariantValue, error)
 }
 
 type service struct {
@@ -36,6 +40,19 @@ AddVariant creates a new variant
 func (s *service) AddVariant(variant *Variant) error {
 
 	variant, err := s.variantRepository.AddVariant(variant)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+AddVariantValue creates a new variantvalue
+*/
+func (s *service) AddVariantValue(variantValue *VariantValue) error {
+
+	variantValue, err := s.variantRepository.AddVariantValue(variantValue)
 	if err != nil {
 		return err
 	}
@@ -99,4 +116,37 @@ func (s *service) GetVariantsByName(name string) ([]Variant, error) {
 		return nil, err
 	}
 	return variants, nil
+}
+
+/*
+GetAllVariantValues gets all variantvaluess
+*/
+func (s *service) GetAllVariantValues() ([]VariantValue, error) {
+	variantValues, err := s.variantRepository.GetAllVariantValues()
+	if err != nil {
+		return nil, err
+	}
+	return variantValues, nil
+}
+
+/*
+GetVariantValueByID gets all variantvalues
+*/
+func (s *service) GetVariantValueByID(ID uuid.UUID) (VariantValue, error) {
+	variantValue, err := s.variantRepository.GetVariantValueByID(ID)
+	if err != nil {
+		return VariantValue{}, err
+	}
+	return variantValue, nil
+}
+
+/*
+GetVariantValuesByName gets all variant values  with the 'name'
+*/
+func (s *service) GetVariantValuesByName(name string) ([]VariantValue, error) {
+	variantValues, err := s.variantRepository.GetVariantValuesByName(name)
+	if err != nil {
+		return nil, err
+	}
+	return variantValues, nil
 }

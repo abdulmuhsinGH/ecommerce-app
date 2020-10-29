@@ -18,12 +18,12 @@ type Variant struct {
 }
 
 type VariantValue struct {
-	ID          uuid.UUID `json:"id"`
-	VariantId   uuid.UUID `json:"variant_id"`
-	VariantName string    `json:"variant_name"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	DeletedAt   time.Time `json:"deleted_at"`
+	ID               uuid.UUID `json:"id"`
+	VariantId        uuid.UUID `json:"variant_id"`
+	VariantValueName string    `json:"variant_name"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+	DeletedAt        time.Time `json:"deleted_at"`
 }
 
 //create variant
