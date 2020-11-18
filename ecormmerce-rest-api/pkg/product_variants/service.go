@@ -3,7 +3,11 @@ package productvariants
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
+	"strings"
 	"time"
+	"unicode/utf8"
+
+	"unicode"
 
 	"github.com/google/uuid"
 )
@@ -32,11 +36,23 @@ func NewService(r Repository) Service {
 	return &service{r}
 }
 
+func generateSKU(productVariantValue string) string {
+	productValriantValues := strings.Split(productVariantValue, "_")
+	sku := ""
+	for _, value := range productValriantValues {
+		r, _ := utf8.DecodeRuneInString(value)
+		sku += string(unicode.ToUpper(r))
+	}
+	return sku
+}
+
 /*
 AddProduct creates a new productVariant
 */
 func (s *service) AddProductVariant(productVariant *ProductVariant) error {
 
+	//productVariant.SKU = fmt.Sprintf("", productValriantValues)
+	productVariant.SKU = generateSKU(productVariant.ProductVariantValue)
 	productVariant, err := s.productVariantRepository.AddProductVariant(productVariant)
 	if err != nil {
 		return err
