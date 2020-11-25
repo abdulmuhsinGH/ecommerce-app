@@ -14,7 +14,7 @@
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark class="mb-2" v-on="on">New Product Category</v-btn>
+              <v-btn color="primary" dark class="mb-2" v-on="on">New Product Variant</v-btn>
             </template>
             <v-card>
               <v-card-title>
@@ -25,10 +25,52 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
+                      <v-select
+                        v-model="editedItem.product_id"
+                        :items="products"
+                        item-value="id"
+                        item-text="name"
+                        menu-props="auto"
+                        label="Select Product"
+                        hide-details
+                        single-line
+                       outlined></v-select>
+
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
-                      <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
+                      <v-text-field v-model="editedItem.product_variant_value" label="Product Variant Value" disabled outlined></v-text-field>
+                    </v-col>
+
+                    <v-col cols="12" sm="12" md="12">
+                      <v-btn @click="addNewVariant">Add New Variant</v-btn>
+                      <v-row v-for="(item, index) in newProductVariantValue" :key="index">
+                        <v-col cols="6" sm="6" md="6">
+                          <v-select
+                            v-model="item.variant_id"
+                            :items="variants"
+                            item-value="name"
+                            item-text="name"
+                            menu-props="auto"
+                            label="Select Variant"
+                            hide-details
+                            single-line
+                          outlined></v-select>
+                        </v-col>
+                        <v-col cols="6" sm="6" md="6">
+                          <v-select
+                            v-model="item.variant_value"
+                            :items="variantValues"
+                            @change="formatProductVariantValue(item.variant_value)"
+                            item-value="variant_name"
+                            item-text="variant_name"
+                            menu-props="auto"
+                            label="Select Variant Value"
+                            hide-details
+                            single-line
+                          outlined></v-select>
+                        </v-col>
+                      </v-row>
+
                     </v-col>
                   </v-row>
                 </v-container>
@@ -78,27 +120,43 @@ export default {
     dialog: false,
     headers: [
       {
-        text: 'Name',
+        text: 'Product',
         align: 'start',
         sortable: false,
-        value: 'name',
+        value: 'product_name',
       },
-      { text: 'Description', value: 'description' },
+      { text: 'SKU', value: 'sku' },
+      { text: 'Product Variant Value', value: 'product_variant_name' },
       { text: 'Created At', value: 'created_at' },
       { text: 'Updated At', value: 'updated_at' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
     productVariants: [],
+    variantValues: [
+      { id: 1, variant_id: 1, variant_name: 'red' },
+      { id: 2, variant_id: 1, variant_name: 'blue' },
+      { id: 3, variant_id: 2, variant_name: 'cotton' },
+      { id: 4, variant_id: 2, variant_name: 'polyester' },
+      { id: 4, variant_id: 3, variant_name: 'small' },
+    ],
+    variants: [
+      { id: 1, description: '', name: 'color' },
+      { id: 2, description: '', name: 'material' },
+      { id: 3, description: '', name: 'size' },
+    ],
     products: [],
+    newProductVariantValue: [],
     editedIndex: -1,
     editedItemID: '',
     editedItem: {
-      name: '',
-      description: '',
+      product_id: '',
+      sku: '',
+      product_variant_value: '',
     },
     defaultItem: {
-      name: '',
-      description: '',
+      product_id: '',
+      sku: '',
+      product_variant_value: '',
     },
   }),
 
@@ -112,6 +170,11 @@ export default {
     dialog(val) {
       if (!val) {
         this.close();
+      }
+      if (val) {
+        this.getAllProducts();
+        // this.getAllVariantValues();
+        // this.getAllVariants();
       }
     },
   },
@@ -137,10 +200,46 @@ export default {
         }
       }
     },
+    async getAllVariantValues() {
+      try {
+        if (this.$store.getters.getToken) {
+          const token = JSON.parse(window.atob(this.$store.getters.getToken));
+          const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/variant-values`, {
+            params: {
+              access_token: token.access_token,
+            },
+          });
+          this.variantValues = response.data.data;
+        }
+      } catch (error) {
+        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+        if (error.response.status === 401) {
+          this.logout();
+        }
+      }
+    },
+    async getAllVariants() {
+      try {
+        if (this.$store.getters.getToken) {
+          const token = JSON.parse(window.atob(this.$store.getters.getToken));
+          const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/variants`, {
+            params: {
+              access_token: token.access_token,
+            },
+          });
+          this.variants = response.data.data;
+        }
+      } catch (error) {
+        eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+        if (error.response.status === 401) {
+          this.logout();
+        }
+      }
+    },
     async getAllProductVariants() {
       try {
         const token = JSON.parse(window.atob(this.$store.getters.getToken));
-        const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/product-variant`, {
+        const response = await axios.get(`${process.env.VUE_APP_ECOMMERCE_API_URL}/api/product-variants`, {
           params: {
             access_token: token.access_token,
           },
@@ -154,6 +253,14 @@ export default {
           }
         }
       }
+    },
+    formatProductVariantValue(variantValue) {
+      console.log(variantValue);
+      this.editedItem.product_variant_value += `${variantValue}_`;
+      console.log(this.editedItem);
+    },
+    addNewVariant() {
+      this.newProductVariantValue.push({ variant_id: 0, variant_value: '' });
     },
     editItem(item) {
       this.editedIndex = this.productVariants.indexOf(item);
