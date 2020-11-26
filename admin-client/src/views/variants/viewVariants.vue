@@ -9,7 +9,7 @@
          justify="center"
         >
           <v-col cols="12">
-            <bvariants-datatable/>
+            <variants-datatable/>
           </v-col>
         </v-row>
       </v-container>
