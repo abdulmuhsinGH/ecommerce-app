@@ -44,7 +44,7 @@
         </v-toolbar>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+        <!-- <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon> -->
         <v-icon small @click="deleteVariant(item)">mdi-delete</v-icon>
       </template>
       <template v-slot:no-data>
@@ -178,7 +178,7 @@ export default {
           responseData = await this.updateItem('api/variants/', this.editedItem, this.editedItemID);
           Object.assign(this.variants[this.editedIndex], this.editedItem);
         } else {
-          responseData = await this.createItem('api/variants/', this.editedItem);
+          responseData = await this.createItem('api/variants/new', this.editedItem);
           this.editedItem.created_at = currentDate;
           this.variants.push(this.editedItem);
         }
