@@ -9,6 +9,7 @@ import (
 	server "ecormmerce-app/ecormmerce-rest-api/pkg/server"
 	postgres "ecormmerce-app/ecormmerce-rest-api/pkg/storage/postgres"
 	users "ecormmerce-app/ecormmerce-rest-api/pkg/users"
+	"ecormmerce-app/ecormmerce-rest-api/pkg/variants"
 	"os"
 
 	"github.com/go-pg/pg/v9"
@@ -59,6 +60,9 @@ func main() {
 
 	productCatHandler := productcategories.NewHandlers(logging, db, authServer)
 	productCatHandler.SetupRoutes(router)
+
+	variantsHandler := variants.NewHandlers(logging, db, authServer)
+	variantsHandler.SetupRoutes(router)
 
 	srv := server.New(router, ":"+os.Getenv("PORT"))
 
