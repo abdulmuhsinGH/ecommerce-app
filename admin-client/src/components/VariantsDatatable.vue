@@ -174,7 +174,7 @@ export default {
         let responseData;
         const currentDate = new Date(Date.now()).toString();
         this.editedItem.updated_at = currentDate;
-        if (this.editedIndex > -1) {s
+        if (this.editedIndex > -1) {
           responseData = await this.updateItem('api/variants/', this.editedItem, this.editedItemID);
           Object.assign(this.variants[this.editedIndex], this.editedItem);
         } else {
