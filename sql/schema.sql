@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS variants (
   variant_name   text 	not null  ,
   variant_desc text not null,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  updated_by text not null,
+  updated_by text ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
   
