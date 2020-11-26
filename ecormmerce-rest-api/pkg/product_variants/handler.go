@@ -132,7 +132,7 @@ func parseBody(productVariant *ProductVariant, request *http.Request) error {
 	}
 	productVariant.ProductID = productID
 
-	productVariant.ProductVariantValue = request.Form.Get("product_variant_value")
+	productVariant.ProductVariantName = request.Form.Get("product_variant_name")
 	productVariant.SKU = request.Form.Get("sku")
 	return nil
 }

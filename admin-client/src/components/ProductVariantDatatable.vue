@@ -38,7 +38,7 @@
 
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.product_variant_value" label="Product Variant Value" disabled outlined></v-text-field>
+                      <v-text-field v-model="editedItem.product_variant_name" label="Product Variant Value" disabled outlined></v-text-field>
                     </v-col>
 
                     <v-col cols="12" sm="12" md="12">
@@ -151,12 +151,12 @@ export default {
     editedItem: {
       product_id: '',
       sku: '',
-      product_variant_value: '',
+      product_variant_name: '',
     },
     defaultItem: {
       product_id: '',
       sku: '',
-      product_variant_value: '',
+      product_variant_name: '',
     },
   }),
 
@@ -256,7 +256,7 @@ export default {
     },
     formatProductVariantValue(variantValue) {
       console.log(variantValue);
-      this.editedItem.product_variant_value += `${variantValue}_`;
+      this.editedItem.product_variant_name += `${variantValue}_`;
       console.log(this.editedItem);
     },
     addNewVariant() {

@@ -3,6 +3,7 @@ package productvariants
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -37,13 +38,15 @@ func NewService(r Repository) Service {
 }
 
 func generateSKU(productVariantValue string) string {
-	productValriantValues := strings.Split(productVariantValue, "_")
+	productVariantValue = strings.Trim(productVariantValue, " ")
+	productVariantValues := strings.Split(productVariantValue, "_")
 	sku := ""
-	for _, value := range productValriantValues {
+	for _, value := range productVariantValues {
 		r, _ := utf8.DecodeRuneInString(value)
 		sku += string(unicode.ToUpper(r))
 	}
-	return sku
+
+	return fmt.Sprintf("%s-%d", sku, time.Now().UnixNano())
 }
 
 /*
@@ -51,8 +54,10 @@ AddProduct creates a new productVariant
 */
 func (s *service) AddProductVariant(productVariant *ProductVariant) error {
 
-	//productVariant.SKU = fmt.Sprintf("", productValriantValues)
-	productVariant.SKU = generateSKU(productVariant.ProductVariantValue)
+	if productVariant.SKU == "" {
+		productVariant.SKU = generateSKU(productVariant.ProductVariantName)
+	}
+
 	productVariant, err := s.productVariantRepository.AddProductVariant(productVariant)
 	if err != nil {
 		return err
@@ -65,6 +70,10 @@ func (s *service) AddProductVariant(productVariant *ProductVariant) error {
 UpdateProduct creates a new productVariant
 */
 func (s *service) UpdateProductVariant(productVariant *ProductVariant) error {
+
+	if productVariant.SKU == "" {
+		productVariant.SKU = generateSKU(productVariant.ProductVariantName)
+	}
 	productVariant.UpdatedAt = time.Now().UTC()
 	_, err := s.productVariantRepository.UpdateProductVariant(productVariant)
 	if err != nil {

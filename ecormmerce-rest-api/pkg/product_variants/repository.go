@@ -17,6 +17,7 @@ type Repository interface {
 	UpdateProductVariant(*ProductVariant) (*ProductVariant, error)
 	DeleteProductVariant(*ProductVariant) error
 	GetProductVariantByID(uuid.UUID) (ProductVariant, error)
+	//GetProductVariantByVariantID(uuid.UUID) (ProductVariant, error)
 	GetProductVariantsByName(string) ([]ProductVariant, error)
 }
 
@@ -51,7 +52,7 @@ type ProductVariant struct {
 UpdateProductVariant updates a productVariant's info
 */
 func (r *repository) UpdateProductVariant(productVariant *ProductVariant) (*ProductVariant, error) {
-	_, err := r.db.Model(productVariant).Column("id", "product_id", "sku", "product_variant_value", "created_at", "updated_at").WherePK().Update()
+	_, err := r.db.Model(productVariant).Column("id", "product_id", "sku", "product_variant_name", "created_at", "updated_at").WherePK().Update()
 	if err != nil {
 		productVariantRepositoryLogging.Printlog("UpdateProduct_Error", err.Error())
 		return &ProductVariant{}, err
@@ -96,13 +97,13 @@ GetAllProductVariants returns all product variants from the product variant's ta
 func (r *repository) GetAllProductVariants() ([]ProductVariant, error) {
 	productVariants := []ProductVariant{}
 	/*
-		 ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_value, product_variant.created_at, product_variant.updated_at").
+		 ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_name, product_variant.created_at, product_variant.updated_at").
 			ColumnExpr("products.name AS product_name").
 			Join("JOIN products ON products.id = product_variant.product_id").
 			Where("product_variant.id = ?", ID).
 	*/
 	err := r.db.Model(&productVariants).
-		ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_value, product_variant.created_at, product_variant.updated_at").
+		ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_name, product_variant.created_at, product_variant.updated_at").
 		ColumnExpr("products.name AS product_name").
 		Join("JOIN products ON products.id = product_variant.product_id").
 		Select()
@@ -121,7 +122,7 @@ func (r *repository) GetProductVariantByID(ID uuid.UUID) (ProductVariant, error)
 	productVariant := ProductVariant{}
 
 	err := r.db.Model(&productVariant).
-		ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_value, product_variant.created_at, product_variant.updated_at").
+		ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_name, product_variant.created_at, product_variant.updated_at").
 		ColumnExpr("products.name AS product_name").
 		Join("JOIN products ON products.id = product_variant.product_id").
 		Where("product_variant.id = ?", ID).
@@ -141,7 +142,7 @@ GetProductVariantsByName returns a product variant by the id from the product va
 func (r *repository) GetProductVariantsByName(sku string) ([]ProductVariant, error) {
 	productVariants := []ProductVariant{}
 	err := r.db.Model(&productVariants).
-		ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_value, product_variant.created_at, product_variant.updated_at").
+		ColumnExpr("product_variant.id, product_variant.product_id, product_variant.sku, product_variant.product_variant_name, product_variant.created_at, product_variant.updated_at").
 		ColumnExpr("products.name AS product_name").
 		Join("JOIN products ON products.id = product_variant.product_id").
 		Where("product_variant.sku like ?", "%"+sku+"%").
