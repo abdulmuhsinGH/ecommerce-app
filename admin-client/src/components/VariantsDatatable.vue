@@ -88,7 +88,7 @@ export default {
       { text: 'Updated At', value: 'updated_at' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
-    Variants: [],
+    variants: [],
     editedIndex: -1,
     editedItemID: '',
     editedItem: {
