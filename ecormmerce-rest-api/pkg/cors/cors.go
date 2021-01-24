@@ -1,4 +1,5 @@
 package cors
+
 // SOURCE: https://github.com/heppu/simple-cors/blob/master/cors.go
 import (
 	"net/http"
@@ -42,7 +43,6 @@ func CORS(next http.Handler) http.Handler {
 			w.Write(nil)
 			return
 		}
-
 		next.ServeHTTP(w, r)
 	})
 }

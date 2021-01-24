@@ -3,7 +3,9 @@ package users
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	"errors"
+	"fmt"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/oauth2.v3/server"
@@ -17,6 +19,9 @@ type Service interface {
 	HashPassword(string) (string, error)
 	CheckPasswordHash(string, string) bool
 	ValidateToken(http.HandlerFunc, *server.Server) http.HandlerFunc
+	GetAllUserRoles() ([]UserRole, error)
+	UpdateUser(user *User) error
+	DeleteUser(user *User) error
 }
 
 type service struct {
@@ -38,16 +43,44 @@ AddUser creates a new user
 */
 func (s *service) AddUser(user *User) error {
 	var err error
+	if len(user.Password) == 0 {
+		user.Password = fmt.Sprintf("%s@%s", user.Username, user.EmailWork)
+	}
 	user.Password, err = s.HashPassword(user.Password)
 	if err != nil {
 		userServiceLogging.Printlog("Password Hash Error;", err.Error())
 		return err
 	}
 
-	status := s.userRepository.AddUser(user)
-	if !status {
-		userServiceLogging.Printlog("Add user Error;", err.Error())
+	user, err = s.userRepository.FindOrAddUser(user)
+	if err != nil {
 		return errors.New("not created")
+	}
+	return nil
+
+}
+
+/*
+UpdateUser creates a new user
+*/
+func (s *service) UpdateUser(user *User) error {
+
+	user.UpdatedAt = time.Now().UTC()
+	_, err := s.userRepository.UpdateUser(user)
+	if err != nil {
+		return errors.New("not updated")
+	}
+	return nil
+
+}
+
+/*
+DeleteUser creates a new user
+*/
+func (s *service) DeleteUser(user *User) error {
+	err := s.userRepository.DeleteUser(user)
+	if err != nil {
+		return errors.New("not deleted")
 	}
 	return nil
 
@@ -59,11 +92,21 @@ GetAllUsers gets all users
 func (s *service) GetAllUsers() ([]User, error) {
 	users, err := s.userRepository.GetAllUsers()
 	if err != nil {
-		userServiceLogging.Printlog("GetAllUsers_Error;", err.Error())
-		panic(err)
-		//return nil, err
+		return nil, err
 	}
 	return users, nil
+}
+
+/*
+GetAllUserRoles gets all user roles
+*/
+func (s *service) GetAllUserRoles() ([]UserRole, error) {
+	userRoles, err := s.userRepository.GetAllUserRoles()
+	if err != nil {
+		return nil, err
+	}
+
+	return userRoles, nil
 }
 
 /*
@@ -104,7 +147,6 @@ ValidateToken checks if user token is valid and authorises user to access route
 func (s *service) ValidateToken(next http.HandlerFunc, srv *server.Server) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userServiceLogging.Printlog("d", r.FormValue("access_token"))
 		_, err := srv.ValidationBearerToken(r)
 		if err != nil {
 			userServiceLogging.Printlog("validate_token_error", err.Error())

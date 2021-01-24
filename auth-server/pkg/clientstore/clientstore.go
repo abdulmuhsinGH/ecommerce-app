@@ -1,8 +1,6 @@
 package clientstore
 
 import (
-	"fmt"
-
 	"github.com/go-pg/pg/v9"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
@@ -48,12 +46,10 @@ func (c *ClientStore) GetByID(ID string) (oauth2.ClientInfo, error) {
 	oauthClient := OauthClient{ID: ID}
 	err := c.db.Select(&oauthClient)
 	if err != nil {
-		fmt.Println("oc", err.Error())
 		return nil, err
 	}
 	clientInfo := c.toClientInfo(oauthClient)
 	if err != nil {
-		fmt.Println("ci", err.Error())
 		return nil, err
 	}
 	return clientInfo, nil

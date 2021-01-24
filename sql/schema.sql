@@ -1,11 +1,15 @@
+<<<<<<< HEAD
 -- Schema is work in progress
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS user_roles(
+=======
+CREATE TABLE IF NOT EXISTS user_roles (
+>>>>>>> 7869fc9582c7e26da6c578cf5f0a261140d51c36
 	id uuid primary key DEFAULT uuid_generate_v4(),
 	role_name VARCHAR(100) UNIQUE not null,
 	description text  NOT NULL,
 	comment text,
-	updated_by TEXT,
+	updated_by uuid,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
@@ -31,7 +35,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
-	updated_by TEXT,
+	updated_by uuid,
 	PRIMARY KEY (id, username)
 	
 );
@@ -54,7 +58,7 @@ CREATE TABLE IF NOT EXISTS customers(
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
-	updated_by TEXT
+	updated_by uuid
 );
 
 CREATE TABLE IF NOT EXISTS address_type(
@@ -75,7 +79,7 @@ CREATE TABLE IF NOT EXISTS addresses(
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ,
-	updated_by TEXT
+	updated_by uuid
 );
 
 create table IF NOT EXISTS customer_address(
@@ -107,7 +111,7 @@ CREATE table IF NOT EXISTS payment_vendor(
 );
 
 CREATE TABLE IF NOT EXISTS customer_payment_types(
-	id uuid PRIMARY KEY NOT NULL,
+	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid NOT NULL REFERENCES customers(id),
 	payment_vendor_id int not null REFERENCES payment_vendor(id),
 	details json not null,
@@ -127,7 +131,7 @@ CREATE TABLE IF NOT EXISTS cart_type(
 );
 
 create table IF NOT EXISTS carts(
-	id uuid PRIMARY KEY NOT NULL,
+	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	customer_id uuid not null REFERENCES customers(id),
 	cart_items json not null,
 	cart_type int not null REFERENCES cart_type(id),
@@ -150,7 +154,7 @@ CREATE TABLE IF NOT EXISTS delivery_status(
 );
 
 CREATE TABLE IF NOT EXISTS orders(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	customer_id uuid REFERENCES customers(id),
 	cart_id uuid REFERENCES carts(id),
 	total_cost numeric not null,
@@ -158,7 +162,7 @@ CREATE TABLE IF NOT EXISTS orders(
 	order_status int not null REFERENCES order_status(id),
 	delivery_status int not null REFERENCES delivery_status(id),
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by varchar(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
@@ -172,33 +176,20 @@ CREATE TABLE IF NOT EXISTS product_brands(
 );
 
 create TABLE IF NOT EXISTS products(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	name text not null,
 	category int not null,
 	brand int not null REFERENCES product_brands(id),
 	-- cost numeric not null,
 	description text not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
-
-CREATE TABLE IF NOT EXISTS order_items(
-	id uuid primary key not null,
-	order_id uuid REFERENCES orders(id),
-	product_id uuid REFERENCES products(id),
-	quantity INTEGER not null,
-	cost numeric not null,
-	delivery_status int not null REFERENCES delivery_status(id),
-	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
 
 create TABLE IF NOT EXISTS payments(
-	id uuid PRIMARY key not null,
+	id uuid PRIMARY key DEFAULT uuid_generate_v4(),
 	order_id uuid REFERENCES orders(id),
 	payment_type integer not null REFERENCES  payment_types(id),
 	amount_paid numeric not null,
@@ -209,22 +200,12 @@ create TABLE IF NOT EXISTS payments(
 	deleted_at TIMESTAMPTZ
 );
 
-create table IF NOT EXISTS inventory(
-	id uuid PRIMARY key not null,
-	product_id uuid REFERENCES products(id),
-	quantity integer not null,
-	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
-	updated_at TIMESTAMPTZ,
-	deleted_at TIMESTAMPTZ
-);
-
 CREATE TABLE IF NOT EXISTS product_categories(
 	id serial not null PRIMARY key,
 	name varchar(100) not null,
 	description text,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	updated_by VARCHAR(100),
+	updated_by uuid,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
 );
@@ -240,8 +221,14 @@ CREATE TABLE IF NOT EXISTS oauth_clients (
 CREATE TABLE IF NOT EXISTS variants (
   id     uuid PRIMARY KEY DEFAULT uuid_generate_v4(),	
   variant_name   text 	not null  ,
+<<<<<<< HEAD
   vaiant_desc text not null,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+=======
+  variant_desc text not null,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_by text ,
+>>>>>>> 7869fc9582c7e26da6c578cf5f0a261140d51c36
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
   
@@ -251,7 +238,11 @@ CREATE TABLE IF NOT EXISTS variants (
 create table if not exists variant_value(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	variant_id uuid  not null REFERENCES variants(id),
+<<<<<<< HEAD
 	variant_name text not null,
+=======
+	variant_value_name text not null,
+>>>>>>> 7869fc9582c7e26da6c578cf5f0a261140d51c36
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
@@ -313,4 +304,20 @@ create table if not exists batch(
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ
+<<<<<<< HEAD
+=======
+);
+
+CREATE TABLE IF NOT EXISTS order_items(
+	id uuid primary key DEFAULT uuid_generate_v4(),
+	order_id uuid REFERENCES orders(id),
+	product_details_id uuid REFERENCES product_details(id),
+	quantity INTEGER not null,
+	cost numeric not null,
+	delivery_status int not null REFERENCES delivery_status(id),
+	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	updated_by uuid,
+	updated_at TIMESTAMPTZ,
+	deleted_at TIMESTAMPTZ
+>>>>>>> 7869fc9582c7e26da6c578cf5f0a261140d51c36
 );

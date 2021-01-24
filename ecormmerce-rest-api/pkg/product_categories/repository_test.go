@@ -1,2 +1,1 @@
-package product_categories
-
+package productcategories

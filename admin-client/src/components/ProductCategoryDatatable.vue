@@ -1,6 +1,12 @@
 <template>
   <div>
     <v-data-table :headers="headers" :items="productCategories" sort-by="name" class="elevation-2">
+      <template v-slot:[`item.created_at`]="{ item }">
+           <span>{{new Date(item.created_at).toString()}}</span>
+      </template>
+      <template v-slot:[`item.updated_at`]="{ item }">
+           <span>{{new Date(item.updated_at).toString()}}</span>
+      </template>
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Product Categories</v-toolbar-title>
@@ -18,8 +24,11 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.name" label="name"></v-text-field>
+                    <v-col cols="12" sm="12" md="12">
+                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="12" md="12">
+                      <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -34,12 +43,12 @@
           </v-dialog>
         </v-toolbar>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
         <v-icon small @click="deleteProductCategory(item)">mdi-delete</v-icon>
       </template>
       <template v-slot:no-data>
-        <v-btn color="primary" @click="getAllProductCategories">Reset</v-btn>
+        <v-btn color="primary" @click="getAllProductCategories">Refresh</v-btn>
       </template>
     </v-data-table>
     <div class="text-center pt-2">
@@ -52,6 +61,7 @@
 <script>
 import axios from 'axios';
 import crudMixin from '@/mixins/crudMixin';
+import auth from '@/mixins/authentication';
 import eventBus from '@/plugins/eventbus';
 import SnackbarComponent from './SnackbarComponent.vue';
 
@@ -62,6 +72,7 @@ export default {
   },
   mixins: [
     crudMixin,
+    auth,
   ],
   data: () => ({
     dialog: false,
@@ -74,24 +85,25 @@ export default {
       },
       { text: 'Description', value: 'description' },
       { text: 'Created At', value: 'created_at' },
-      { text: 'Updated By', value: 'updated_by' },
       { text: 'Updated At', value: 'updated_at' },
-      { text: 'Deleted At', value: 'deleted_at' },
       { text: 'Actions', value: 'actions', sortable: false },
     ],
     productCategories: [],
     editedIndex: -1,
+    editedItemID: '',
     editedItem: {
       name: '',
+      description: '',
     },
     defaultItem: {
       name: '',
+      description: '',
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
+      return this.editedIndex === -1 ? 'New Category' : 'Edit Category';
     },
   },
 
@@ -116,12 +128,17 @@ export default {
         });
         this.productCategories = response.data.data;
       } catch (error) {
-        console.error({ error });
-        eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
+        }
       }
     },
     editItem(item) {
       this.editedIndex = this.productCategories.indexOf(item);
+      this.editedItemID = this.productCategories[this.editedIndex].id;
       this.editedItem = { ...item };
       this.dialog = true;
     },
@@ -137,8 +154,12 @@ export default {
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
       } catch (error) {
-        console.log({ error });
-        eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
+        }
       }
     },
     close() {
@@ -151,19 +172,25 @@ export default {
     async save() {
       try {
         let responseData;
+        const currentDate = new Date(Date.now()).toString();
+        this.editedItem.updated_at = currentDate;
         if (this.editedIndex > -1) {
-          responseData = await this.updateItem('api/product-categories', this.editedItem);
+          responseData = await this.updateItem('api/product-categories', this.editedItem, this.editedItemID);
           Object.assign(this.productCategories[this.editedIndex], this.editedItem);
         } else {
           responseData = await this.createItem('api/product-categories/new', this.editedItem);
+          this.editedItem.created_at = currentDate;
           this.productCategories.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });
         this.close();
       } catch (error) {
-        console.log({ error });
-        eventBus.$emit('show-snackbar', { message: 'Something went wrong', messageType: 'error' });
-        this.close();
+        if (error.response && error.response.data) {
+          eventBus.$emit('show-snackbar', { message: `Something went wrong: ${error.response.data.message}`, messageType: 'error' });
+          if (error.response.status === 401) {
+            this.logout();
+          }
+        }
       }
     },
   },

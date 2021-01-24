@@ -1,15 +1,14 @@
 package products
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
-
-	uuid "github.com/satori/go.uuid"
+	"strconv"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/google/uuid"
 	"gopkg.in/oauth2.v3/server"
 
+	"ecormmerce-app/ecormmerce-rest-api/pkg/auth"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/format"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 
@@ -38,10 +37,9 @@ type Resp map[string]interface{}
 HandleAddProduct gets data from http request and sends to
 */
 func (h *Handlers) handleAddProduct(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("add new products")
 	newProduct := Product{}
 
-	err := json.NewDecoder(request.Body).Decode(&newProduct)
+	err := parseBody(&newProduct, request)
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleAddProduct; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -61,10 +59,17 @@ func (h *Handlers) handleAddProduct(response http.ResponseWriter, request *http.
 HandleUpdateProduct gets data from http request and sends to
 */
 func (h *Handlers) handleUpdateProduct(response http.ResponseWriter, request *http.Request) {
-	fmt.Println("Update products")
 	product := Product{}
 
-	err := json.NewDecoder(request.Body).Decode(&product)
+	uuid, err := uuid.Parse(mux.Vars(request)["id"])
+	if err != nil {
+		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while converting string to uuid:", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
+		return
+	}
+	product.ID = uuid
+
+	err = parseBody(&product, request)
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while decoding request body:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error while decoding request body", nil))
@@ -86,7 +91,7 @@ HandleDeleteProduct gets data from http request and sends to
 func (h *Handlers) handleDeleteProduct(response http.ResponseWriter, request *http.Request) {
 	product := Product{}
 
-	uuid, err := uuid.FromString(mux.Vars(request)["id"])
+	uuid, err := uuid.Parse(mux.Vars(request)["id"])
 	if err != nil {
 		productHandlerLogging.Printlog("Product HandleUpdateProduct; Error while converting string to uuid:", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error occured while converting string to uuid", nil))
@@ -117,27 +122,41 @@ func (h *Handlers) handleGetProducts(response http.ResponseWriter, request *http
 
 }
 
-func validateToken(next http.HandlerFunc) http.HandlerFunc {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := authServer.ValidationBearerToken(r)
+func parseBody(product *Product, request *http.Request) error {
+	err := request.ParseForm()
+	if err != nil {
+		return err
+	}
+	product.Name = request.Form.Get("name")
+	product.Description = request.Form.Get("description")
+	productCategory, err := strconv.ParseInt(request.Form.Get("category"), 10, 64)
+	if err != nil {
+		return err
+	}
+	product.Category = productCategory
+	productBrand, err := strconv.ParseInt(request.Form.Get("brand"), 10, 64)
+	if err != nil {
+		return err
+	}
+	product.Brand = productBrand
+	if request.Method == "PUT" {
+		productUpdatedBy, err := uuid.Parse(request.Form.Get("updated_by"))
 		if err != nil {
-			format.Send(w, http.StatusBadRequest, format.Message(false, err.Error(), nil))
-			//http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return err
 		}
-		next(w, r)
-	})
+		product.UpdatedBy = productUpdatedBy
+	}
+	return nil
 }
 
 /*
 SetupRoutes sets up routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/products/new", productHandlerLogging.Httplog((validateToken(h.handleAddProduct)))).Methods("POST")
-	mux.HandleFunc("/api/products", productHandlerLogging.Httplog((validateToken(h.handleGetProducts)))).Methods("GET")
-	mux.HandleFunc("/api/products", productHandlerLogging.Httplog((validateToken(h.handleUpdateProduct)))).Methods("PUT")
-	mux.HandleFunc("/api/products/{id}", productHandlerLogging.Httplog((validateToken(h.handleDeleteProduct)))).Methods("DELETE")
+	mux.HandleFunc("/api/products/new", productHandlerLogging.Httplog((auth.ValidateToken(h.handleAddProduct, authServer)))).Methods("POST")
+	mux.HandleFunc("/api/products", productHandlerLogging.Httplog((auth.ValidateToken(h.handleGetProducts, authServer)))).Methods("GET")
+	mux.HandleFunc("/api/products/{id}", productHandlerLogging.Httplog((auth.ValidateToken(h.handleUpdateProduct, authServer)))).Methods("PUT")
+	mux.HandleFunc("/api/products/{id}", productHandlerLogging.Httplog((auth.ValidateToken(h.handleDeleteProduct, authServer)))).Methods("DELETE")
 }
 
 /*

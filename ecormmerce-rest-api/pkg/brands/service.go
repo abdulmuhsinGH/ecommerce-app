@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-// Service provides Brand adding operations.
+// Service provides ProductBrand adding operations.
 type Service interface {
-	AddBrand(*Brand) error
-	GetAllBrands() ([]Brand, error)
-	UpdateBrand(Brand *Brand) error
-	DeleteBrand(Brand *Brand) error
-	GetBrandByID(ID int) (Brand, error)
-	GetBrandsByName(name string) ([]Brand, error)
+	AddBrand(*ProductBrand) error
+	GetAllBrands() ([]ProductBrand, error)
+	UpdateBrand(ProductBrand *ProductBrand) error
+	DeleteBrand(ProductBrand *ProductBrand) error
+	GetBrandByID(ID int) (ProductBrand, error)
+	GetBrandsByName(name string) ([]ProductBrand, error)
 }
 
 type service struct {
@@ -31,9 +31,9 @@ func NewService(r Repository) Service {
 }
 
 /*
-AddBrand creates a new Brand
+AddBrand creates a new ProductBrand
 */
-func (s *service) AddBrand(brand *Brand) error {
+func (s *service) AddBrand(brand *ProductBrand) error {
 
 	brand, err := s.brandRepository.AddBrand(brand)
 	if err != nil {
@@ -44,13 +44,12 @@ func (s *service) AddBrand(brand *Brand) error {
 }
 
 /*
-UpdateBrand creates a new Brand
+UpdateBrand creates a new ProductBrand
 */
-func (s *service) UpdateBrand(brand *Brand) error {
-	var err error
+func (s *service) UpdateBrand(brand *ProductBrand) error {
 
-	brand.UpdatedAt = time.Now()
-	brand, err = s.brandRepository.UpdateBrand(brand)
+	brand.UpdatedAt = time.Now().UTC()
+	_, err := s.brandRepository.UpdateBrand(brand)
 	if err != nil {
 		return err
 	}
@@ -59,9 +58,9 @@ func (s *service) UpdateBrand(brand *Brand) error {
 }
 
 /*
-DeleteBrand creates a new Brand
+DeleteBrand creates a new ProductBrand
 */
-func (s *service) DeleteBrand(brand *Brand) error {
+func (s *service) DeleteBrand(brand *ProductBrand) error {
 	err := s.brandRepository.DeleteBrand(brand)
 	if err != nil {
 		return errors.New("not deleted")
@@ -73,7 +72,7 @@ func (s *service) DeleteBrand(brand *Brand) error {
 /*
 GetAllBrands gets all Brands
 */
-func (s *service) GetAllBrands() ([]Brand, error) {
+func (s *service) GetAllBrands() ([]ProductBrand, error) {
 	brands, err := s.brandRepository.GetAllBrands()
 	if err != nil {
 		return nil, err
@@ -84,10 +83,10 @@ func (s *service) GetAllBrands() ([]Brand, error) {
 /*
 GetBrandByID gets all Brands
 */
-func (s *service) GetBrandByID(ID int) (Brand, error) {
+func (s *service) GetBrandByID(ID int) (ProductBrand, error) {
 	brand, err := s.brandRepository.GetBrandByID(ID)
 	if err != nil {
-		return Brand{}, err
+		return ProductBrand{}, err
 	}
 	return brand, nil
 }
@@ -95,7 +94,7 @@ func (s *service) GetBrandByID(ID int) (Brand, error) {
 /*
 GetBrandsByName gets all Brands
 */
-func (s *service) GetBrandsByName(name string) ([]Brand, error) {
+func (s *service) GetBrandsByName(name string) ([]ProductBrand, error) {
 	brands, err := s.brandRepository.GetBrandsByName(name)
 	if err != nil {
 		return nil, err

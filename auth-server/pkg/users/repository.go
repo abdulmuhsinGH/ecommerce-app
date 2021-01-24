@@ -2,9 +2,9 @@ package users
 
 import (
 	"ecormmerce-app/auth-server/pkg/logging"
-	"os"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/google/uuid"
 )
 
 /*
@@ -15,6 +15,9 @@ type Repository interface {
 	GetAllUsers() ([]User, error)
 	FindUserByUsername(string) *User
 	FindOrAddUser(*User) (*User, error)
+	FindUserRoleByName(string) *UserRole
+	FindUserRoleByID(uuid.UUID) *UserRole
+	FindUserByID(ID uuid.UUID) (*User, error)
 }
 
 type repository struct {
@@ -36,6 +39,8 @@ func NewRepository(db *pg.DB) Repository {
 AddUser saves user to the user's table
 */
 func (r *repository) AddUser(user *User) bool {
+	setDefaultUserRole(r, user)
+	userRepositoryLogging.Printlog("user new role", user.Role.String())
 	err := r.db.Insert(user)
 	if err != nil {
 		userRepositoryLogging.Printlog("AddUser_Error", err.Error())
@@ -45,11 +50,20 @@ func (r *repository) AddUser(user *User) bool {
 
 }
 
+func setDefaultUserRole(r *repository, user *User) {
+
+	if user.Role.String() == "00000000-0000-0000-0000-000000000000" {
+		role := (*repository).FindUserRoleByName(r, "viewer")
+		user.Role = role.ID
+	}
+
+}
+
 /*
 FindOrAddUser finds user or saves user if not found to the user's table
 */
 func (r *repository) FindOrAddUser(user *User) (*User, error) {
-
+	setDefaultUserRole(r, user)
 	_, err := r.db.Model(user).
 		Column("id").
 		Where("email_work = ?email_work").
@@ -79,16 +93,60 @@ func (r *repository) GetAllUsers() ([]User, error) {
 }
 
 /*
-GetAllUsers returns all users from the user's table
+FindUserByUsername returns all users from the user's table
 */
 func (r *repository) FindUserByUsername(username string) *User {
 	user := new(User)
 
-	userRepositoryLogging.Printlog("pg_host", os.Getenv("DB_HOST"))
 	err := r.db.Model(user).Where("username = ?", username).Select()
 	if err != nil {
-		userRepositoryLogging.Printlog("pg_host", os.Getenv("DB_HOST"))
 		userRepositoryLogging.Printlog("FindUserByUsername_Error", err.Error())
 	}
 	return user
+}
+
+/*
+FindUserByUsername returns all users from the user's table
+*/
+func (r *repository) FindUserByID(ID uuid.UUID) (*User, error) {
+	user := new(User)
+
+	err := r.db.Model(user).Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
+		"email_personal", "phone_personal", "gender", "role", "status", "last_login").Where("id = ?", ID).Select()
+	if err != nil {
+		userRepositoryLogging.Printlog("FindUserByID", err.Error())
+		return &User{}, err
+	}
+
+	role := r.FindUserRoleByID(user.Role)
+
+	user.RoleName = role.RoleName
+	return user, nil
+}
+
+/*
+FindUserRoleByName returns all users from the user's table
+*/
+func (r *repository) FindUserRoleByName(role string) *UserRole {
+	userRole := new(UserRole)
+
+	err := r.db.Model(userRole).Where("role_name = ?", role).Select()
+	if err != nil {
+		userRepositoryLogging.Printlog("FindUserRoleByRoleName_Error", err.Error())
+	}
+
+	return userRole
+}
+
+/*
+FindUserRoleByName returns all users from the user's table
+*/
+func (r *repository) FindUserRoleByID(ID uuid.UUID) *UserRole {
+	userRole := new(UserRole)
+
+	err := r.db.Model(userRole).Where("id = ?", ID).Select()
+	if err != nil {
+		userRepositoryLogging.Printlog("FindUserRoleByRoleName_Error", err.Error())
+	}
+	return userRole
 }

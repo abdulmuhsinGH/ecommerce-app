@@ -7,6 +7,7 @@
 <script>
 import axios from 'axios';
 
+axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 export default {
   name: 'App',
   components: {
@@ -47,8 +48,6 @@ export default {
       { icon: 'mdi-keyboard', text: 'Go to the old version' },
     ],
   }),
-  mounted() {
-  },
   watch: {
     '$route.query.code': {
       async handler(code) {
@@ -70,9 +69,6 @@ export default {
         grant_type: 'authorization_code',
       },
       {
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
         params: {
           client_id: `${process.env.VUE_APP_ClientID}`,
           client_secret: `${process.env.VUE_APP_ClientSecret}`,
@@ -87,7 +83,7 @@ export default {
         window.location.href = 'dashboard';
       }).catch((err) => {
         // TODO: Log errors properly
-        console.log({ err });
+        // console.log({ err });
       });
     },
   },

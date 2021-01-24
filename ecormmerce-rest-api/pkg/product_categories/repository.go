@@ -1,4 +1,4 @@
-package product_categories
+package productcategories
 
 import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
@@ -7,7 +7,7 @@ import (
 )
 
 /*
-Repository provides productCategory repository operations
+Repository provides product category repository operations
 */
 type Repository interface {
 	//AddproductCategory(*productCategory) bool
@@ -34,7 +34,7 @@ func NewRepository(db *pg.DB) Repository {
 }
 
 func (r *repository) UpdateProductCategory(productCategory *ProductCategory) (*ProductCategory, error) {
-	_, err := r.db.Model(productCategory).Column("id", "name", "description", "created_at", "updated_by", "updated_at", "deleted_at").WherePK().Update()
+	_, err := r.db.Model(productCategory).Column("id", "name", "description", "updated_by", "updated_at").WherePK().Update()
 	if err != nil {
 		productCategoryRepositoryLogging.Printlog("UpdateproductCategory_Error", err.Error())
 		return &ProductCategory{}, err
@@ -44,7 +44,7 @@ func (r *repository) UpdateProductCategory(productCategory *ProductCategory) (*P
 }
 
 /*
-AddProductCategory finds productCategory or saves productCategory if not found to the productCategory's table
+AddProductCategory finds product category or saves product category if not found to the product category's table
 */
 func (r *repository) AddProductCategory(productCategory *ProductCategory) (*ProductCategory, error) {
 
@@ -61,7 +61,7 @@ func (r *repository) AddProductCategory(productCategory *ProductCategory) (*Prod
 }
 
 /*
-DeleteProductCategory saves productCategory to the productCategory's table
+DeleteProductCategory saves product category to the product category's table
 */
 func (r *repository) DeleteProductCategory(productCategory *ProductCategory) error {
 	_, err := r.db.Model(productCategory).WherePK().Delete()
@@ -74,11 +74,11 @@ func (r *repository) DeleteProductCategory(productCategory *ProductCategory) err
 }
 
 /*
-GetAllProductCategories returns all productCategorys from the productCategory's table
+GetAllProductCategories returns all productCategorys from the product category's table
 */
-func (r *repository) GetAllProductCategories() (productCategories []ProductCategory, err error) {
-
-	err = r.db.Model(&productCategories).
+func (r *repository) GetAllProductCategories() ([]ProductCategory, error) {
+	productCategories := []ProductCategory{}
+	err := r.db.Model(&productCategories).
 		Column("id", "name", "description", "created_at", "updated_by", "updated_at", "deleted_at").
 		Select()
 	if err != nil {
@@ -93,7 +93,7 @@ func (r *repository) GetAllProductCategories() (productCategories []ProductCateg
 GetProductCategoryByID returns a productCategory by the id from the productCategory's table
 */
 func (r *repository) GetProductCategoryByID(ID int64) (ProductCategory, error) {
-	var productCategory ProductCategory
+	productCategory := ProductCategory{}
 
 	err := r.db.Model(&productCategory).
 		Column("id", "name", "description", "created_at", "updated_by", "updated_at", "deleted_at").
@@ -109,11 +109,11 @@ func (r *repository) GetProductCategoryByID(ID int64) (ProductCategory, error) {
 }
 
 /*
-GetProductCategoriesByName returns a productCategory by the id from the productCategory's table
+GetProductCategoriesByName returns a product category by the id from the product category's table
 */
-func (r *repository) GetProductCategoriesByName(name string) (productCategories []ProductCategory, err error) {
-	//var productCategories []productCategory
-	err = r.db.Model(&productCategories).Where("name like ?", "%"+name+"%").
+func (r *repository) GetProductCategoriesByName(name string) ([]ProductCategory, error) {
+	productCategories := []ProductCategory{}
+	err := r.db.Model(&productCategories).Where("name like ?", "%"+name+"%").
 		Column("id", "name", "description", "created_at", "updated_by", "updated_at", "deleted_at").
 		Select()
 	if err != nil {

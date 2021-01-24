@@ -1,24 +1,24 @@
-
 const state = {
   status: '',
   profile: {},
   token: window.$cookies.get('ank_tkn_val') || null,
   headers: {
-    accept: 'application/json',
+    accept: 'application/x-www-form-urlencoded',
     authorization: '',
   },
 };
 
 const getters = {
   getProfile(state) {
-    if (!state.profile.id) {
-      state.profile = JSON.parse(window.atob(window.$cookies.get('ank_tkn_val')));
+    if (!state.profile.id && window.$cookies.get('ank_usr_val')) {
+      state.profile = JSON.parse(window.atob(window.$cookies.get('ank_usr_val')));
     }
     return state.profile;
   },
   isProfileLoaded: (state) => !!state.profile && !!state.profile.name,
   isAuthenticated: (state) => (!!state.token && !!state.token.length > 0),
-  isAdmin: (state) => (state.profile.user_type === 'admin'),
+  isAdmin: (state) => (state.profile.role_name === 'admin'),
+  canEdit: (state) => (state.profile.role_name === 'admin' || state.profile.role === 'editor'),
   authStatus: (state) => state.status,
   getHeaders: (state) => state.headers,
   getToken(state) {
@@ -35,7 +35,6 @@ const actions = {
 
 const mutations = {
   setProfile(userProfile) {
-    window.$cookies.set('ank_tkn_val', JSON.stringify(userProfile));
     state.profile = userProfile;
   },
   setHeaders(header) {

@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import ProductDatatable from '../../components/BrandDatatable.vue';
+import BrandDatatable from '../../components/BrandDatatable.vue';
 
 export default {
   name: 'ViewBrands',

@@ -40,15 +40,14 @@ ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	Category    int       `json:"category"`
 	Brand       int       `json:"brand"`
-	Cost        float64   `json:"cost"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
-	UpdatedBy   int       `json:"updated_by"`
+	UpdatedBy   uuid.UUID `json:"updated_by"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`
 */
 func (r *repository) UpdateProduct(product *Product) (*Product, error) {
-	_, err := r.db.Model(product).Column("id", "name", "category", "brand", "cost", "description", "created_at", "updated_by", "updated_at").WherePK().Update()
+	_, err := r.db.Model(product).Column("id", "name", "category", "brand", "description", "updated_by", "updated_at").WherePK().Update()
 	if err != nil {
 		productRepositoryLogging.Printlog("UpdateProduct_Error", err.Error())
 		return &Product{}, err
@@ -91,9 +90,9 @@ func (r *repository) DeleteProduct(product *Product) error {
 GetAllProducts returns all products from the product's table
 */
 func (r *repository) GetAllProducts() ([]Product, error) {
-	var products []Product
+	products := []Product{}
 	err := r.db.Model(&products).
-		Column("id", "name", "category", "brand", "cost", "description", "created_at", "updated_by", "updated_at").
+		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
 		Select()
 	if err != nil {
 		productRepositoryLogging.Printlog("GetAllproducts_Error", err.Error())
@@ -107,10 +106,10 @@ func (r *repository) GetAllProducts() ([]Product, error) {
 GetProductByID returns a product by the id from the product's table
 */
 func (r *repository) GetProductByID(ID uuid.UUID) (Product, error) {
-	var product Product
+	product := Product{}
 
 	err := r.db.Model(&product).
-		Column("id", "name", "category", "brand", "cost", "description", "created_at", "updated_by", "updated_at").
+		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
 		Where("id = ?", ID).
 		Select()
 
@@ -126,9 +125,9 @@ func (r *repository) GetProductByID(ID uuid.UUID) (Product, error) {
 GetProductsByName returns a product by the id from the product's table
 */
 func (r *repository) GetProductsByName(name string) ([]Product, error) {
-	var products []Product
+	products := []Product{}
 	err := r.db.Model(&products).Where("name like ?", "%"+name+"%").
-		Column("id", "name", "category", "brand", "cost", "description", "created_at", "updated_by", "updated_at").
+		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
 		Select()
 	if err != nil {
 		productRepositoryLogging.Printlog("GetAllproducts_Error", err.Error())

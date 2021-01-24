@@ -28,7 +28,7 @@
               </v-list-item-content>
             </template>
             <v-list-item v-for="(child, i) in item.children" :key="i" link>
-              <v-list-item-action v-if="child.icon">
+              <v-list-item-action v-if="child.icon" @click="goTo(item.to)">
                 <v-icon>{{ child.icon }}</v-icon>
               </v-list-item-action>
               <v-list-item-content>
@@ -36,12 +36,12 @@
               </v-list-item-content>
             </v-list-item>
           </v-list-group>
-          <v-list-item v-else :key="item.text" link>
+          <v-list-item v-else :key="item.text" link @click="goTo(item.to)">
             <v-list-item-action>
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title @click="goTo(item.to)">{{ item.text }}</v-list-item-title>
+            <v-list-item-content >
+              <v-list-item-title>{{ item.text }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </template>
@@ -61,6 +61,10 @@
         class="hidden-sm-and-down"
       />
       <v-spacer />
+      <v-toolbar-title class="ml-0 pl-4" v-if="this.$store.getters.isAuthenticated">
+        <span class="hidden-sm-and-down">Welcome, {{userFullName}} </span>
+      </v-toolbar-title>
+      <v-spacer />
       <v-btn v-if="!this.$store.getters.isAuthenticated" @click="login">Login/Sign up</v-btn>
       <v-btn v-else @click="logout">Logout</v-btn>
     </v-app-bar>
@@ -77,16 +81,23 @@ export default {
   mixins: [
     auth,
   ],
-  mounted() {
+  async mounted() {
+    await this.getUserDetails();
+    const userInfo = this.$store.getters.getProfile;
+    this.userFullName = `${userInfo.firstname} ${userInfo.lastname}`;
   },
   data: () => ({
     dialog: false,
     drawer: null,
+    userFullName: '',
     items: [
+      { icon: 'mdi-home', text: 'Home', to: '/dashboard' },
       { icon: 'mdi-contacts', text: 'Users', to: '/dashboard/users' },
-      { icon: 'mdi-history', text: 'Products', to: '/dashboard/products' },
-      { icon: 'mdi-content-copy', text: 'Brands', to: '/dashboard/brands' },
-      {
+      { icon: 'mdi-shopping', text: 'Products', to: '/dashboard/products' },
+      { icon: 'mdi-format-list-bulleted-type', text: 'Brands', to: '/dashboard/brands' },
+      { icon: 'mdi-format-list-bulleted', text: 'Categories', to: '/dashboard/product-categories' },
+      { icon: 'mdi-shopping', text: 'Variants', to: '/dashboard/variants' },
+      /* {
         icon: 'mdi-chevron-up',
         'icon-alt': 'mdi-chevron-down',
         text: 'Labels',
@@ -110,12 +121,12 @@ export default {
       { icon: 'mdi-message', text: 'Send feedback' },
       { icon: 'mdi-help-circle', text: 'Help' },
       { icon: 'mdi-cellphone-link', text: 'App downloads' },
-      { icon: 'mdi-keyboard', text: 'Go to the old version' },
+      { icon: 'mdi-keyboard', text: 'Go to the old version' }, */
     ],
   }),
   methods: {
     goTo(route) {
-      this.$router.push(route);
+      if (this.$route.path !== route) this.$router.push(route);
     },
   },
 };

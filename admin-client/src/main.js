@@ -6,7 +6,6 @@ import store from './store';
 import './registerServiceWorker';
 import vuetify from './plugins/vuetify';
 
-
 Vue.use(VueCookies);
 Vue.config.productionTip = false;
 

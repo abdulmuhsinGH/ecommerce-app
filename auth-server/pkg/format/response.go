@@ -14,7 +14,7 @@ type Resp map[string]interface{}
 Send sends response of a request
 */
 func Send(response http.ResponseWriter, status int, data Resp) {
-	response.Header().Set("Content-Type", "application/json")
+	response.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	response.WriteHeader(status)
 	json.NewEncoder(response).Encode(data)
 }

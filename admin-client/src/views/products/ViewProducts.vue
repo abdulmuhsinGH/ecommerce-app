@@ -13,12 +13,10 @@
           </v-col>
         </v-row>
       </v-container>
-    <add-product-dialog/>
   </div>
 </template>
 
 <script>
-import AddProductDialog from '../../components/AddProductDialog.vue';
 import ProductDatatable from '../../components/ProductDatatable.vue';
 
 export default {
@@ -27,7 +25,6 @@ export default {
     source: String,
   },
   components: {
-    AddProductDialog,
     ProductDatatable,
   },
   mounted() {

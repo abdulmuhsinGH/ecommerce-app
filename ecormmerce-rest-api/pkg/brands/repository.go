@@ -7,16 +7,16 @@ import (
 )
 
 /*
-Repository provides Brand repository operations
+Repository provides ProductBrand repository operations
 */
 type Repository interface {
-	//AddBrand(*Brand) bool
-	GetAllBrands() ([]Brand, error)
-	AddBrand(*Brand) (*Brand, error)
-	UpdateBrand(*Brand) (*Brand, error)
-	DeleteBrand(*Brand) error
-	GetBrandByID(int) (Brand, error)
-	GetBrandsByName(string) ([]Brand, error)
+	//AddBrand(*ProductBrand) bool
+	GetAllBrands() ([]ProductBrand, error)
+	AddBrand(*ProductBrand) (*ProductBrand, error)
+	UpdateBrand(*ProductBrand) (*ProductBrand, error)
+	DeleteBrand(*ProductBrand) error
+	GetBrandByID(int) (ProductBrand, error)
+	GetBrandsByName(string) ([]ProductBrand, error)
 }
 
 type repository struct {
@@ -26,34 +26,34 @@ type repository struct {
 var brandRepositoryLogging logging.Logging
 
 /*
-NewRepository creates a Brand repository with the necessary dependencies
+NewRepository creates a ProductBrand repository with the necessary dependencies
 */
 func NewRepository(db *pg.DB) Repository {
 	brandRepositoryLogging = logging.New("brand_repository: ")
 	return &repository{db}
 }
 
-func (r *repository) UpdateBrand(brand *Brand) (*Brand, error) {
-	_, err := r.db.Model(brand).Column("id", "name", "created_at", "updated_at", "deleted_at").WherePK().Update()
+func (r *repository) UpdateBrand(brand *ProductBrand) (*ProductBrand, error) {
+	_, err := r.db.Model(brand).Column("id", "name", "updated_at").WherePK().Update()
 	if err != nil {
 		brandRepositoryLogging.Printlog("UpdateBrand_Error", err.Error())
-		return &Brand{}, err
+		return &ProductBrand{}, err
 	}
 	return brand, nil
 
 }
 
 /*
-FindOrAddBrand finds Brand or saves Brand if not found to the Brand's table
+FindOrAddBrand finds ProductBrand or saves ProductBrand if not found to the ProductBrand's table
 */
-func (r *repository) AddBrand(brand *Brand) (*Brand, error) {
+func (r *repository) AddBrand(brand *ProductBrand) (*ProductBrand, error) {
 
 	_, err := r.db.Model(brand).
 		Returning("id").
 		Insert()
 	if err != nil {
 		brandRepositoryLogging.Printlog("AddBrand_Error", err.Error())
-		return &Brand{}, err
+		return &ProductBrand{}, err
 	}
 
 	return brand, nil
@@ -61,9 +61,9 @@ func (r *repository) AddBrand(brand *Brand) (*Brand, error) {
 }
 
 /*
-DeleteBrand saves Brand to the Brand's table
+DeleteBrand saves ProductBrand to the ProductBrand's table
 */
-func (r *repository) DeleteBrand(brand *Brand) error {
+func (r *repository) DeleteBrand(brand *ProductBrand) error {
 	_, err := r.db.Model(brand).WherePK().Delete()
 	if err != nil {
 		brandRepositoryLogging.Printlog("DeleteBrand_Error", err.Error())
@@ -74,10 +74,10 @@ func (r *repository) DeleteBrand(brand *Brand) error {
 }
 
 /*
-GetAllBrands returns all Brands from the Brand's table
+GetAllBrands returns all Brands from the ProductBrand's table
 */
-func (r *repository) GetAllBrands() ([]Brand, error) {
-	var brands []Brand
+func (r *repository) GetAllBrands() ([]ProductBrand, error) {
+	brands := []ProductBrand{}
 	err := r.db.Model(&brands).
 		Column("id", "name", "created_at", "updated_at", "deleted_at").
 		Select()
@@ -90,10 +90,10 @@ func (r *repository) GetAllBrands() ([]Brand, error) {
 }
 
 /*
-GetBrandByID returns a Brand by the id from the Brand's table
+GetBrandByID returns a ProductBrand by the id from the ProductBrand's table
 */
-func (r *repository) GetBrandByID(ID int) (Brand, error) {
-	var brand Brand
+func (r *repository) GetBrandByID(ID int) (ProductBrand, error) {
+	brand := ProductBrand{}
 
 	err := r.db.Model(&brand).
 		Column("id", "name", "created_at", "updated_at", "deleted_at").
@@ -102,17 +102,17 @@ func (r *repository) GetBrandByID(ID int) (Brand, error) {
 
 	if err != nil {
 		brandRepositoryLogging.Printlog("GetAllBrands_Error", err.Error())
-		return Brand{}, err
+		return ProductBrand{}, err
 	}
 
 	return brand, nil
 }
 
 /*
-GetBrandsByName returns a Brand by the id from the Brand's table
+GetBrandsByName returns a ProductBrand by the id from the ProductBrand's table
 */
-func (r *repository) GetBrandsByName(name string) ([]Brand, error) {
-	var brands []Brand
+func (r *repository) GetBrandsByName(name string) ([]ProductBrand, error) {
+	brands := []ProductBrand{}
 	err := r.db.Model(&brands).Where("name like ?", "%"+name+"%").
 		Column("id", "name", "created_at", "updated_at", "deleted_at").
 		Select()

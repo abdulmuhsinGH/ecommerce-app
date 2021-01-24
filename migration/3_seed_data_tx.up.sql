@@ -1,0 +1,4 @@
+INSERT INTO user_roles (role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('admin', 'Administrator', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
+INSERT INTO user_roles (role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('editor', 'Editor', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
+INSERT INTO user_roles (role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('viewer', 'Viewer', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);
+INSERT INTO user_roles (role_name, description, comment, updated_by, created_at, updated_at, deleted_at) VALUES ('customer', 'Customer', NULL, NULL, '2020-03-02 12:49:31.386119+00', NULL, NULL);

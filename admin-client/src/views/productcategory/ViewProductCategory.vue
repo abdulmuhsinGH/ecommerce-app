@@ -17,10 +17,10 @@
 </template>
 
 <script>
-import ProductDatatable from '../../components/ProductCategoryDatatable.vue';
+import ProductCategoryDatatable from '../../components/ProductCategoryDatatable.vue';
 
 export default {
-  name: 'View/ProductCategory',
+  name: 'ViewProductCategory',
   props: {
     source: String,
   },

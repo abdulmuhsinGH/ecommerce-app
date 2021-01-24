@@ -14,8 +14,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/gorilla/securecookie"
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/oauth2.v3/server"
 )
@@ -31,6 +32,7 @@ type Service interface {
 	AddOuathClient(clientstore.OauthClient) error
 	GetUserDataFromGoogle(string) (users.User, error)
 	ValidateToken(http.HandlerFunc, *server.Server) http.HandlerFunc
+	GetUserByID(uuid.UUID) (*users.User, error)
 }
 
 type service struct {
@@ -54,7 +56,6 @@ func NewAuthService(r users.Repository, c *clientstore.ClientStore) Service {
 GenerateState genearate a state for verifying request to prevent CSRF
 */
 func (s *service) GenerateState(w http.ResponseWriter) string {
-	fmt.Println("sa:", os.Getenv("SESSION_KEY"), os.Getenv("STATE_HASH_KEY"))
 	var expiration = time.Now().Add(365 * 24 * time.Hour)
 	SecuredCookie = securecookie.New([]byte(os.Getenv("SESSION_KEY")), []byte(os.Getenv("STATE_HASH_KEY")))
 
@@ -117,14 +118,14 @@ type googleUserInfo struct {
 
 func googleUserInfoToUserStruct(userInfo googleUserInfo) users.User {
 	var user users.User
-	user.ID = uuid.NewV4()
+	user.ID = uuid.New()
 	user.EmailWork = userInfo.Email
 	user.Firstname = userInfo.GivenName
 	user.Lastname = userInfo.FamilyName
 	user.Username = strings.Split(userInfo.Email, "@")[0]
 	user.Password = userInfo.ID
 	user.Gender = "_"
-	user.Role = 1 //TODO find a way to assing a role. for users and customers. This is temporal
+	//user.Role = 1 //TODO find a way to assing a role. for users and customers. This is temporal
 	user.Status = userInfo.VerifiedEmail
 
 	return user
@@ -155,6 +156,18 @@ func (s *service) Login(username string, password string) (*users.User, error) {
 	passwordMatched := s.CheckPasswordHash(password, user.Password)
 	if !passwordMatched {
 		return &users.User{}, errors.New("password does not match")
+	}
+
+	return user, nil
+}
+
+/*
+GetUserByID gets user using their id
+*/
+func (s *service) GetUserByID(ID uuid.UUID) (*users.User, error) {
+	user, err := s.userRepository.FindUserByID(ID)
+	if err != nil {
+		return &users.User{}, err
 	}
 
 	return user, nil
