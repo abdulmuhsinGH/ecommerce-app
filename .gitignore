@@ -1,4 +1,4 @@
-
+git 
 # Golang 
 main
 .env
@@ -29,14 +29,8 @@ redis.config
 ecormmerce-rest-api/bin/ecommerce_api
 redis.conf
 
-<<<<<<< HEAD
-postgres-data/
-redis-data/
-migration/migrate_cli
-=======
 /postgres-data
 /redis-data
 openapi2-run.yaml
 migration/migrate_cli
 migration/migration_cli
->>>>>>> 7869fc9582c7e26da6c578cf5f0a261140d51c36
