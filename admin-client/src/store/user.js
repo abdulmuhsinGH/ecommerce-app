@@ -10,7 +10,7 @@ const state = {
 
 const getters = {
   getProfile(state) {
-    if (!state.profile.id) {
+    if (!state.profile.id && window.$cookies.get('ank_usr_val')) {
       state.profile = JSON.parse(window.atob(window.$cookies.get('ank_usr_val')));
     }
     return state.profile;

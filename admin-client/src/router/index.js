@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import ViewUsers from '../views/users/ViewUsers.vue';
 import ViewProducts from '../views/products/ViewProducts.vue';
 import ViewBrands from '../views/brands/ViewBrands.vue';
+import ViewVariants from '../views/variants/ViewVariants.vue';
 import ViewProductCategory from '../views/productcategory/ViewProductCategory.vue';
 import ViewProductVariants from '../views/productvariants/ViewProductVariants.vue';
 import Home from '../views/Home.vue';
@@ -42,6 +43,11 @@ const routes = [
         path: '/dashboard/brands',
         name: 'Brand',
         component: ViewBrands,
+      },
+      {
+        path: '/dashboard/variants',
+        name: 'Variants',
+        component: ViewVariants,
       },
       {
         path: '/dashboard/product-categories',

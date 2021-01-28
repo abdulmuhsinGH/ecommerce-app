@@ -215,8 +215,9 @@ CREATE TABLE IF NOT EXISTS oauth_clients (
 CREATE TABLE IF NOT EXISTS variants (
   id     uuid PRIMARY KEY DEFAULT uuid_generate_v4(),	
   variant_name   text 	not null  ,
-  vaiant_desc text not null,
+  variant_desc text not null,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_by text ,
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ
   
@@ -226,7 +227,7 @@ CREATE TABLE IF NOT EXISTS variants (
 create table if not exists variant_value(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	variant_id uuid  not null REFERENCES variants(id),
-	variant_name text not null,
+	variant_value_name text not null,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ

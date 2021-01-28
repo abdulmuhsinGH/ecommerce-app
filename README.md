@@ -16,8 +16,8 @@ ___
 ## DB Migration
 ___
 ### Building the binary file for to run migrations in CLI
-1. open terminal and change directory to the project folder
-2. Cchange directory to the migration folder
+1. Open terminal and change directory to the project folder
+2. Change directory to the migration folder
 3. Run this command to build the bin file - `go build -o migration_cli main.go`
 4. You should add binary file in the folder with the name `migration_cli`
 
