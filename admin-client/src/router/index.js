@@ -5,6 +5,7 @@ import ViewProducts from '../views/products/ViewProducts.vue';
 import ViewBrands from '../views/brands/ViewBrands.vue';
 import ViewVariants from '../views/variants/ViewVariants.vue';
 import ViewProductCategory from '../views/productcategory/ViewProductCategory.vue';
+import ViewProductVariants from '../views/productvariants/ViewProductVariants.vue';
 import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
@@ -52,6 +53,11 @@ const routes = [
         path: '/dashboard/product-categories',
         name: 'ProductCategory',
         component: ViewProductCategory,
+      },
+      {
+        path: '/dashboard/product-variants',
+        name: 'ProductVariant',
+        component: ViewProductVariants,
       },
     ],
   },

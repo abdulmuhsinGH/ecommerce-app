@@ -97,6 +97,9 @@ export default {
       { icon: 'mdi-format-list-bulleted-type', text: 'Brands', to: '/dashboard/brands' },
       { icon: 'mdi-format-list-bulleted', text: 'Categories', to: '/dashboard/product-categories' },
       { icon: 'mdi-shopping', text: 'Variants', to: '/dashboard/variants' },
+      { icon: 'mdi-alpha-b-box', text: 'Brands', to: '/dashboard/brands' },
+      { icon: 'mdi-alpha-c-box', text: 'Categories', to: '/dashboard/product-categories' },
+      { icon: 'mdi-alpha-v-box', text: 'Product Variant', to: '/dashboard/product-variants' },
       /* {
         icon: 'mdi-chevron-up',
         'icon-alt': 'mdi-chevron-down',

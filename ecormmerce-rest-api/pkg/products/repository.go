@@ -92,7 +92,10 @@ GetAllProducts returns all products from the product's table
 func (r *repository) GetAllProducts() ([]Product, error) {
 	products := []Product{}
 	err := r.db.Model(&products).
-		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
+		ColumnExpr("product.id, product.name, product.category, product.brand, product.description, product.created_at, product.updated_at").
+		ColumnExpr("product_brands.name AS brand_name, product_categories.name as category_name").
+		Join("JOIN product_brands ON product_brands.id = product.brand").
+		Join("JOIN product_categories ON product_categories.id = product.category").
 		Select()
 	if err != nil {
 		productRepositoryLogging.Printlog("GetAllproducts_Error", err.Error())
@@ -109,8 +112,11 @@ func (r *repository) GetProductByID(ID uuid.UUID) (Product, error) {
 	product := Product{}
 
 	err := r.db.Model(&product).
-		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
-		Where("id = ?", ID).
+		ColumnExpr("product.id, product.name, product.category, product.brand, product.description, product.created_at, product.updated_at").
+		ColumnExpr("product_brands.name AS brand_name, product_categories.name as category_name").
+		Join("JOIN product_brands ON product_brands.id = product.brand").
+		Join("JOIN product_categories ON product_categories.id = product.category").
+		Where("product.id = ?", ID).
 		Select()
 
 	if err != nil {
@@ -126,8 +132,12 @@ GetProductsByName returns a product by the id from the product's table
 */
 func (r *repository) GetProductsByName(name string) ([]Product, error) {
 	products := []Product{}
-	err := r.db.Model(&products).Where("name like ?", "%"+name+"%").
-		Column("id", "name", "category", "brand", "description", "created_at", "updated_by", "updated_at").
+	err := r.db.Model(&products).
+		ColumnExpr("product.id, product.name, product.category, product.brand, product.description, product.created_at, product.updated_at").
+		ColumnExpr("product_brands.name AS brand_name, product_categories.name as category_name").
+		Join("JOIN product_brands ON product_brands.id = product.brand").
+		Join("JOIN product_categories ON product_categories.id = product.category").
+		Where("product.name like ?", "%"+name+"%").
 		Select()
 	if err != nil {
 		productRepositoryLogging.Printlog("GetAllproducts_Error", err.Error())

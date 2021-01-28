@@ -5,6 +5,7 @@ import (
 	"ecormmerce-app/ecormmerce-rest-api/pkg/brands"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/logging"
 	productcategories "ecormmerce-app/ecormmerce-rest-api/pkg/product_categories"
+	productvariants "ecormmerce-app/ecormmerce-rest-api/pkg/product_variants"
 	"ecormmerce-app/ecormmerce-rest-api/pkg/products"
 	server "ecormmerce-app/ecormmerce-rest-api/pkg/server"
 	postgres "ecormmerce-app/ecormmerce-rest-api/pkg/storage/postgres"
@@ -63,6 +64,8 @@ func main() {
 
 	variantsHandler := variants.NewHandlers(logging, db, authServer)
 	variantsHandler.SetupRoutes(router)
+	productVariantHandler := productvariants.NewHandlers(logging, db, authServer)
+	productVariantHandler.SetupRoutes(router)
 
 	srv := server.New(router, ":"+os.Getenv("PORT"))
 

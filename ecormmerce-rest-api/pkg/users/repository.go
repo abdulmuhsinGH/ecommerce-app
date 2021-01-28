@@ -66,7 +66,7 @@ FindOrAddUser finds user or saves user if not found to the user's table
 */
 func (r *repository) FindOrAddUser(user *User) (*User, error) {
 	//TODO set user role
-	// user.Role = 1
+	// users.Role = 1
 
 	_, err := r.db.Model(user).
 		Column("id").
@@ -100,10 +100,22 @@ func (r *repository) DeleteUser(user *User) error {
 GetAllUsers returns all users from the user's table
 */
 func (r *repository) GetAllUsers() ([]User, error) {
+	/*
+		ColumnExpr("users.id, users.firstname, users.middlename, users.lastname, users.email_work").
+			ColumnExpr("users.phone_work, users.email_personal, users.phone_personal, users.gender").
+			ColumnExpr("users.role, users.status, users.last_login, users.updated_by, users.updated_at, users.created_at").
+			ColumnExpr("user_roles.role_name").
+			Join("JOIN user_roles ON user_roles.id = users.role").
+
+	*/
 	users := []User{}
 	err := r.db.Model(&users).
-		Column("id", "username", "firstname", "middlename", "lastname", "email_work", "phone_work",
-			"email_personal", "phone_personal", "gender", "role", "status", "last_login", "updated_by", "updated_at").
+		TableExpr("users").
+		ColumnExpr("users.id, users.firstname, users.middlename, users.lastname, users.email_work, users.username").
+		ColumnExpr("users.phone_work, users.email_personal, users.phone_personal, users.gender").
+		ColumnExpr("users.role, users.status, users.last_login, users.updated_by, users.updated_at, users.created_at").
+		ColumnExpr("user_roles.role_name").
+		Join("JOIN user_roles ON user_roles.id = users.role").
 		Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
@@ -133,7 +145,14 @@ GetAllUsers returns all users from the user's table
 */
 func (r *repository) FindUserByUsername(username string) *User {
 	user := &User{}
-	err := r.db.Model(user).Where("username = ?", username).Select()
+	err := r.db.Model(user).
+		TableExpr("users").
+		ColumnExpr("users.id, users.firstname, users.middlename, users.lastname, users.email_work, users.username").
+		ColumnExpr("users.phone_work, users.email_personal, users.phone_personal, users.gender").
+		ColumnExpr("users.role, users.status, users.last_login, users.updated_by, users.updated_at, users.created_at").
+		ColumnExpr("user_roles.role_name").
+		Join("JOIN user_roles ON user_roles.id = users.role").
+		Where("users.username = ?", username).Select()
 	if err != nil {
 		userRepositoryLogging.Printlog("FindUserByUsername_Error", err.Error())
 	}
