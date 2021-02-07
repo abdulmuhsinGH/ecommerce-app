@@ -112,15 +112,15 @@ func (r *repository) GetAllVariants() ([]Variant, error) {
 }
 
 /*
-GetAllVariantValues returns all variantvalues from the variant_value table
+GetAllVariantValues returns all variantvalues from the variant_values table
 */
 func (r *repository) GetAllVariantValues() ([]VariantValue, error) {
 	variantValues := []VariantValue{}
 	err := r.db.Model(&variantValues).
-		Column("id", "variant_id", "variant_value_name", "updated_by", "created_at", "updated_at").
+		Column("id", "variant_id", "variant_value_name", "created_at", "updated_at").
 		Select()
 	if err != nil {
-		variantRepositoryLogging.Printlog("GetAllVariantValuess_Error", err.Error())
+		variantRepositoryLogging.Printlog("GetAllVariantValues_Error", err.Error())
 		return nil, err
 	}
 
@@ -153,7 +153,7 @@ func (r *repository) GetVariantValueByID(ID uuid.UUID) (VariantValue, error) {
 	variantValue := VariantValue{}
 
 	err := r.db.Model(&variantValue).
-		Column("id", "variant_id", "variant_value_name", "updated_by", "created_at", "updated_at").
+		Column("id", "variant_id", "variant_value_name", "created_at", "updated_at").
 		Where("id = ?", ID).
 		Select()
 
@@ -187,7 +187,7 @@ GetVariantValuesByName returns a variant_value_name  by the id from the variant_
 func (r *repository) GetVariantValuesByName(name string) ([]VariantValue, error) {
 	variantValues := []VariantValue{}
 	err := r.db.Model(&variantValues).Where("variant_value_name like ?", "%"+name+"%").
-		Column("id", "variant_value_name", "created_at", "updated_by", "updated_at").
+		Column("id", "variant_value_name", "created_at", "updated_at").
 		Select()
 	if err != nil {
 		variantRepositoryLogging.Printlog("GetVariantValuesByName", err.Error())

@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//Variant defines the properties of a produt type
+//Variant defines the properties of a variant type
 type Variant struct {
 	ID          uuid.UUID `json:"id"`
 	VariantName string    `json:"variant_name"`
@@ -17,10 +17,11 @@ type Variant struct {
 	DeletedAt   time.Time `json:"deleted_at"`
 }
 
+//VariantValue defines the properties of a variant value type
 type VariantValue struct {
 	ID               uuid.UUID `json:"id"`
-	VariantId        uuid.UUID `json:"variant_id"`
-	VariantValueName string    `json:"variant_name"`
+	VariantID        uuid.UUID `json:"variant_id"`
+	VariantValueName string    `json:"variant_value_name"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 	DeletedAt        time.Time `json:"deleted_at"`

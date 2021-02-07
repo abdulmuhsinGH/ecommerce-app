@@ -219,12 +219,10 @@ CREATE TABLE IF NOT EXISTS variants (
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_by text ,
   updated_at TIMESTAMPTZ,
-  deleted_at TIMESTAMPTZ
-  
-  
+  deleted_at TIMESTAMPTZ 
 );
 
-create table if not exists variant_value(
+create table if not exists variant_values(
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	variant_id uuid  not null REFERENCES variants(id),
 	variant_value_name text not null,
