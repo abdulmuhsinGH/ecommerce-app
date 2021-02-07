@@ -194,10 +194,10 @@ export default {
     },
   },
   async mounted() {
-    // ths.canEdit = $store.getters.canEdit
     this.getAllUsers();
     this.getAllUserRoles();
-    this.canEdit = this.$store.getters.canEdit;
+    await this.$store.getters.getProfile;
+    this.canEdit = await this.$store.getters.canEdit;
   },
   methods: {
     async getAllUsers() {

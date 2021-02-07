@@ -83,7 +83,7 @@ export default {
   ],
   async mounted() {
     await this.getUserDetails();
-    const userInfo = this.$store.getters.getProfile;
+    const userInfo = await this.$store.getters.getProfile;
     this.userFullName = `${userInfo.firstname} ${userInfo.lastname}`;
   },
   data: () => ({
