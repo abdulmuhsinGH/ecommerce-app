@@ -1,6 +1,7 @@
 package users
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -151,6 +152,11 @@ func parseBody(user *User, request *http.Request) error {
 	user.PhonePersonal = request.Form.Get("phone_personal")
 	user.PhoneWork = request.Form.Get("phone_work")
 	user.Gender = request.Form.Get("gender")
+
+	if len(request.Form.Get("user_role")) == 0 {
+		return errors.New("user_role is required")
+	}
+
 	userRole, err := uuid.Parse(request.Form.Get("user_role"))
 	if err != nil {
 		return err

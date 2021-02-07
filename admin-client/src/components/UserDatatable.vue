@@ -70,6 +70,8 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
+                        :value="editedItem.role"
+                        :no-data-text="editedItem.role_name"
                         v-model="editedItem.user_role"
                         :items="userRoles"
                         item-value="id"
@@ -127,6 +129,7 @@ export default {
   ],
   data: () => ({
     dialog: false,
+    rules: [],
     headers: [
       {
         text: 'Username',
@@ -198,6 +201,7 @@ export default {
     this.getAllUsers();
     this.getAllUserRoles();
     this.canEdit = this.$store.getters.canEdit;
+    this.rules = [(value) => value.length <= 0 || 'role is required'];
   },
   methods: {
     async getAllUsers() {
@@ -240,6 +244,8 @@ export default {
       this.editedIndex = this.users.indexOf(item);
       this.editedItemID = this.users[this.editedIndex].id;
       this.editedItem = { ...item };
+      this.editedItem.user_role = this.editedItem.role;
+      console.log(this.editedItem);
       this.dialog = true;
     },
     async deleteUser(item) {
