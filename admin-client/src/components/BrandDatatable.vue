@@ -1,6 +1,11 @@
 <template>
   <div>
-    <v-data-table :headers="headers" :items="brands" sort-by="name" class="elevation-2">
+    <v-data-table
+      :headers="headers"
+      :items="brands"
+      item-key="id"
+      sort-by="name"
+      class="elevation-2">
       <template v-slot:[`item.created_at`]="{ item }">
            <span>{{new Date(item.created_at).toString()}}</span>
       </template>
