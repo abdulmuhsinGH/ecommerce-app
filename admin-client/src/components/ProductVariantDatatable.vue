@@ -23,9 +23,11 @@
 
               <v-card-text>
                 <v-container>
+                  <v-form v-model="allValid" ref="form">
                   <v-row>
                     <v-col cols="12" sm="12" md="12">
                       <v-select
+                        :rules="selectFieldRules"
                         v-model="editedItem.product_id"
                         :items="products"
                         item-value="id"
@@ -38,7 +40,9 @@
 
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.product_variant_name" label="Product Variant Value" disabled outlined></v-text-field>
+                      <v-text-field
+                        :rules="textFieldRules"
+                        v-model="editedItem.product_variant_name" label="Product Variant Value" disabled outlined></v-text-field>
                     </v-col>
 
                     <v-col cols="12" sm="12" md="12">
@@ -46,6 +50,7 @@
                       <v-row v-for="(item, index) in newProductVariantValue" :key="index">
                         <v-col cols="6" sm="6" md="6">
                           <v-select
+                            :rules="selectFieldRules"
                             v-model="item.variant_id"
                             :items="variants"
                             item-value="name"
@@ -58,6 +63,7 @@
                         </v-col>
                         <v-col cols="6" sm="6" md="6">
                           <v-select
+                            :rules="selectFieldRules"
                             v-model="item.variant_value"
                             :items="variantValues"
                             @change="formatProductVariantValue(item.variant_value)"
@@ -70,9 +76,9 @@
                           outlined></v-select>
                         </v-col>
                       </v-row>
-
                     </v-col>
                   </v-row>
+                  </v-form>
                 </v-container>
               </v-card-text>
 
@@ -104,6 +110,7 @@
 import axios from 'axios';
 import crudMixin from '@/mixins/crudMixin';
 import auth from '@/mixins/authentication';
+import formValidation from '@/mixins/formValidationMixin';
 import eventBus from '@/plugins/eventbus';
 import SnackbarComponent from './SnackbarComponent.vue';
 
@@ -115,6 +122,7 @@ export default {
   mixins: [
     crudMixin,
     auth,
+    formValidation,
   ],
   data: () => ({
     dialog: false,
@@ -297,6 +305,10 @@ export default {
     },
     async save() {
       try {
+        if (!this.$refs.form.validate()) {
+          eventBus.$emit('show-snackbar', { message: 'Please fill the required fields', messageType: 'warning' });
+          return;
+        }
         let responseData;
         const currentDate = new Date(Date.now()).toString();
         this.editedItem.updated_at = currentDate;

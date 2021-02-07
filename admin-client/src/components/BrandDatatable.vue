@@ -28,11 +28,18 @@
 
               <v-card-text>
                 <v-container>
+                  <v-form v-model="allValid" ref="form">
                   <v-row>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
+                      <v-text-field
+                        :rules="textFieldRules"
+                        v-model="editedItem.name"
+                        label="name"
+                        outlined>
+                      </v-text-field>
                     </v-col>
                   </v-row>
+                  </v-form>
                 </v-container>
               </v-card-text>
 
@@ -63,6 +70,7 @@
 <script>
 import axios from 'axios';
 import crudMixin from '@/mixins/crudMixin';
+import formValidation from '@/mixins/formValidationMixin';
 import eventBus from '@/plugins/eventbus';
 import auth from '../mixins/authentication';
 import SnackbarComponent from './SnackbarComponent.vue';
@@ -75,6 +83,7 @@ export default {
   mixins: [
     crudMixin,
     auth,
+    formValidation,
   ],
   data: () => ({
     dialog: false,
@@ -170,6 +179,10 @@ export default {
     },
     async save() {
       try {
+        if (!this.$refs.form.validate()) {
+          eventBus.$emit('show-snackbar', { message: 'Please fill the required fields', messageType: 'warning' });
+          return;
+        }
         let responseData;
         const currentDate = new Date(Date.now()).toString();
         this.editedItem.updated_at = currentDate;

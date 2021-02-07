@@ -24,15 +24,22 @@
 
               <v-card-text>
                 <v-container>
+                  <v-form v-model="allValid" ref="form">
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
+                      <v-text-field
+                        :rules="textFieldRules"
+                        v-model="editedItem.name"
+                        label="name"
+                        outlined>
+                      </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
                         v-model="editedItem.brand"
                         :items="brands"
                         item-value="id"
+                        :rules="selectFieldRules"
                         item-text="name"
                         menu-props="auto"
                         label="Select Brand"
@@ -42,6 +49,7 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
+                        :rules="selectFieldRules"
                         v-model="editedItem.category"
                         :items="categories"
                         item-value="id"
@@ -53,10 +61,14 @@
                        outlined></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
+                      <v-textarea
+                      :rules="textFieldRules"
+                      outlined
+                      v-model="editedItem.description" label="Description"></v-textarea>
                     </v-col>
 
                   </v-row>
+                  </v-form>
                 </v-container>
               </v-card-text>
 
@@ -102,6 +114,9 @@ export default {
   ],
   data: () => ({
     dialog: false,
+    allValid: false,
+    textFieldRules: [(v) => v.length > 0 || 'Must not be empty'],
+    selectFieldRules: [(v) => !!v || 'Must not be empty'],
     headers: [
       {
         text: 'Name',
@@ -248,6 +263,10 @@ export default {
     },
     async save() {
       try {
+        if (!this.$refs.form.validate()) {
+          eventBus.$emit('show-snackbar', { message: 'Please fill the required fields', messageType: 'warning' });
+          return;
+        }
         let responseData;
         const currentDate = new Date(Date.now()).toString();
         this.editedItem.updated_at = currentDate;
@@ -256,7 +275,9 @@ export default {
           Object.assign(this.products[this.editedIndex], this.editedItem);
         } else {
           responseData = await this.createItem('api/products/new', this.editedItem);
+          console.log({ responseData });
           this.editedItem.created_at = currentDate;
+          console.log({ 'saved-product': this.editedItem });
           this.products.push(this.editedItem);
         }
         eventBus.$emit('show-snackbar', { message: responseData.message, messageType: 'success' });

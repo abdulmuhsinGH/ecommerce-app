@@ -23,14 +23,20 @@
 
               <v-card-text>
                 <v-container>
+                  <v-form v-model="allValid" ref="form">
                   <v-row>
                     <v-col cols="12" sm="12" md="12">
-                      <v-text-field v-model="editedItem.name" label="name" outlined></v-text-field>
+                      <v-text-field
+                        :rules="textFieldRules"
+                        v-model="editedItem.name" label="name" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
-                      <v-textarea outlined v-model="editedItem.description" label="Description"></v-textarea>
+                      <v-textarea
+                        :rules="textFieldRules"
+                        outlined v-model="editedItem.description" label="Description"></v-textarea>
                     </v-col>
                   </v-row>
+                  </v-form>
                 </v-container>
               </v-card-text>
 
@@ -61,6 +67,7 @@
 <script>
 import axios from 'axios';
 import crudMixin from '@/mixins/crudMixin';
+import formValidation from '@/mixins/formValidationMixin';
 import auth from '@/mixins/authentication';
 import eventBus from '@/plugins/eventbus';
 import SnackbarComponent from './SnackbarComponent.vue';
@@ -73,6 +80,7 @@ export default {
   mixins: [
     crudMixin,
     auth,
+    formValidation,
   ],
   data: () => ({
     dialog: false,
@@ -81,9 +89,9 @@ export default {
         text: 'Name',
         align: 'start',
         sortable: false,
-        value: 'name',
+        value: 'variant_name',
       },
-      { text: 'Description', value: 'description' },
+      { text: 'Description', value: 'variant_desc' },
       { text: 'Created At', value: 'created_at' },
       { text: 'Updated At', value: 'updated_at' },
       { text: 'Actions', value: 'actions', sortable: false },
@@ -126,6 +134,7 @@ export default {
             access_token: token.access_token,
           },
         });
+        console.log({ variants: response.data.data });
         this.variants = response.data.data;
       } catch (error) {
         if (error.response && error.response.data) {
@@ -171,6 +180,10 @@ export default {
     },
     async save() {
       try {
+        if (!this.$refs.form.validate()) {
+          eventBus.$emit('show-snackbar', { message: 'Please fill the required fields', messageType: 'warning' });
+          return;
+        }
         let responseData;
         const currentDate = new Date(Date.now()).toString();
         this.editedItem.updated_at = currentDate;
