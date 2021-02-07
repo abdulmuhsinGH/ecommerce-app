@@ -1,6 +1,6 @@
 const state = {
   status: '',
-  profile: {},
+  profile: null,
   token: window.$cookies.get('ank_tkn_val') || null,
   headers: {
     accept: 'application/x-www-form-urlencoded',
@@ -9,16 +9,16 @@ const state = {
 };
 
 const getters = {
-  getProfile(state) {
-    if (!state.profile.id && window.$cookies.get('ank_usr_val')) {
-      state.profile = JSON.parse(window.atob(window.$cookies.get('ank_usr_val')));
+  async getProfile(state) {
+    if ((state.profile == null || !state.profile.id) && window.$cookies.get('ank_usr_val')) {
+      state.profile = await JSON.parse(window.atob(window.$cookies.get('ank_usr_val')));
     }
     return state.profile;
   },
   isProfileLoaded: (state) => !!state.profile && !!state.profile.name,
   isAuthenticated: (state) => (!!state.token && !!state.token.length > 0),
   isAdmin: (state) => (state.profile.role_name === 'administrator'),
-  canEdit: (state) => (state.profile.role_name === 'administrator' || state.profile.role_name === 'editor'),
+  canEdit: async (state) => (state.profile != null && (state.profile.role_name === 'administrator' || state.profile.role_name === 'editor')),
   authStatus: (state) => state.status,
   getHeaders: (state) => state.headers,
   getToken(state) {
