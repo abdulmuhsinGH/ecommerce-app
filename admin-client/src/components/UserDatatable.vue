@@ -23,12 +23,22 @@
 
               <v-card-text>
                 <v-container>
-                  <v-row>
+                  <v-form v-model="allValid" ref="form">
+                    <v-row>
+
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.username" label="Username" outlined></v-text-field>
+                      <v-text-field
+                      :rules="textFieldRules"
+                      v-model="editedItem.username"
+                      label="Username *"
+                      outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.firstname" label="Firstname" outlined></v-text-field>
+                      <v-text-field
+                      :rules="textFieldRules"
+                      v-model="editedItem.firstname"
+                      label="Firstname * "
+                      outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
@@ -36,12 +46,17 @@
                         label="Middlename" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.lastname" label="Lastname" outlined></v-text-field>
+                      <v-text-field
+                      :rules="textFieldRules"
+                      v-model="editedItem.lastname"
+                      label="Lastname *"
+                      outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
+                        :rules="emailRules"
                         v-model="editedItem.email_work"
-                        label="Work Email" outlined></v-text-field>
+                        label="Work Email *" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
@@ -54,10 +69,23 @@
                         label="Personal Phone" outlined></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.gender" label="Gender" outlined></v-text-field>
+                      <v-select
+                        :rules="selectFieldRules"
+                        v-model="editedItem.gender"
+                        :items="[{text: 'Male', value: 'm'},
+                          {text: 'Female', value: 'f'},
+                          {text: 'Prefer not to say', value: '_'}
+                          ]"
+                        menu-props="auto"
+                        label="Select Status"
+                        hide-details
+                        single-line
+                        outlined
+                      ></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
+                        :rules="selectFieldRules"
                         v-model="editedItem.status"
                         :items="[{text: 'Active', value: true},
                           {text: 'Inactive', value: false}]"
@@ -70,6 +98,7 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                        <v-select
+                        :rules="selectFieldRules"
                         v-model="editedItem.user_role"
                         :items="userRoles"
                         item-value="id"
@@ -81,7 +110,8 @@
                         outlined
                        ></v-select>
                     </v-col>
-                  </v-row>
+
+                  </v-row></v-form>
                 </v-container>
               </v-card-text>
 
@@ -127,6 +157,13 @@ export default {
   ],
   data: () => ({
     dialog: false,
+    textFieldRules: [(v) => v.length > 0 || 'Must not be empty'],
+    selectFieldRules: [(v) => !!v || 'Must not be empty'],
+    emailRules: [
+      (v) => !!v || 'E-mail is required',
+      (v) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(.\w{2,3})+$/.test(v) || 'E-mail must be valid',
+    ],
+    allValid: false,
     headers: [
       {
         text: 'Username',
@@ -240,6 +277,7 @@ export default {
       this.editedIndex = this.users.indexOf(item);
       this.editedItemID = this.users[this.editedIndex].id;
       this.editedItem = { ...item };
+      this.editedItem.user_role = this.users[this.editedIndex].role;
       this.dialog = true;
     },
     async deleteUser(item) {
@@ -272,6 +310,10 @@ export default {
     },
     async save() {
       try {
+        if (!this.$refs.form.validate()) {
+          eventBus.$emit('show-snackbar', { message: 'Please fill the required fields', messageType: 'warning' });
+          return;
+        }
         let responseData;
         const currentDate = new Date(Date.now()).toString();
         this.editedItem.updated_at = currentDate;
