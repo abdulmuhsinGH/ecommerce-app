@@ -99,6 +99,8 @@
                     <v-col cols="12" sm="6" md="4">
                        <v-select
                         :rules="selectFieldRules"
+                        :value="editedItem.role"
+                        :no-data-text="editedItem.role_name"
                         v-model="editedItem.user_role"
                         :items="userRoles"
                         item-value="id"
