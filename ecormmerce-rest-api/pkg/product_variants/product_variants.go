@@ -8,15 +8,15 @@ import (
 
 //ProductVariant defines the properties of a produt type
 type ProductVariant struct {
-	tableName struct{} `pg:"product_variant"`
-	ID                  uuid.UUID `json:"id"`
-	ProductID           uuid.UUID `json:"product_id"`
-	ProductName         string    `json:"product_name" pg:",discard_unknown_columns" sql:"-"`
-	SKU                 string    `json:"sku"`
+	tableName          struct{}  `pg:"product_variant"`
+	ID                 uuid.UUID `json:"id"`
+	ProductID          uuid.UUID `json:"product_id"`
+	ProductName        string    `json:"product_name" pg:",discard_unknown_columns" sql:"-"`
+	SKU                string    `json:"sku"`
 	ProductVariantName string    `json:"product_variant_name"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
-	DeletedAt           time.Time `json:"deleted_at"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
+	DeletedAt          time.Time `json:"deleted_at"`
 }
 
 //create product

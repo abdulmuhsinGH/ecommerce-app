@@ -35,16 +35,7 @@ func NewRepository(db *pg.DB) Repository {
 }
 
 /*
-Update a product's info
-ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Category    int       `json:"category"`
-	Brand       int       `json:"brand"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedBy   uuid.UUID `json:"updated_by"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	DeletedAt   time.Time `json:"deleted_at"`
+UpdateProduct Update a product's info
 */
 func (r *repository) UpdateProduct(product *Product) (*Product, error) {
 	_, err := r.db.Model(product).Column("id", "name", "category", "brand", "description", "updated_by", "updated_at").WherePK().Update()

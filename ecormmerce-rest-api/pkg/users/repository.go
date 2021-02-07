@@ -100,28 +100,18 @@ func (r *repository) DeleteUser(user *User) error {
 GetAllUsers returns all users from the user's table
 */
 func (r *repository) GetAllUsers() ([]User, error) {
-	/*
-		ColumnExpr("users.id, users.firstname, users.middlename, users.lastname, users.email_work").
-			ColumnExpr("users.phone_work, users.email_personal, users.phone_personal, users.gender").
-			ColumnExpr("users.role, users.status, users.last_login, users.updated_by, users.updated_at, users.created_at").
-			ColumnExpr("user_roles.role_name").
-			Join("JOIN user_roles ON user_roles.id = users.role").
-
-	*/
 	users := []User{}
-	err := r.db.Model(&users).
-		TableExpr("users").
-		ColumnExpr("users.id, users.firstname, users.middlename, users.lastname, users.email_work, users.username").
-		ColumnExpr("users.phone_work, users.email_personal, users.phone_personal, users.gender").
-		ColumnExpr("users.role, users.status, users.last_login, users.updated_by, users.updated_at, users.created_at").
-		ColumnExpr("user_roles.role_name").
-		Join("JOIN user_roles ON user_roles.id = users.role").
-		Select()
+	_, err := r.db.Query(&users, `
+		SELECT users.id, users.firstname, users.middlename, users.lastname, users.email_work, users.username,
+			users.phone_work, users.email_personal, users.phone_personal, users.gender, user_roles.role_name,
+			users.role, users.status, users.last_login, users.updated_by, users.updated_at, users.created_at
+		FROM users, user_roles
+		WHERE users.role = user_roles.id
+	`)
 	if err != nil {
 		userRepositoryLogging.Printlog("GetAllusers_Error", err.Error())
 		return nil, err
 	}
-
 	return users, nil
 }
 
@@ -141,7 +131,7 @@ func (r *repository) GetAllUserRoles() ([]UserRole, error) {
 }
 
 /*
-GetAllUsers returns all users from the user's table
+FindUserByUsername returns user by username
 */
 func (r *repository) FindUserByUsername(username string) *User {
 	user := &User{}
